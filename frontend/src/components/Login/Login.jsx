@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { User, Lock, Eye, EyeOff } from 'lucide-react';
+import {toast} from 'react-toastify';
 
 const Login = ({ onLogin, onNavigateToRegister }) => {
   const [formData, setFormData] = useState({
@@ -22,21 +23,22 @@ const Login = ({ onLogin, onNavigateToRegister }) => {
     setError('');
 
     try {
-      const response = await fetch('/api/auth/login', {
+      const response = await fetch('http://localhost:5000/api/users/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(formData)
       });
 
       if (response.ok) {
-        const userData = await response.json();
-        onLogin(userData);
+        const result = await response.json();
+        console.log(result);
+        toast.success('Login successful! Welcome back.');
+        onLogin(result.data);
       } else {
-        const errorData = await response.json();
-        setError(errorData.message || 'Login failed');
+        toast.error(result.message || 'Login failed');
       }
     } catch (err) {
-      setError('Network error. Please try again.');
+      toast.error('Network error. Please try again.');
     } finally {
       setLoading(false);
     }
