@@ -38,7 +38,7 @@ const Login = ({ onLogin, onNavigateToRegister }) => {
         toast.error(result.message || 'Login failed');
       }
     } catch (err) {
-      toast.error('Network error. Please try again.');
+      toast.error('Wrong credentials. Please try again.');
     } finally {
       setLoading(false);
     }
