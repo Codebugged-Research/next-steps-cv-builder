@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import './App.css'
 import Header from './components/Dashboard/Header'
 import Footer from './components/Dashboard/Footer'
@@ -11,12 +11,33 @@ import Login from './components/Login/Login'
 import Register from './components/Register/Register'
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import api from './utils/api';
 
 function App() {
   const [activeSection, setActiveSection] = useState('cv-builder');
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [showRegister, setShowRegister] = useState(false);
   const [user, setUser] = useState(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    checkAuthStatus();
+  }, []);
+
+  const checkAuthStatus = async () => {
+    try {
+      const response = await api.get('/users/current-user', { withCredentials: true });
+      if (response.data.success) {
+        setUser(response.data.data);
+        setIsAuthenticated(true);
+      }
+    } catch (error) {
+      setIsAuthenticated(false);
+      setUser(null);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleLogin = (userData) => {
     setUser(userData);
@@ -30,11 +51,25 @@ function App() {
     setShowRegister(false);
   };
 
-  const handleLogout = () => {
-    setUser(null);
-    setIsAuthenticated(false);
-    setActiveSection('cv-builder');
+  const handleLogout = async () => {
+    try {
+      await api.post('/users/logout');
+    } catch (error) {
+      console.error('Logout error:', error);
+    } finally {
+      setUser(null);
+      setIsAuthenticated(false);
+      setActiveSection('cv-builder');
+    }
   };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-xl text-[#04445E]">Loading...</div>
+      </div>
+    );
+  }
 
   return (
     <>
