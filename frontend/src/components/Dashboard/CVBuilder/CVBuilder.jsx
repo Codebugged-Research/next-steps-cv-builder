@@ -3,9 +3,13 @@ import ProgressBar from './ProgressBar';
 import StepContent from './StepContent';
 import NavigationControls from './NavigationControls';
 import CVProgress from './CVProgress';
+import api from '../../../utils/api.js';
+import {toast} from 'react-toastify';
+import CVPreview from './CVPreview.jsx';
+
+
 
 const initialCVData = {
-  userId: 'test-user-123',
   basicDetails: {
     fullName: '',
     email: '',
@@ -45,9 +49,10 @@ const initialCVData = {
   }
 };
 
-const CVBuilder = ({ onPreview }) => {
+const CVBuilder = ({ onPreview ,user}) => {
   const [formData, setFormData] = useState(initialCVData);
   const [currentStep, setCurrentStep] = useState(1);
+  const [showPreview, setShowPreview] = useState(false);
   const totalSteps = 10;
 
   const handleInputChange = (section, field, value) => {
@@ -81,27 +86,37 @@ const CVBuilder = ({ onPreview }) => {
   const handleArrayUpdate = (section, index, field, value) => {
     setFormData(prev => ({
       ...prev,
-      [section]: prev[section].map((item, i) => 
+      [section]: prev[section].map((item, i) =>
         i === index ? { ...item, [field]: value } : item
       )
     }));
   };
 
-  const handleSave = () => {
-    localStorage.setItem(`cv_${formData.userId}`, JSON.stringify(formData));
-    alert('CV saved successfully!');
+  const handleSave = async () => {
+    try {
+      const response = await api.post('/cv/save', {
+        userId: user?.id,
+        ...formData
+      });
+      toast.success("CV Saved Successfully")
+    } catch (error) {
+      const errorMessage = error.response?.data?.message || 'Failed to save CV';
+      toast.error(errorMessage);
+    }
     console.log('Saved CV Data:', formData);
   };
 
   const handlePreview = () => {
-    handleSave();
-    if (onPreview) {
-      onPreview();
-    } else {
-      alert('Preview functionality - check console for CV data');
-      console.log('CV Preview Data:', formData);
-    }
+    setShowPreview(true);
   };
+  const handleBackFromPreview = () => {
+    setShowPreview(false);
+
+  };
+  if (showPreview) {
+    return <CVPreview cvData={formData} onClose={() => setShowPreview(false)}  onBack={handleBackFromPreview}/>;
+  }
+
 
   return (
     <div className="bg-white rounded-xl shadow-lg p-8 ">

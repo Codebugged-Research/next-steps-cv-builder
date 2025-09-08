@@ -10,24 +10,26 @@ const NavigationControls = ({ currentStep, totalSteps, onPrevious, onNext, onSav
     >
       Previous
     </button>
-    
+
     <div className="flex gap-4">
-      <button
-        onClick={onSave}
-        className="flex items-center gap-2 px-6 py-2 border border-[#169AB4] text-[#169AB4] rounded-lg hover:bg-[#169AB4] hover:text-white transition-colors"
-      >
-        <Download className="h-4 w-4" />
-        Save Progress
-      </button>
-      
       {currentStep === totalSteps ? (
-        <button
-          onClick={onPreview}
-          className="flex items-center gap-2 px-6 py-2 bg-[#04445E] text-white rounded-lg hover:bg-[#033a4d] transition-colors"
-        >
-          <FileText className="h-4 w-4" />
-          Preview CV
-        </button>
+        <>
+          <button
+            onClick={onSave}
+            className="flex items-center gap-2 px-6 py-2 border border-[#169AB4] text-[#169AB4] rounded-lg hover:bg-[#169AB4] hover:text-white transition-colors"
+          >
+            <Download className="h-4 w-4" />
+            Save Progress
+          </button>
+
+          <button
+            onClick={onPreview}
+            className="flex items-center gap-2 px-6 py-2 bg-[#04445E] text-white rounded-lg hover:bg-[#033a4d] transition-colors"
+          >
+            <FileText className="h-4 w-4" />
+            Preview CV
+          </button>
+        </>
       ) : (
         <button
           onClick={onNext}

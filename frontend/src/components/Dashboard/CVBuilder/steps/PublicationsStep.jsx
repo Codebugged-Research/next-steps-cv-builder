@@ -2,38 +2,28 @@ import ArrayFieldManager from '../forms/ArrayFieldManager';
 import FormField from '../forms/FormField';
 import FormGrid from '../forms/FormGrid';
 
-const PublicationsStep = ({ formData, onArrayAdd, onArrayRemove }) => {
+const PublicationsStep = ({ formData, onArrayAdd, onArrayRemove, onArrayUpdate }) => {
   const newPublication = { title: '', journal: '', year: '', type: 'research-article' };
-
+  
   const renderPublication = (publication, index) => (
     <div>
       <FormGrid>
         <FormField
           label="Title"
           value={publication.title}
-          onChange={(value) => {
-            const updated = [...formData.publications];
-            updated[index] = { ...updated[index], title: value };
-            // would need to be handled by parent component
-          }}
+          onChange={(value) => onArrayUpdate('publications', index, 'title', value)}
         />
         
         <FormField
           label="Journal"
           value={publication.journal}
-          onChange={(value) => {
-            const updated = [...formData.publications];
-            updated[index] = { ...updated[index], journal: value };
-          }}
+          onChange={(value) => onArrayUpdate('publications', index, 'journal', value)}
         />
         
         <FormField
           label="Year"
           value={publication.year}
-          onChange={(value) => {
-            const updated = [...formData.publications];
-            updated[index] = { ...updated[index], year: value };
-          }}
+          onChange={(value) => onArrayUpdate('publications', index, 'year', value)}
         />
         
         <FormField
@@ -44,10 +34,7 @@ const PublicationsStep = ({ formData, onArrayAdd, onArrayRemove }) => {
             { value: 'research-article', label: 'Research Article' },
             { value: 'case-report', label: 'Case Report' }
           ]}
-          onChange={(value) => {
-            const updated = [...formData.publications];
-            updated[index] = { ...updated[index], type: value };
-          }}
+          onChange={(value) => onArrayUpdate('publications', index, 'type', value)}
         />
       </FormGrid>
     </div>

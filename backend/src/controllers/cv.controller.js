@@ -5,7 +5,7 @@ import { ApiResponse } from "../utils/ApiResponse.js";
 
 
 const createOrUpdateCV = asyncHandler(async (req, res) => {
-    const userId = req.body.userId;
+    const userId = req.user._id;
     if (!userId) {
         throw new ApiError(400, "User ID is required");
     }

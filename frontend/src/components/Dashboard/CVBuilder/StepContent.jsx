@@ -21,7 +21,7 @@ const stepComponents = {
   9: ReviewStep
 };
 
-const StepContent = ({ currentStep, formData, onInputChange, onArrayAdd, onArrayRemove }) => {
+const StepContent = ({ currentStep, formData, onInputChange, onArrayAdd, onArrayRemove, onArrayUpdate }) => {
   const StepComponent = stepComponents[currentStep];
   
   if (!StepComponent) return null;
@@ -32,6 +32,7 @@ const StepContent = ({ currentStep, formData, onInputChange, onArrayAdd, onArray
       onInputChange={onInputChange}
       onArrayAdd={onArrayAdd}
       onArrayRemove={onArrayRemove}
+      onArrayUpdate={onArrayUpdate}
     />
   );
 };

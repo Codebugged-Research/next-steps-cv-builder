@@ -26,6 +26,7 @@ const Login = ({ onLogin, onNavigateToRegister }) => {
       const response = await fetch('http://localhost:5000/api/users/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
         body: JSON.stringify(formData)
       });
 
