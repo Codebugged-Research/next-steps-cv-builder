@@ -7,6 +7,7 @@ import CVBuilder from './components/Dashboard/CVBuilder/CVBuilder'
 import SystematicReviews from './components/Dashboard/SystematicReview/SystematicReviews'
 import CaseReports from './components/Dashboard/CaseReports/CaseReports'
 import Conferences from './components/Dashboard/Conferences/Conferences'
+import Existingcv from './components/Dashboard/ExistingCV/Existingcv'
 import Login from './components/Login/Login'
 import Register from './components/Register/Register'
 import { ToastContainer } from 'react-toastify';
@@ -98,6 +99,7 @@ function App() {
               />
               <div className="flex-1">
                 {activeSection === 'cv-builder' && <CVBuilder user={user} />}
+                {activeSection === 'existing-cv' && <Existingcv onBack={() => setActiveSection('cv-builder')} />}
                 {activeSection === 'systematic-reviews' && <SystematicReviews onBack={() => setActiveSection('cv-builder')} />}
                 {activeSection === 'case-reports' && <CaseReports onBack={() => setActiveSection('cv-builder')} />}
                 {activeSection === 'conferences' && <Conferences onBack={() => setActiveSection('cv-builder')} />}

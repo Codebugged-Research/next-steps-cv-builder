@@ -57,6 +57,7 @@ const CVBuilder = ({ onPreview, user }) => {
 
   useEffect(() => {
     if (user?._id) {
+      setLoading(true);
       checkExistingCV();
     } else {
       setLoading(false);
@@ -66,6 +67,7 @@ const CVBuilder = ({ onPreview, user }) => {
   const checkExistingCV = async () => {
     try {
       const response = await api.get(`/cv/${user._id}`);
+      console.log(response);
       if (response.data.success) {
         setFormData(response.data.data);
         setCvExists(true);

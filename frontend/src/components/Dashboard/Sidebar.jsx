@@ -5,6 +5,7 @@ import CVProgress from '../Dashboard/CVBuilder/CVProgress';
 const Sidebar = ({ activeSection, onSectionChange, user }) => {
   const navigationItems = [
     { id: 'cv-builder', label: 'CV Builder', icon: FileText },
+    { id: 'existing-cv', label: 'Upload Your CV', icon: FileText },
     { id: 'systematic-reviews', label: 'Systematic Reviews', icon: BookOpen },
     { id: 'case-reports', label: 'Case Reports', icon: FileText },
     { id: 'conferences', label: 'Conferences', icon: Calendar },
@@ -20,8 +21,8 @@ const Sidebar = ({ activeSection, onSectionChange, user }) => {
             <User className="h-6 w-6 text-white" />
           </div>
           <div>
-            <h3 className="font-semibold text-[#04445E]">Aryaman </h3>
-            <p className="text-sm text-gray-500 uppercase">{activeSection}</p>
+            <h3 className="font-semibold text-[#04445E]">{user?.fullName || 'User'} </h3>
+            <p className="text-sm text-gray-500 uppercase">{user?.medicalSchool}</p>
           </div>
         </div>
 
