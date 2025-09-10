@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { User, Mail, Phone, Lock, Eye, EyeOff, ArrowLeft, GraduationCap } from 'lucide-react';
+import api from '../../utils/api';
 
 const Register = ({ onRegister, onNavigateToLogin }) => {
   const [formData, setFormData] = useState({
@@ -18,10 +19,10 @@ const Register = ({ onRegister, onNavigateToLogin }) => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
+
     const requiredFields = Object.keys(formData);
     const emptyFields = requiredFields.filter(field => !formData[field].trim());
-    
+
     if (emptyFields.length > 0) {
       setError('Please fill in all fields');
       return;
@@ -41,21 +42,15 @@ const Register = ({ onRegister, onNavigateToLogin }) => {
     setError('');
 
     try {
-      const response = await fetch('/api/auth/register', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formData)
-      });
-
-      if (response.ok) {
-        const userData = await response.json();
-        onRegister(userData);
-      } else {
-        const errorData = await response.json();
-        setError(errorData.message || 'Registration failed');
-      }
+      const response = await api.post('/users/register', formData);
+      onRegister(response.data);
     } catch (err) {
-      setError('Network error. Please try again.');
+      console.error(err);
+      if (err.response) {
+        setError(err.response.data?.message || 'Registration failed');
+      } else {
+        setError('Network error. Please try again.');
+      }
     } finally {
       setLoading(false);
     }
@@ -65,9 +60,9 @@ const Register = ({ onRegister, onNavigateToLogin }) => {
     <div className="min-h-screen bg-gradient-to-r from-[#04445E] to-[#169AB4] flex items-center justify-center p-4">
       <div className="bg-white rounded-2xl shadow-2xl p-6 w-full max-w-5xl">
         <div className="text-left mb-6">
-          <img 
-            src="/NEXT-STEPS-LOGO.png" 
-            alt="Next Steps Logo" 
+          <img
+            src="/NEXT-STEPS-LOGO.png"
+            alt="Next Steps Logo"
             className="h-12 mb-3"
           />
           <h1 className="text-2xl font-bold text-[#04445E] mb-1">Create Your Account</h1>

@@ -64,10 +64,21 @@ const CVBuilder = ({ onPreview, user }) => {
     }
   }, [user]);
 
+  
+  useEffect(() => {
+    let checked = false;
+    if (user?._id && !checked) {
+      setLoading(true);
+      checkExistingCV();
+      checked = true;
+    } else {
+      setLoading(false);
+    }
+  }, [user?._id]);
+
   const checkExistingCV = async () => {
     try {
       const response = await api.get(`/cv/${user._id}`);
-      console.log(response);
       if (response.data.success) {
         setFormData(response.data.data);
         setCvExists(true);

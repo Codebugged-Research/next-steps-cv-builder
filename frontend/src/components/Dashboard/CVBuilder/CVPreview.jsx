@@ -1,4 +1,3 @@
-// src/components/Dashboard/CVBuilder/CVPreview.jsx
 import React from 'react';
 import { ArrowLeft, Download } from 'lucide-react';
 

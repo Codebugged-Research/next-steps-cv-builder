@@ -1,4 +1,3 @@
-// src/components/Dashboard/CVBuilder/CVStatus.jsx
 import React from 'react';
 import { Download, FileText, Edit, Calendar } from 'lucide-react';
 
