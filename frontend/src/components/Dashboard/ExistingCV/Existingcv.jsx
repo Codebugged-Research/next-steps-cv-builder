@@ -36,11 +36,11 @@ const Existingcv = ({ onBack }) => {
   };
 
   const handleFileSelect = (selectedFile) => {
-    const allowedTypes = ['application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'];
+    const allowedTypes = ['application/pdf'];
     const maxSize = 5 * 1024 * 1024; // 5MB
 
     if (!allowedTypes.includes(selectedFile.type)) {
-      toast.error('Please upload a PDF or Word document');
+      toast.error('Please upload a PDF document');
       return;
     }
 
@@ -63,9 +63,9 @@ const Existingcv = ({ onBack }) => {
 
     try {
       const formData = new FormData();
-      formData.append('cv', file);
+      formData.append('govCV', file);
 
-      const response = await api.post('/cv/upload', formData, {
+      const response = await api.post('/cv/upload-gov-csv', formData, {
         headers: {
           'Content-Type': 'multipart/form-data',
         },
@@ -203,7 +203,7 @@ const Existingcv = ({ onBack }) => {
               </button>
             </div>
           )}
-
+          
         </div>
       </div>
     </div>

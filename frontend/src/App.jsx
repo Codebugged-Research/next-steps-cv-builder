@@ -20,6 +20,8 @@ function App() {
   const [showRegister, setShowRegister] = useState(false);
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [currentCVStep, setCurrentCVStep] = useState(1);
+  const [completedSteps, setCompletedSteps] = useState([]);
 
   useEffect(() => {
     checkAuthStatus();
@@ -61,6 +63,98 @@ function App() {
       setUser(null);
       setIsAuthenticated(false);
       setActiveSection('cv-builder');
+      // Reset CV builder states on logout
+      setCurrentCVStep(1);
+      setCompletedSteps([]);
+    }
+  };
+
+  const handleSectionChange = (section) => {
+    setActiveSection(section);
+    // Reset CV step when switching to CV builder from other sections
+    if (section === 'cv-builder' && activeSection !== 'cv-builder') {
+      setCurrentCVStep(1);
+    }
+  };
+
+  const handleCVStepChange = (step) => {
+    setCurrentCVStep(step);
+  };
+
+  const handleStepComplete = (step) => {
+    if (!completedSteps.includes(step)) {
+      setCompletedSteps(prev => [...prev, step].sort((a, b) => a - b));
+    }
+  };
+
+  const renderActiveSection = () => {
+    switch (activeSection) {
+      case 'cv-builder':
+        return (
+          <CVBuilder
+            key={user?._id || "guest"}
+            user={user}
+            currentStep={currentCVStep}
+            onStepChange={handleCVStepChange}
+            onStepComplete={handleStepComplete}
+          />
+        );
+
+      case 'existing-cv':
+        return (
+          <Existingcv onBack={() => setActiveSection('cv-builder')} />
+        );
+
+      case 'systematic-reviews':
+        return (
+          <SystematicReviews
+            onBack={() => setActiveSection('cv-builder')}
+            user={user}
+          />
+        );
+
+      case 'case-reports':
+        return (
+          <CaseReports
+            onBack={() => setActiveSection('cv-builder')}
+            user={user}
+          />
+        );
+
+      case 'conferences':
+        return (
+          <Conferences
+            onBack={() => setActiveSection('cv-builder')}
+            user={user}
+          />
+        );
+
+      case 'workshops':
+        return (
+          <Workshops
+            onBack={() => setActiveSection('cv-builder')}
+            user={user}
+          />
+        );
+
+      case 'emr-training':
+        return (
+          <EMRTraining
+            onBack={() => setActiveSection('cv-builder')}
+            user={user}
+          />
+        );
+
+      default:
+        return (
+          <CVBuilder
+            key={user?._id || "guest"}
+            user={user}
+            currentStep={currentCVStep}
+            onStepChange={handleCVStepChange}
+            onStepComplete={handleStepComplete}
+          />
+        );
     }
   };
 
@@ -76,12 +170,12 @@ function App() {
     <>
       {!isAuthenticated ? (
         showRegister ? (
-          <Register 
+          <Register
             onRegister={handleRegister}
             onNavigateToLogin={() => setShowRegister(false)}
           />
         ) : (
-          <Login 
+          <Login
             onLogin={handleLogin}
             onNavigateToRegister={() => setShowRegister(true)}
           />
@@ -89,30 +183,28 @@ function App() {
       ) : (
         <div className="min-h-screen bg-gray-50 flex flex-col">
           <Header user={user} onLogout={handleLogout} />
-          
+
           <div className="flex-1 max-w-full w-full px-4 sm:px-6 lg:px-8 py-8">
             <div className="flex gap-8 h-full">
               <Sidebar
                 activeSection={activeSection}
-                onSectionChange={setActiveSection}
+                onSectionChange={handleSectionChange}
                 user={user}
+                // CV Builder specific props - only pass when CV Builder is active
+                currentStep={activeSection === 'cv-builder' ? currentCVStep : null}
+                onStepChange={activeSection === 'cv-builder' ? handleCVStepChange : null}
+                completedSteps={activeSection === 'cv-builder' ? completedSteps : []}
               />
               <div className="flex-1">
-                {activeSection === 'cv-builder' && <CVBuilder user={user} />}
-                {activeSection === 'existing-cv' && <Existingcv onBack={() => setActiveSection('cv-builder')} />}
-                {activeSection === 'systematic-reviews' && <SystematicReviews onBack={() => setActiveSection('cv-builder')} />}
-                {activeSection === 'case-reports' && <CaseReports onBack={() => setActiveSection('cv-builder')} />}
-                {activeSection === 'conferences' && <Conferences onBack={() => setActiveSection('cv-builder')} />}
-                {activeSection === 'workshops' && <div>Workshops Component</div>}
-                {activeSection === 'emr-training' && <div>EMR Training Component</div>}
+                {renderActiveSection()}
               </div>
             </div>
           </div>
-          
+
           <Footer />
         </div>
       )}
-      
+
       <ToastContainer
         position="top-right"
         autoClose={3000}

@@ -20,6 +20,23 @@ const cvSchema = new mongoose.Schema({
             type: String,
             required: true
         },
+        gender: {
+            type: String,
+            enum: ['male', 'female', 'other', 'prefer-not-to-say'],
+            default: ""
+        },
+        nationality: {
+            type: String,
+            default: ""
+        },
+        usmleId: {
+            type: String,
+            default: ""
+        },
+        address: {
+            type: String,
+            default: ""
+        },
         medicalSchool: {
             type: String,
             required: true
@@ -28,10 +45,28 @@ const cvSchema = new mongoose.Schema({
             type: String,
             required: true
         },
+        mbbsRegNo: {
+            type: String,
+            default: ""
+        },
         city: {
             type: String,
             required: true
-        }
+        },
+        photo: {
+            type: String, // GridFS file ID for profile photo
+            default: null
+        },
+        languages: [{
+            language: {
+                type: String,
+                enum: ['English', 'Hindi', 'Spanish', 'French', 'German', 'Mandarin', 'Arabic', 'Portuguese', 'Russian', 'Japanese']
+            },
+            fluency: {
+                type: String,
+                enum: ['native', 'fluent', 'conversational', 'basic', 'beginner']
+            }
+        }]
     },
     education: {
         medicalSchoolName: {
@@ -191,6 +226,46 @@ const cvSchema = new mongoose.Schema({
             type: String,
             default: ""
         }
+    },
+    // Government CV upload section
+    govCV: {
+        userId: { 
+            type: mongoose.Schema.Types.ObjectId, 
+            ref: 'User' 
+        },
+        originalName: { 
+            type: String 
+        },
+        filename: { 
+            type: String 
+        },
+        fileId: { 
+            type: String // GridFS file ID
+        },
+        size: { 
+            type: Number 
+        },
+        uploadDate: { 
+            type: Date, 
+            default: Date.now 
+        },
+        type: { 
+            type: String, 
+            default: 'government' 
+        },
+        status: {
+            type: String,
+            enum: ['pending', 'approved', 'rejected'],
+            default: 'pending'
+        }
+    },
+    lastModified: {
+        type: Date,
+        default: Date.now
+    },
+    isComplete: {
+        type: Boolean,
+        default: false
     }
 }, {
     timestamps: true
