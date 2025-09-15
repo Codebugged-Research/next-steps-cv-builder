@@ -140,7 +140,6 @@ const ViewCV = ({ onEdit }) => {
     );
   }
 
-  // CV data loaded successfully
   return (
     <div className="bg-white rounded-xl shadow-lg p-8">
       <div className="bg-gray-50 rounded-lg p-6 mb-8">

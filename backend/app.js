@@ -16,8 +16,10 @@ app.use(express.static('public'));
 
 import userRoutes from './src/routes/user.routes.js';
 import cvRoutes from './src/routes/cv.routes.js';
+import conferenceRoutes from './src/routes/conference.routes.js';
+
 app.use('/api/users', userRoutes);
 app.use('/api/cv', cvRoutes);
-
+app.use('/api/conferences', conferenceRoutes);
 
 export { app };

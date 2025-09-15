@@ -91,7 +91,6 @@ const CVBuilder = ({ onPreview, user, onStepChange, currentStep, onStepComplete 
         setCompletedSteps(calculateCompletedSteps(response.data.data));
       }
     } catch (error) {
-      // CV doesn't exist, keep default empty form
     } finally {
       setLoading(false);
     }

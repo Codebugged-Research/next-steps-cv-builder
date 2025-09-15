@@ -26,12 +26,7 @@ const CVStrengtheningSection = ({
       icon: Calendar,
       description: 'Medical conferences and presentations'
     },
-    { 
-      id: 'workshops', 
-      label: 'Workshops', 
-      icon: FileText,
-      description: 'Skills development workshops'
-    },
+
     { 
       id: 'emr-training', 
       label: 'EMR & RCM Training', 

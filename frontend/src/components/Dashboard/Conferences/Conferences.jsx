@@ -1,49 +1,98 @@
-import React, { useState } from 'react';
-import { ArrowLeft, BookOpen } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { ArrowLeft, BookOpen, Loader } from 'lucide-react';
+import { toast } from 'react-toastify';
 import ProjectHeader from '../../Common/ProjectHeader';
 import ConferenceTabs from './ConferenceTabs';
+import api from '../../../utils/api';
 
-const CaseReports = ({ onBack }) => {
-    const [upcomingConferences] = useState([
-        {
-            id: 1,
-            title: 'International Medical Conference 2025',
-            category: 'Internal Medicine',
-            price: 299,
-            description: 'Join leading medical professionals from around the world for cutting-edge research presentations, networking opportunities, and continuing education.',
-            date: 'October 14-16, 2025',
-            location: 'New York Convention Center, NY',
-            format: 'Hybrid',
-            activeSlots: { current: 50, total: 50 },
-            passiveSlots: { current: 450, total: 450 },
-            deadline: '30/09/2025'
-        },
-    ]);
-    const [registrations] = useState([]);
+const Conferences = ({ onBack }) => {
+    const [conferences, setConferences] = useState([]);
+    const [registrations, setRegistrations] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const [stats, setStats] = useState({
+        available: 0,
+        registered: 0
+    });
+
+    // Fetch conferences from backend
+    const fetchConferences = async () => {
+        try {
+            setLoading(true);
+            const response = await api.get('/conferences');
+            
+            if (response.data.success) {
+                setConferences(response.data.data);
+                setStats(prev => ({
+                    ...prev,
+                    available: response.data.data.length
+                }));
+            }
+        } catch (error) {
+            console.error('Error fetching conferences:', error);
+            toast.error('Failed to load conferences');
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    // Fetch user registrations (you'll need to implement this endpoint)
+    const fetchRegistrations = async () => {
+        try {
+            // Uncomment when you have the registration endpoint
+            // const response = await api.get('/conferences/registrations');
+            // if (response.data.success) {
+            //     setRegistrations(response.data.data);
+            //     setStats(prev => ({
+            //         ...prev,
+            //         registered: response.data.data.length
+            //     }));
+            // }
+            
+            // For now, use empty array
+            setRegistrations([]);
+            setStats(prev => ({
+                ...prev,
+                registered: 0
+            }));
+        } catch (error) {
+            console.error('Error fetching registrations:', error);
+        }
+    };
+
+    useEffect(() => {
+        fetchConferences();
+        fetchRegistrations();
+    }, []);
+
     const headerConfig = {
         icon: BookOpen,
         title: 'Conferences & Events',
         subtitle: 'Find below the list of upcoming conferences and events',
         stats: [
-            { value: '8', label: 'Available Conferences' },
-            { value: '5', label: 'Your Registration' },
+            { value: stats.available.toString(), label: 'Available Conferences' },
+            { value: stats.registered.toString(), label: 'Your Registrations' },
         ]
     };
+
+    if (loading) {
+        return (
+            <div className="min-h-screen bg-gray-50">
+                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                    <div className="flex items-center justify-center py-12">
+                        <Loader className="h-8 w-8 text-[#169AB4] animate-spin mr-3" />
+                        <span className="text-lg text-[#04445E]">Loading conferences...</span>
+                    </div>
+                </div>
+            </div>
+        );
+    }
 
     return (
         <div className="min-h-screen bg-gray-50">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                {/* <button
-          onClick={onBack}
-          className="flex items-center gap-2 mb-6 text-[#169AB4] hover:text-[#147a8f] transition-colors"
-        >
-          <ArrowLeft className="h-4 w-4" />
-          Back to Dashboard
-        </button> */}
-
                 <ProjectHeader {...headerConfig} />
                 <ConferenceTabs
-                    upcomingConferences={upcomingConferences}
+                    upcomingConferences={conferences}
                     registrations={registrations}
                 />
             </div>
@@ -51,4 +100,4 @@ const CaseReports = ({ onBack }) => {
     );
 };
 
-export default CaseReports;
+export default Conferences;

@@ -143,10 +143,21 @@ const cvSchema = new mongoose.Schema({
         duration: String,
         description: String
     }],
-    significantAchievements: {
-        type: String,
-        default: ""
-    },
+    achievements: [{
+        id: Number,
+        title: {
+            type: String,
+            required: true
+        },
+        description: String,
+        date: String,
+        attachmentType: {
+            type: String,
+            enum: ['none', 'url'],
+            default: 'none'
+        },
+        url: String
+    }],
     publications: [{
         title: {
             type: String,
@@ -229,29 +240,29 @@ const cvSchema = new mongoose.Schema({
     },
     // Government CV upload section
     govCV: {
-        userId: { 
-            type: mongoose.Schema.Types.ObjectId, 
-            ref: 'User' 
+        userId: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'User'
         },
-        originalName: { 
-            type: String 
+        originalName: {
+            type: String
         },
-        filename: { 
-            type: String 
+        filename: {
+            type: String
         },
-        fileId: { 
+        fileId: {
             type: String // GridFS file ID
         },
-        size: { 
-            type: Number 
+        size: {
+            type: Number
         },
-        uploadDate: { 
-            type: Date, 
-            default: Date.now 
+        uploadDate: {
+            type: Date,
+            default: Date.now
         },
-        type: { 
-            type: String, 
-            default: 'government' 
+        type: {
+            type: String,
+            default: 'government'
         },
         status: {
             type: String,
