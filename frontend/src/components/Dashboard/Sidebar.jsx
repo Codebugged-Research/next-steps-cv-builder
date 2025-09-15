@@ -1,5 +1,5 @@
-import React, { useState,useEffect   } from 'react';
-import { User, FileText, Heart, ArrowRight, CheckCircle, ChevronDown, ChevronRight } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { User, FileText, Heart, ArrowRight, CheckCircle, ChevronDown, ChevronRight, Eye } from 'lucide-react';
 import NavigationItem from './NavigationItem';
 import CVStrengtheningSection from './CVStrengtheningSection';
 
@@ -18,18 +18,20 @@ const Sidebar = ({
 
   const mainNavigationItems = [
     { id: 'cv-builder', label: 'CV Builder', icon: FileText },
+    { id: 'cv-status', label: 'View CV', icon: Eye },
   ];
+  
   const cvSteps = [
-    { id: 1, label: 'Basic Details', shortLabel: 'Basic' },
+    { id: 1, label: 'Basic Details', shortLabel: 'Basic Details' },
     { id: 2, label: 'Education', shortLabel: 'Education' },
-    { id: 3, label: 'USMLE Scores', shortLabel: 'USMLE' },
-    { id: 4, label: 'Clinical Experience', shortLabel: 'Clinical' },
-    { id: 5, label: 'Skills', shortLabel: 'Skills' },
-    { id: 6, label: 'Professional Experience', shortLabel: 'Experience' },
-    { id: 7, label: 'Volunteer Work', shortLabel: 'Volunteer' },
-    { id: 8, label: 'Achievements', shortLabel: 'Achievements' },
-    { id: 9, label: 'Publications & Research', shortLabel: 'Research' },
-    { id: 10, label: 'EMR & Training', shortLabel: 'Training' }
+    { id: 3, label: 'USMLE Scores', shortLabel: 'USMLE Scores' },
+    { id: 4, label: 'Skills', shortLabel: 'Skills' },
+    { id: 5, label: 'Achievements', shortLabel: 'Achievements' },
+    { id: 6, label: 'Publications', shortLabel: 'Publications' },
+    { id: 7, label: 'Conferences', shortLabel: 'Conferences' },
+    { id: 8, label: 'Workshops', shortLabel: 'Workshops' },
+    { id: 9, label: 'EMR & RCM', shortLabel: 'EMR & RCM' },
+    { id: 10, label: 'Review', shortLabel: 'Review' }
   ];
 
   const handleCVBuilderClick = () => {
@@ -59,11 +61,11 @@ const Sidebar = ({
   };
 
   useEffect(() => {
-  if (['systematic-reviews', 'case-reports', 'conferences', 'workshops', 'emr-training'].includes(activeSection)) {
-    setShowPrograms(true);
-    setShowCVSteps(false);
-  }
-}, [activeSection]);
+    if (['systematic-reviews', 'case-reports', 'conferences', 'workshops', 'emr-training'].includes(activeSection)) {
+      setShowPrograms(true);
+      setShowCVSteps(false);
+    }
+  }, [activeSection]);
 
   return (
     <div className="w-80 flex-shrink-0">

@@ -167,7 +167,6 @@ const Existingcv = ({ onBack }) => {
             )}
           </div>
 
-          {/* Upload Button */}
           {file && !uploadSuccess && (
             <div className="text-center">
               <button
@@ -187,7 +186,6 @@ const Existingcv = ({ onBack }) => {
             </div>
           )}
 
-          {/* Success State */}
           {uploadSuccess && (
             <div className="bg-green-50 border border-green-200 rounded-lg p-6 text-center">
               <Check className="h-12 w-12 text-green-500 mx-auto mb-4" />

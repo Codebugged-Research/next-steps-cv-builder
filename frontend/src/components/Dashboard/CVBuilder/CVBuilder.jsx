@@ -5,7 +5,6 @@ import NavigationControls from './NavigationControls';
 import api from '../../../utils/api.js';
 import { toast } from 'react-toastify';
 import CVPreview from './CVPreview.jsx';
-import CVStatus from './CVStatus.jsx';
 
 const initialCVData = {
   basicDetails: {
@@ -51,7 +50,6 @@ const CVBuilder = ({ onPreview, user, onStepChange, currentStep, onStepComplete 
   const [formData, setFormData] = useState(initialCVData);
   const [internalCurrentStep, setInternalCurrentStep] = useState(1);
   const [showPreview, setShowPreview] = useState(false);
-  const [cvExists, setCvExists] = useState(false);
   const [loading, setLoading] = useState(true);
   const [completedSteps, setCompletedSteps] = useState([]);
   
@@ -90,13 +88,10 @@ const CVBuilder = ({ onPreview, user, onStepChange, currentStep, onStepComplete 
       const response = await api.get(`/cv/${user._id}`);
       if (response.data.success) {
         setFormData(response.data.data);
-        setCvExists(true);
         setCompletedSteps(calculateCompletedSteps(response.data.data));
-      } else {
-        setCvExists(false);
       }
     } catch (error) {
-      setCvExists(false);
+      // CV doesn't exist, keep default empty form
     } finally {
       setLoading(false);
     }
@@ -172,7 +167,6 @@ const CVBuilder = ({ onPreview, user, onStepChange, currentStep, onStepComplete 
     try {
       await api.post('/cv/save', formData);
       toast.success("CV Saved Successfully");
-      setCvExists(true);
     } catch (error) {
       const errorMessage = error.response?.data?.message || 'Failed to save CV';
       toast.error(errorMessage);
@@ -182,12 +176,6 @@ const CVBuilder = ({ onPreview, user, onStepChange, currentStep, onStepComplete 
   const handlePreview = useCallback(() => setShowPreview(true), []);
   const handleBackFromPreview = useCallback(() => setShowPreview(false), []);
   
-  const handleEdit = useCallback(() => {
-    setCvExists(false);
-    setInternalCurrentStep(1);
-    onStepChange?.(1);
-  }, [onStepChange]);
-
   const handleDownload = useCallback(() => {
     toast.info('PDF download functionality will be implemented soon');
   }, []);
@@ -236,18 +224,6 @@ const CVBuilder = ({ onPreview, user, onStepChange, currentStep, onStepComplete 
         onClose={handleBackFromPreview} 
         onBack={handleBackFromPreview}
         onDownload={handleDownload}
-      />
-    );
-  }
-
-  if (cvExists) {
-    return (
-      <CVStatus
-        cvData={formData}
-        onEdit={handleEdit}
-        onDownload={handleDownload}
-        completedSteps={completedSteps}
-        totalSteps={totalSteps}
       />
     );
   }

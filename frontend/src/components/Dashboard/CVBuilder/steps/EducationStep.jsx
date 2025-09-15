@@ -7,12 +7,6 @@ const EducationStep = ({ formData, onInputChange }) => (
     <h2 className="text-2xl font-bold text-[#04445E] mb-6">Education Details</h2>
     
     <FormGrid>
-      <FormField
-        label="Medical School Name"
-        type="text"
-        value={formData.education.medicalSchoolName}
-        onChange={(value) => onInputChange('education', 'medicalSchoolName', value)}
-      />
       
       <FormField
         label="Country"

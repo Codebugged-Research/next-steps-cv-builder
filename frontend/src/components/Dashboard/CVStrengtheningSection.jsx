@@ -1,5 +1,5 @@
 import React from 'react';
-import { BookOpen, FileText, Calendar, Heart, Award, ArrowRight, ChevronDown, ChevronRight } from 'lucide-react';
+import { BookOpen, FileText, Calendar, Heart, Award, ArrowRight, ChevronDown, ChevronRight, ChartSpline } from 'lucide-react';
 
 const CVStrengtheningSection = ({
   activeSection,
@@ -10,7 +10,7 @@ const CVStrengtheningSection = ({
   const programItems = [
     { 
       id: 'systematic-reviews', 
-      label: 'Systematic Reviews', 
+      label: 'Publications', 
       icon: BookOpen,
       description: 'Research and review medical literature'
     },
@@ -29,7 +29,7 @@ const CVStrengtheningSection = ({
     { 
       id: 'workshops', 
       label: 'Workshops', 
-      icon: Heart,
+      icon: FileText,
       description: 'Skills development workshops'
     },
     { 
@@ -51,7 +51,7 @@ const CVStrengtheningSection = ({
             : 'text-gray-700 hover:bg-gray-50'
         }`}
       >
-        <Heart className={`h-5 w-5 ${
+        <ChartSpline className={`h-5 w-5 ${
           programItems.some(item => activeSection === item.id) ? 'text-white' : 'text-gray-500'
         }`} />
         <span className="font-medium flex-1">My CV Strengthening Program</span>
