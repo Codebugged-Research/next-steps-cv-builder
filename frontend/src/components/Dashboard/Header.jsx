@@ -16,7 +16,7 @@ const Header = ({ onLogout }) => (
                     </h1>
                 </div>
                 <div className="flex items-center gap-4">
-                    <span className="text-sm text-gray-600">Welcome, Aryaman</span>
+                    <span className="text-sm text-gray-600">Welcome</span>
                     <button
                         onClick={onLogout}
                         className="flex items-center gap-2 px-4 py-2 text-[#04445E] hover:bg-gray-100 rounded-lg transition-colors duration-200"
