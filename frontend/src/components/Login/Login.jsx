@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { User, Lock, Eye, EyeOff } from 'lucide-react';
-import {toast} from 'react-toastify';
+import { toast } from 'react-toastify';
 
 const Login = ({ onLogin, onNavigateToRegister }) => {
   const [formData, setFormData] = useState({
@@ -13,7 +13,7 @@ const Login = ({ onLogin, onNavigateToRegister }) => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
+
     if (!formData.email.trim() || !formData.password.trim()) {
       setError('Please fill in all fields');
       return;
@@ -23,26 +23,21 @@ const Login = ({ onLogin, onNavigateToRegister }) => {
     setError('');
 
     try {
-      const response = await fetch('http://localhost:5000/api/users/login', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        credentials: 'include',
-        body: JSON.stringify(formData)
-      });
-
-      if (response.ok) {
-        const result = await response.json();
-        console.log(result);
-        toast.success('Login successful! Welcome back.');
-        onLogin(result.data);
-      } else {
-        toast.error(result.message || 'Login failed');
-      }
+      const response = await api.post('/users/login', formData, { withCredentials: true });
+      console.log(response.data);
+      toast.success('Login successful! Welcome back.');
+      onLogin(response.data.data);
     } catch (err) {
-      toast.error('Wrong credentials. Please try again.');
+      console.error(err);
+      if (err.response) {
+        toast.error(err.response.data?.message || 'Login failed');
+      } else {
+        toast.error('Network error. Please try again.');
+      }
     } finally {
       setLoading(false);
     }
+
   };
 
   return (
@@ -50,9 +45,9 @@ const Login = ({ onLogin, onNavigateToRegister }) => {
       <div className="bg-white rounded-2xl shadow-2xl p-8 w-full max-w-md">
         <div className="text-center mb-8">
           <div className="mb-6">
-            <img 
-              src="/NEXT-STEPS-LOGO.png" 
-              alt="Next Steps Logo" 
+            <img
+              src="/NEXT-STEPS-LOGO.png"
+              alt="Next Steps Logo"
               className="h-16 mx-auto mb-4"
             />
           </div>

@@ -13,20 +13,20 @@ const ViewCV = ({ onEdit }) => {
     try {
       setLoading(true);
       setError(null);
-      
+
       const userResponse = await api.get('/users/current-user');
       if (!userResponse.data.success) {
         throw new Error('Failed to get user information');
       }
-      
+
       const userId = userResponse.data.data._id;
       console.log('User ID:', userId);
 
       const cvEndpoint = `/cv/${userId}`;
       console.log('Calling CV endpoint:', cvEndpoint);
-      
+
       const response = await api.get(cvEndpoint);
-      
+
       if (response.data.success) {
         setCvData(response.data.data);
         console.log('CV data fetched successfully');
@@ -44,29 +44,27 @@ const ViewCV = ({ onEdit }) => {
   const handleDownload = async () => {
     try {
       setDownloading(true);
-      
-      const response = await api.get('/cv/download', {
+
+      const userResponse = await api.get('/users/current-user');
+      const userId = userResponse.data.data._id;
+
+      const response = await api.get(`/cv/download/${userId}`, {
         responseType: 'blob',
       });
-      
+
       const url = window.URL.createObjectURL(new Blob([response.data]));
       const link = document.createElement('a');
       link.href = url;
-      
-      const fileName = getFileName();
-      link.setAttribute('download', fileName);
-      
+      link.setAttribute('download', getFileName());
       document.body.appendChild(link);
-      
       link.click();
-
       link.parentNode.removeChild(link);
       window.URL.revokeObjectURL(url);
-      
+
       toast.success('CV downloaded successfully!');
     } catch (error) {
       console.error('Error downloading CV:', error);
-      toast.error(error.response?.data?.message || 'Failed to download CV');
+      toast.error('Failed to download CV');
     } finally {
       setDownloading(false);
     }
@@ -199,7 +197,7 @@ const ViewCV = ({ onEdit }) => {
           <Edit className="h-4 w-4" />
           Edit CV
         </button>
-        
+
         <button
           onClick={handleDownload}
           disabled={downloading}

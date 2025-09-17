@@ -2,6 +2,7 @@ import { CV } from "../models/cv.model.js";
 import { asyncHandler } from '../utils/asyncHandler.js';
 import { ApiError } from "../utils/ApiError.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
+import { generateCVPDF } from "../utils/generatepdf.js";
 
 
 const createOrUpdateCV = asyncHandler(async (req, res) => {
@@ -102,8 +103,33 @@ const uploadGovCV = asyncHandler(async (req, res) => {
         }
     }
 });
+
+const downloadCVPDF = async (req, res) => {
+    try {
+        const userId = req.params.userId || req.user._id;
+        
+        const pdfBuffer = await generateCVPDF(userId);
+        
+        // Get user name for filename
+        const cvData = await CV.findOne({ userId });
+        const filename = `${cvData.basicDetails.fullName.replace(/\s+/g, '_')}_CV.pdf`;
+        
+        res.setHeader('Content-Type', 'application/pdf');
+        res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
+        res.setHeader('Content-Length', pdfBuffer.length);
+        
+        res.send(pdfBuffer);
+        
+    } catch (error) {
+        res.status(500).json({
+            success: false,
+            message: error.message
+        });
+    }
+};
 export {
     createOrUpdateCV,
     getCV,
-    uploadGovCV
+    uploadGovCV,
+    downloadCVPDF
 }
