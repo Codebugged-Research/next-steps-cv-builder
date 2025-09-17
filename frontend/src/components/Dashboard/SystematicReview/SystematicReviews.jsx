@@ -7,7 +7,7 @@ import IndependentArticles from './IndependentArticles';
 const SystematicReviews = ({ onBack }) => {
   const headerConfig = {
     icon: BookOpen,
-    title: 'Systematic Review Projects',
+    title: 'Publications',
     subtitle: 'Collaborate with peers and Next Steps team for publication-ready research',
     stats: [
       { value: '8', label: 'Project Stages' },

@@ -1,50 +1,61 @@
 import React, { useState } from 'react';
 import FormField from '../forms/FormField';
 import FormGrid from '../forms/FormGrid';
-import { Upload, X, User, Plus, Trash2 } from 'lucide-react';
+import { Upload, X, User, Plus, Trash2, AlertCircle } from 'lucide-react';
+import { 
+  GENDER_OPTIONS, 
+  LANGUAGE_OPTIONS, 
+  FLUENCY_OPTIONS, 
+  FILE_CONSTRAINTS 
+} from '../../../../constants/formConstants';
+import { 
+  validateField, 
+  validateFile, 
+  validateLanguage,
+  validateFormSection 
+} from '../../../../utils/validationRules';
 
 const BasicDetailsStep = ({ formData, onInputChange }) => {
   const [photoPreview, setPhotoPreview] = useState(null);
-
-  const genderOptions = [
-    { value: '', label: 'Select Gender' },
-    { value: 'male', label: 'Male' },
-    { value: 'female', label: 'Female' },
-    { value: 'other', label: 'Other' },
-    { value: 'prefer-not-to-say', label: 'Prefer not to say' }
-  ];
-
-  const languageOptions = [
-    'English',
-    'Hindi',
-    'Spanish',
-    'French',
-    'German',
-    'Mandarin',
-    'Arabic',
-    'Portuguese',
-    'Russian',
-    'Japanese'
-  ];
-
-  const fluencyOptions = [
-    { value: '', label: 'Select Fluency' },
-    { value: 'native', label: 'Native' },
-    { value: 'fluent', label: 'Fluent' },
-    { value: 'conversational', label: 'Conversational' },
-    { value: 'basic', label: 'Basic' },
-    { value: 'beginner', label: 'Beginner' }
-  ];
+  const [errors, setErrors] = useState({});
+  const [touched, setTouched] = useState({});
 
   const languages = formData.basicDetails.languages || [];
+
+  const handleInputChange = (field, value) => {
+    // Update the form data
+    onInputChange('basicDetails', field, value);
+    
+    // Mark field as touched
+    setTouched(prev => ({ ...prev, [field]: true }));
+    
+    // Validate field
+    const error = validateField(field, value);
+    setErrors(prev => ({ ...prev, [field]: error }));
+  };
+
+  const handleBlur = (field) => {
+    setTouched(prev => ({ ...prev, [field]: true }));
+    const value = formData.basicDetails[field];
+    const error = validateField(field, value);
+    setErrors(prev => ({ ...prev, [field]: error }));
+  };
 
   const handlePhotoUpload = (e) => {
     const file = e.target.files[0];
     if (file) {
+      // Validate file
+      const error = validateFile(file, 'PHOTO');
+      if (error) {
+        setErrors(prev => ({ ...prev, photo: error }));
+        return;
+      }
+
       const reader = new FileReader();
       reader.onloadend = () => {
         setPhotoPreview(reader.result);
-        onInputChange('basicDetails', 'photo', file);
+        onInputChange('basicDetails', 'photo', null);
+        setErrors(prev => ({ ...prev, photo: '' }));
       };
       reader.readAsDataURL(file);
     }
@@ -65,63 +76,132 @@ const BasicDetailsStep = ({ formData, onInputChange }) => {
       i === index ? { ...lang, [field]: value } : lang
     );
     onInputChange('basicDetails', 'languages', newLanguages);
+    
+    // Validate the specific language entry
+    const langErrors = validateLanguage(newLanguages[index]);
+    setErrors(prev => ({ 
+      ...prev, 
+      [`language_${index}`]: langErrors 
+    }));
   };
 
   const removeLanguage = (index) => {
     const newLanguages = languages.filter((_, i) => i !== index);
     onInputChange('basicDetails', 'languages', newLanguages);
+    
+    // Remove errors for this language
+    setErrors(prev => {
+      const newErrors = { ...prev };
+      delete newErrors[`language_${index}`];
+      return newErrors;
+    });
+  };
+
+  const getFieldError = (field) => {
+    return touched[field] && errors[field] ? errors[field] : '';
+  };
+
+  const isFieldValid = (field) => {
+    return touched[field] && !errors[field] && formData.basicDetails[field];
+  };
+
+  const getLanguageError = (index, field) => {
+    return errors[`language_${index}`] && errors[`language_${index}`][field] 
+      ? errors[`language_${index}`][field] 
+      : '';
+  };
+
+  // Get validation status for entire section
+  const getSectionValidation = () => {
+    const sectionErrors = validateFormSection('basicDetails', formData.basicDetails);
+    return {
+      isValid: Object.keys(sectionErrors).length === 0,
+      errors: sectionErrors
+    };
   };
 
   return (
     <div className="space-y-6">
       <h2 className="text-2xl font-bold text-[#04445E] mb-6">Basic Details</h2>
+      
       <FormGrid>
-        <FormField
-          label="Full Name"
-          type="text"
-          value={formData.basicDetails.fullName || ''}
-          onChange={(value) => onInputChange('basicDetails', 'fullName', value)}
-          required
-        />
+        <div className="relative">
+          <FormField
+            label="Full Name"
+            type="text"
+            value={formData.basicDetails.fullName || ''}
+            onChange={(value) => handleInputChange('fullName', value)}
+            onBlur={() => handleBlur('fullName')}
+            required
+            error={getFieldError('fullName')}
+            className={`${getFieldError('fullName') ? 'border-red-500' : isFieldValid('fullName') ? 'border-green-500' : ''}`}
+          />
+          {isFieldValid('fullName') && (
+            <div className="absolute right-3 top-8 text-green-500">✓</div>
+          )}
+        </div>
         
-        <FormField
-          label="Email"
-          type="email"
-          value={formData.basicDetails.email || ''}
-          onChange={(value) => onInputChange('basicDetails', 'email', value)}
-          required
-        />
+        <div className="relative">
+          <FormField
+            label="Email"
+            type="email"
+            value={formData.basicDetails.email || ''}
+            onChange={(value) => handleInputChange('email', value)}
+            onBlur={() => handleBlur('email')}
+            required
+            error={getFieldError('email')}
+            className={`${getFieldError('email') ? 'border-red-500' : isFieldValid('email') ? 'border-green-500' : ''}`}
+          />
+          {isFieldValid('email') && (
+            <div className="absolute right-3 top-8 text-green-500">✓</div>
+          )}
+        </div>
         
-        <FormField
-          label="Phone"
-          type="tel"
-          value={formData.basicDetails.phone || ''}
-          onChange={(value) => onInputChange('basicDetails', 'phone', value)}
-          required
-        />
+        <div className="relative">
+          <FormField
+            label="Phone"
+            type="tel"
+            value={formData.basicDetails.phone || ''}
+            onChange={(value) => handleInputChange('phone', value)}
+            onBlur={() => handleBlur('phone')}
+            required
+            error={getFieldError('phone')}
+            className={`${getFieldError('phone') ? 'border-red-500' : isFieldValid('phone') ? 'border-green-500' : ''}`}
+          />
+          {isFieldValid('phone') && (
+            <div className="absolute right-3 top-8 text-green-500">✓</div>
+          )}
+        </div>
 
         <FormField
           label="Gender"
           type="select"
-          options={genderOptions}
+          options={GENDER_OPTIONS}
           value={formData.basicDetails.gender || ''}
-          onChange={(value) => onInputChange('basicDetails', 'gender', value)}
+          onChange={(value) => handleInputChange('gender', value)}
         />
 
         <FormField
           label="Nationality"
           type="text"
           value={formData.basicDetails.nationality || ''}
-          onChange={(value) => onInputChange('basicDetails', 'nationality', value)}
+          onChange={(value) => handleInputChange('nationality', value)}
+          onBlur={() => handleBlur('nationality')}
+          error={getFieldError('nationality')}
         />
 
-        <FormField
-          label="USMLE ID"
-          type="text"
-          value={formData.basicDetails.usmleId || ''}
-          onChange={(value) => onInputChange('basicDetails', 'usmleId', value)}
-          placeholder="Enter your USMLE ID"
-        />
+        <div className="relative">
+          <FormField
+            label="USMLE ID"
+            type="text"
+            value={formData.basicDetails.usmleId || ''}
+            onChange={(value) => handleInputChange('usmleId', value.toUpperCase())}
+            onBlur={() => handleBlur('usmleId')}
+            placeholder="Enter your USMLE ID"
+            error={getFieldError('usmleId')}
+            className={`${getFieldError('usmleId') ? 'border-red-500' : isFieldValid('usmleId') ? 'border-green-500' : ''}`}
+          />
+        </div>
       </FormGrid>
 
       <div className="space-y-4">
@@ -130,44 +210,77 @@ const BasicDetailsStep = ({ formData, onInputChange }) => {
           label="Address"
           type="textarea"
           value={formData.basicDetails.address || ''}
-          onChange={(value) => onInputChange('basicDetails', 'address', value)}
+          onChange={(value) => handleInputChange('address', value)}
+          onBlur={() => handleBlur('address')}
           placeholder="Enter your complete address"
           rows={3}
+          error={getFieldError('address')}
         />
       </div>
 
       <FormGrid>
-        <FormField
-          label="Medical School"
-          type="text"
-          value={formData.basicDetails.medicalSchool || ''}
-          onChange={(value) => onInputChange('basicDetails', 'medicalSchool', value)}
-          required
-        />
+        <div className="relative">
+          <FormField
+            label="Medical School"
+            type="text"
+            value={formData.basicDetails.medicalSchool || ''}
+            onChange={(value) => handleInputChange('medicalSchool', value)}
+            onBlur={() => handleBlur('medicalSchool')}
+            required
+            error={getFieldError('medicalSchool')}
+            className={`${getFieldError('medicalSchool') ? 'border-red-500' : isFieldValid('medicalSchool') ? 'border-green-500' : ''}`}
+          />
+          {isFieldValid('medicalSchool') && (
+            <div className="absolute right-3 top-8 text-green-500">✓</div>
+          )}
+        </div>
         
-        <FormField
-          label="Graduation Year"
-          type="number"
-          value={formData.basicDetails.graduationYear || ''}
-          onChange={(value) => onInputChange('basicDetails', 'graduationYear', value)}
-          min="1990"
-          max={new Date().getFullYear() + 10}
-        />
+        <div className="relative">
+          <FormField
+            label="Graduation Year"
+            type="number"
+            value={formData.basicDetails.graduationYear || ''}
+            onChange={(value) => handleInputChange('graduationYear', value)}
+            onBlur={() => handleBlur('graduationYear')}
+            min="1990"
+            max={new Date().getFullYear() + 10}
+            required
+            error={getFieldError('graduationYear')}
+            className={`${getFieldError('graduationYear') ? 'border-red-500' : isFieldValid('graduationYear') ? 'border-green-500' : ''}`}
+          />
+          {isFieldValid('graduationYear') && (
+            <div className="absolute right-3 top-8 text-green-500">✓</div>
+          )}
+        </div>
 
-        <FormField
-          label="MBBS Registration No."
-          type="text"
-          value={formData.basicDetails.mbbsRegNo || ''}
-          onChange={(value) => onInputChange('basicDetails', 'mbbsRegNo', value)}
-          placeholder="Enter your MBBS registration number"
-        />
+        <div className="relative">
+          <FormField
+            label="MBBS Registration No."
+            type="text"
+            value={formData.basicDetails.mbbsRegNo || ''}
+            onChange={(value) => handleInputChange('mbbsRegNo', value.toUpperCase())}
+            onBlur={() => handleBlur('mbbsRegNo')}
+            placeholder="Enter your MBBS registration number"
+            error={getFieldError('mbbsRegNo')}
+            className={`${getFieldError('mbbsRegNo') ? 'border-red-500' : isFieldValid('mbbsRegNo') ? 'border-green-500' : ''}`}
+          />
+        </div>
 
-        <FormField
-          label="City"
-          type="text"
-          value={formData.basicDetails.city || ''}
-          onChange={(value) => onInputChange('basicDetails', 'city', value)}
-        />
+        <div className="relative">
+          <FormField
+            label="City"
+            type="text"
+            value={formData.basicDetails.city || ''}
+            onChange={(value) => handleInputChange('city', value)}
+            onBlur={() => handleBlur('city')}
+            required
+            error={getFieldError('city')}
+            className={`${getFieldError('city') ? 'border-red-500' : isFieldValid('city') ? 'border-green-500' : ''}`}
+          />
+          {isFieldValid('city') && (
+            <div className="absolute right-3 top-8 text-green-500">✓</div>
+          )}
+        </div>
       </FormGrid>
 
       <div className="space-y-4">
@@ -194,37 +307,47 @@ const BasicDetailsStep = ({ formData, onInputChange }) => {
                 <div className="flex items-end gap-4">
                   <div className="flex-1">
                     <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Language
+                      Language <span className="text-red-500">*</span>
                     </label>
                     <select
                       value={lang.language}
                       onChange={(e) => updateLanguage(index, 'language', e.target.value)}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-[#169AB4] focus:border-transparent"
+                      className={`w-full px-3 py-2 border rounded-md focus:ring-2 focus:ring-[#169AB4] focus:border-transparent ${
+                        getLanguageError(index, 'language') ? 'border-red-300' : 'border-gray-300'
+                      }`}
                     >
                       <option value="">Select Language</option>
-                      {languageOptions.map(language => (
+                      {LANGUAGE_OPTIONS.map(language => (
                         <option key={language} value={language}>
                           {language}
                         </option>
                       ))}
                     </select>
+                    {getLanguageError(index, 'language') && (
+                      <p className="mt-1 text-sm text-red-600">{getLanguageError(index, 'language')}</p>
+                    )}
                   </div>
                   
                   <div className="flex-1">
                     <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Fluency Level
+                      Fluency Level <span className="text-red-500">*</span>
                     </label>
                     <select
                       value={lang.fluency}
                       onChange={(e) => updateLanguage(index, 'fluency', e.target.value)}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-[#169AB4] focus:border-transparent"
+                      className={`w-full px-3 py-2 border rounded-md focus:ring-2 focus:ring-[#169AB4] focus:border-transparent ${
+                        getLanguageError(index, 'fluency') ? 'border-red-300' : 'border-gray-300'
+                      }`}
                     >
-                      {fluencyOptions.map(option => (
+                      {FLUENCY_OPTIONS.map(option => (
                         <option key={option.value} value={option.value}>
                           {option.label}
                         </option>
                       ))}
                     </select>
+                    {getLanguageError(index, 'fluency') && (
+                      <p className="mt-1 text-sm text-red-600">{getLanguageError(index, 'fluency')}</p>
+                    )}
                   </div>
                   
                   <button
@@ -240,20 +363,29 @@ const BasicDetailsStep = ({ formData, onInputChange }) => {
           </div>
         )}
       </div>
+
       <div className="bg-gray-50 rounded-lg p-6">
         <h3 className="text-lg font-semibold text-[#04445E] mb-4">Profile Photo</h3>
         
         {!photoPreview ? (
-          <label className="flex flex-col items-center justify-center w-32 h-32 border-2 border-dashed border-gray-300 rounded-lg cursor-pointer hover:bg-gray-100 transition-colors">
-            <Upload className="h-8 w-8 text-gray-400 mb-2" />
-            <span className="text-sm text-gray-500 text-center">Upload Photo</span>
-            <input
-              type="file"
-              className="hidden"
-              accept="image/*"
-              onChange={handlePhotoUpload}
-            />
-          </label>
+          <div>
+            <label className="flex flex-col items-center justify-center w-32 h-32 border-2 border-dashed border-gray-300 rounded-lg cursor-pointer hover:bg-gray-100 transition-colors">
+              <Upload className="h-8 w-8 text-gray-400 mb-2" />
+              <span className="text-sm text-gray-500 text-center">Upload Photo</span>
+              <input
+                type="file"
+                className="hidden"
+                accept={FILE_CONSTRAINTS.PHOTO.ACCEPTED_EXTENSIONS}
+                onChange={handlePhotoUpload}
+              />
+            </label>
+            {errors.photo && (
+              <p className="mt-2 text-sm text-red-600 flex items-center gap-1">
+                <AlertCircle className="h-4 w-4" />
+                {errors.photo}
+              </p>
+            )}
+          </div>
         ) : (
           <div className="relative w-32 h-32">
             <img
@@ -269,8 +401,24 @@ const BasicDetailsStep = ({ formData, onInputChange }) => {
             </button>
           </div>
         )}
+        <p className="mt-2 text-sm text-gray-500">
+          Accepted formats: {FILE_CONSTRAINTS.PHOTO.ACCEPTED_EXTENSIONS}. Maximum size: {FILE_CONSTRAINTS.PHOTO.MAX_SIZE / (1024 * 1024)}MB
+        </p>
       </div>
-      
+
+      {/* Section Validation Summary */}
+      <div className="bg-blue-50 rounded-lg p-4">
+        <div className="flex items-center gap-2 text-blue-800">
+          <AlertCircle className="h-5 w-5" />
+          <span className="font-medium">Section Status</span>
+        </div>
+        <p className="text-blue-700 text-sm mt-1">
+          {getSectionValidation().isValid 
+            ? "All required fields are completed and valid!" 
+            : "Please complete all required fields to proceed."
+          }
+        </p>
+      </div>
     </div>
   );
 };
