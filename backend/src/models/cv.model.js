@@ -54,7 +54,11 @@ const cvSchema = new mongoose.Schema({
             required: true
         },
         photo: {
-            type: String, // GridFS file ID for profile photo
+            type: String, // S3 URL
+            default: null
+        },
+        photoKey: {
+            type: String,
             default: null
         },
         languages: [{

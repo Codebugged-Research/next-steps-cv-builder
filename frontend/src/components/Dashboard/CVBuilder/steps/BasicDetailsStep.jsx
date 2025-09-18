@@ -2,17 +2,17 @@ import React, { useState } from 'react';
 import FormField from '../forms/FormField';
 import FormGrid from '../forms/FormGrid';
 import { Upload, X, User, Plus, Trash2, AlertCircle } from 'lucide-react';
-import { 
-  GENDER_OPTIONS, 
-  LANGUAGE_OPTIONS, 
-  FLUENCY_OPTIONS, 
-  FILE_CONSTRAINTS 
+import {
+  GENDER_OPTIONS,
+  LANGUAGE_OPTIONS,
+  FLUENCY_OPTIONS,
+  FILE_CONSTRAINTS
 } from '../../../../constants/formConstants';
-import { 
-  validateField, 
-  validateFile, 
+import {
+  validateField,
+  validateFile,
   validateLanguage,
-  validateFormSection 
+  validateFormSection
 } from '../../../../utils/validationRules';
 
 const BasicDetailsStep = ({ formData, onInputChange }) => {
@@ -25,10 +25,10 @@ const BasicDetailsStep = ({ formData, onInputChange }) => {
   const handleInputChange = (field, value) => {
     // Update the form data
     onInputChange('basicDetails', field, value);
-    
+
     // Mark field as touched
     setTouched(prev => ({ ...prev, [field]: true }));
-    
+
     // Validate field
     const error = validateField(field, value);
     setErrors(prev => ({ ...prev, [field]: error }));
@@ -41,23 +41,50 @@ const BasicDetailsStep = ({ formData, onInputChange }) => {
     setErrors(prev => ({ ...prev, [field]: error }));
   };
 
-  const handlePhotoUpload = (e) => {
+  const handlePhotoUpload = async (e) => {
     const file = e.target.files[0];
-    if (file) {
-      // Validate file
-      const error = validateFile(file, 'PHOTO');
-      if (error) {
-        setErrors(prev => ({ ...prev, photo: error }));
-        return;
-      }
+    if (!file) return;
 
+    // Validate file
+    const error = validateFile(file, 'PHOTO');
+    if (error) {
+      setErrors(prev => ({ ...prev, photo: error }));
+      return;
+    }
+
+    try {
+      setUploading(true);
+
+      // Create preview immediately
       const reader = new FileReader();
       reader.onloadend = () => {
         setPhotoPreview(reader.result);
-        onInputChange('basicDetails', 'photo', null);
-        setErrors(prev => ({ ...prev, photo: '' }));
       };
       reader.readAsDataURL(file);
+
+      // Upload to S3
+      const formData = new FormData();
+      formData.append('photo', file);
+
+      const response = await api.post('/photos/upload', formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      });
+
+      if (response.data.success) {
+        // Save the S3 URL to the CV data
+        onInputChange('basicDetails', 'photo', response.data.data.url);
+        onInputChange('basicDetails', 'photoKey', response.data.data.key);
+        setErrors(prev => ({ ...prev, photo: '' }));
+        toast.success('Photo uploaded successfully!');
+      }
+    } catch (error) {
+      console.error('Photo upload error:', error);
+      toast.error(error.response?.data?.message || 'Failed to upload photo');
+      setPhotoPreview(null);
+    } finally {
+      setUploading(false);
     }
   };
 
@@ -72,23 +99,23 @@ const BasicDetailsStep = ({ formData, onInputChange }) => {
   };
 
   const updateLanguage = (index, field, value) => {
-    const newLanguages = languages.map((lang, i) => 
+    const newLanguages = languages.map((lang, i) =>
       i === index ? { ...lang, [field]: value } : lang
     );
     onInputChange('basicDetails', 'languages', newLanguages);
-    
+
     // Validate the specific language entry
     const langErrors = validateLanguage(newLanguages[index]);
-    setErrors(prev => ({ 
-      ...prev, 
-      [`language_${index}`]: langErrors 
+    setErrors(prev => ({
+      ...prev,
+      [`language_${index}`]: langErrors
     }));
   };
 
   const removeLanguage = (index) => {
     const newLanguages = languages.filter((_, i) => i !== index);
     onInputChange('basicDetails', 'languages', newLanguages);
-    
+
     // Remove errors for this language
     setErrors(prev => {
       const newErrors = { ...prev };
@@ -106,8 +133,8 @@ const BasicDetailsStep = ({ formData, onInputChange }) => {
   };
 
   const getLanguageError = (index, field) => {
-    return errors[`language_${index}`] && errors[`language_${index}`][field] 
-      ? errors[`language_${index}`][field] 
+    return errors[`language_${index}`] && errors[`language_${index}`][field]
+      ? errors[`language_${index}`][field]
       : '';
   };
 
@@ -123,7 +150,7 @@ const BasicDetailsStep = ({ formData, onInputChange }) => {
   return (
     <div className="space-y-6">
       <h2 className="text-2xl font-bold text-[#04445E] mb-6">Basic Details</h2>
-      
+
       <FormGrid>
         <div className="relative">
           <FormField
@@ -140,7 +167,7 @@ const BasicDetailsStep = ({ formData, onInputChange }) => {
             <div className="absolute right-3 top-8 text-green-500">✓</div>
           )}
         </div>
-        
+
         <div className="relative">
           <FormField
             label="Email"
@@ -156,7 +183,7 @@ const BasicDetailsStep = ({ formData, onInputChange }) => {
             <div className="absolute right-3 top-8 text-green-500">✓</div>
           )}
         </div>
-        
+
         <div className="relative">
           <FormField
             label="Phone"
@@ -234,7 +261,7 @@ const BasicDetailsStep = ({ formData, onInputChange }) => {
             <div className="absolute right-3 top-8 text-green-500">✓</div>
           )}
         </div>
-        
+
         <div className="relative">
           <FormField
             label="Graduation Year"
@@ -312,9 +339,8 @@ const BasicDetailsStep = ({ formData, onInputChange }) => {
                     <select
                       value={lang.language}
                       onChange={(e) => updateLanguage(index, 'language', e.target.value)}
-                      className={`w-full px-3 py-2 border rounded-md focus:ring-2 focus:ring-[#169AB4] focus:border-transparent ${
-                        getLanguageError(index, 'language') ? 'border-red-300' : 'border-gray-300'
-                      }`}
+                      className={`w-full px-3 py-2 border rounded-md focus:ring-2 focus:ring-[#169AB4] focus:border-transparent ${getLanguageError(index, 'language') ? 'border-red-300' : 'border-gray-300'
+                        }`}
                     >
                       <option value="">Select Language</option>
                       {LANGUAGE_OPTIONS.map(language => (
@@ -327,7 +353,7 @@ const BasicDetailsStep = ({ formData, onInputChange }) => {
                       <p className="mt-1 text-sm text-red-600">{getLanguageError(index, 'language')}</p>
                     )}
                   </div>
-                  
+
                   <div className="flex-1">
                     <label className="block text-sm font-medium text-gray-700 mb-1">
                       Fluency Level <span className="text-red-500">*</span>
@@ -335,9 +361,8 @@ const BasicDetailsStep = ({ formData, onInputChange }) => {
                     <select
                       value={lang.fluency}
                       onChange={(e) => updateLanguage(index, 'fluency', e.target.value)}
-                      className={`w-full px-3 py-2 border rounded-md focus:ring-2 focus:ring-[#169AB4] focus:border-transparent ${
-                        getLanguageError(index, 'fluency') ? 'border-red-300' : 'border-gray-300'
-                      }`}
+                      className={`w-full px-3 py-2 border rounded-md focus:ring-2 focus:ring-[#169AB4] focus:border-transparent ${getLanguageError(index, 'fluency') ? 'border-red-300' : 'border-gray-300'
+                        }`}
                     >
                       {FLUENCY_OPTIONS.map(option => (
                         <option key={option.value} value={option.value}>
@@ -349,7 +374,7 @@ const BasicDetailsStep = ({ formData, onInputChange }) => {
                       <p className="mt-1 text-sm text-red-600">{getLanguageError(index, 'fluency')}</p>
                     )}
                   </div>
-                  
+
                   <button
                     onClick={() => removeLanguage(index)}
                     className="p-2 text-red-500 hover:bg-red-50 rounded-lg transition-colors"
@@ -366,7 +391,7 @@ const BasicDetailsStep = ({ formData, onInputChange }) => {
 
       <div className="bg-gray-50 rounded-lg p-6">
         <h3 className="text-lg font-semibold text-[#04445E] mb-4">Profile Photo</h3>
-        
+
         {!photoPreview ? (
           <div>
             <label className="flex flex-col items-center justify-center w-32 h-32 border-2 border-dashed border-gray-300 rounded-lg cursor-pointer hover:bg-gray-100 transition-colors">
@@ -413,8 +438,8 @@ const BasicDetailsStep = ({ formData, onInputChange }) => {
           <span className="font-medium">Section Status</span>
         </div>
         <p className="text-blue-700 text-sm mt-1">
-          {getSectionValidation().isValid 
-            ? "All required fields are completed and valid!" 
+          {getSectionValidation().isValid
+            ? "All required fields are completed and valid!"
             : "Please complete all required fields to proceed."
           }
         </p>
