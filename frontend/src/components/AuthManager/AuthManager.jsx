@@ -11,17 +11,45 @@ const AuthManager = () => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    checkAuthStatus();
+    initializeAuth();
   }, []);
 
-  const checkAuthStatus = async () => {
+  const initializeAuth = async () => {
     try {
+      const wasLoggedOut = localStorage.getItem('wasLoggedOut') === 'true';
+      
+      if (wasLoggedOut) {
+        setLoading(false);
+        return;
+      }
+
+      const storedUser = localStorage.getItem('user');
+      
+      if (!storedUser) {
+        setLoading(false);
+        return;
+      }
+
+      const userData = JSON.parse(storedUser);
+      setUser(userData);
+      setIsAuthenticated(true);
+
+      // Verify token is still valid
       const response = await api.get('/users/current-user', { withCredentials: true });
+      
       if (response.data.success) {
-        setUser(response.data.data);
+        const freshUserData = response.data.data;
+        setUser(freshUserData);
         setIsAuthenticated(true);
+        localStorage.setItem('user', JSON.stringify(freshUserData));
+        localStorage.removeItem('wasLoggedOut');
+      } else {
+        throw new Error('Token invalid');
       }
     } catch (error) {
+      // Clear invalid data
+      localStorage.removeItem('user');
+      localStorage.removeItem('wasLoggedOut');
       setIsAuthenticated(false);
       setUser(null);
     } finally {
@@ -30,15 +58,20 @@ const AuthManager = () => {
   };
 
   const handleLogin = (userData) => {
-    setUser(userData);
+    const actualUser = userData.user || userData;
+    setUser(actualUser);
     setIsAuthenticated(true);
     setShowRegister(false);
+    localStorage.setItem('user', JSON.stringify(userData));
+    localStorage.removeItem('wasLoggedOut');
   };
 
   const handleRegister = (userData) => {
     setUser(userData);
     setIsAuthenticated(true);
     setShowRegister(false);
+    localStorage.setItem('user', JSON.stringify(userData));
+    localStorage.removeItem('wasLoggedOut'); 
   };
 
   const handleLogout = async () => {
@@ -47,6 +80,8 @@ const AuthManager = () => {
     } catch (error) {
       console.error('Logout error:', error);
     } finally {
+      localStorage.setItem('wasLoggedOut', 'true');
+      localStorage.removeItem('user');
       setUser(null);
       setIsAuthenticated(false);
     }

@@ -1,7 +1,9 @@
 import AWS from 'aws-sdk';
-import multe from 'multer';
+import multer from 'multer';
 import multerS3 from 'multer-s3';
 import { v4 as uuidv4 } from 'uuid';
+import dotenv from 'dotenv';
+dotenv.config();
 
 AWS.config.update({
   accessKeyId: process.env.AWS_ACCESS_KEY_ID,
@@ -28,7 +30,7 @@ const uploadPhoto = multer({
         }
     }),
     limits: {
-        fileSize: 5 * 1024 * 1024 // 5MB limit
+        fileSize: 5 * 1024 * 1024
     },
     fileFilter: (req, file, cb) => {
         if (file.mimetype.startsWith('image/')) {

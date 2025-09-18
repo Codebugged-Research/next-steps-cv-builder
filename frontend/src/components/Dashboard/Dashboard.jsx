@@ -8,7 +8,7 @@ const DashboardLayout = ({ user, onLogout }) => {
   const [activeSection, setActiveSection] = useState('cv-builder');
   const [currentCVStep, setCurrentCVStep] = useState(1);
   const [completedSteps, setCompletedSteps] = useState([]);
-
+  console.log('DashboardLayout user prop:', user);
   const handleSectionChange = (section) => {
     setActiveSection(section);
     if (section === 'cv-builder' && activeSection !== 'cv-builder') {

@@ -1,5 +1,4 @@
 import { s3 } from '../middlewares/s3.upload.middleware.js';
-import User from '../models/user.model.js';
 
 export const uploadProfilePhoto = async (req, res) => {
     try {

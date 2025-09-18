@@ -2,6 +2,8 @@ import React, { useState } from 'react';
 import FormField from '../forms/FormField';
 import FormGrid from '../forms/FormGrid';
 import { Upload, X, User, Plus, Trash2, AlertCircle } from 'lucide-react';
+import { toast } from 'react-toastify'; 
+import api from '../../../../utils/api';
 import {
   GENDER_OPTIONS,
   LANGUAGE_OPTIONS,
@@ -19,6 +21,7 @@ const BasicDetailsStep = ({ formData, onInputChange }) => {
   const [photoPreview, setPhotoPreview] = useState(null);
   const [errors, setErrors] = useState({});
   const [touched, setTouched] = useState({});
+  const [uploading, setUploading] = useState(false); 
 
   const languages = formData.basicDetails.languages || [];
 

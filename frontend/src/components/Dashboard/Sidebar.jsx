@@ -15,7 +15,6 @@ const Sidebar = ({
   const [showPrograms, setShowPrograms] = useState(
     ['systematic-reviews', 'case-reports', 'conferences', 'workshops', 'emr-training'].includes(activeSection)
   );
-
   const mainNavigationItems = [
     { id: 'cv-builder', label: 'CV Builder', icon: FileText },
     { id: 'cv-status', label: 'View CV', icon: Eye },
