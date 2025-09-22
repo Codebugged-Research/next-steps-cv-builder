@@ -17,7 +17,7 @@ const Sidebar = ({
   );
   const mainNavigationItems = [
     { id: 'cv-builder', label: 'CV Builder', icon: FileText },
-    { id: 'cv-status', label: 'View CV', icon: Eye },
+    { id: 'cv-status', label: 'Preview CV', icon: Eye },
   ];
   
   const cvSteps = [

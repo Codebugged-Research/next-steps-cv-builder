@@ -135,7 +135,6 @@ const AchievementsStep = ({ formData, onInputChange, onArrayAdd, onArrayRemove, 
           </div>
         ))}
         
-        {/* Add New Achievement */}
         <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
           <h4 className="font-medium text-[#04445E] mb-4">Add New Achievement</h4>
           

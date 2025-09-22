@@ -19,20 +19,23 @@ import {
 
 const BasicDetailsStep = ({ formData, onInputChange }) => {
   const [photoPreview, setPhotoPreview] = useState(null);
+  const [passportPreview, setPassportPreview] = useState(null);
+  const [aadharFrontPreview, setAadharFrontPreview] = useState(null);
+  const [aadharBackPreview, setAadharBackPreview] = useState(null);
   const [errors, setErrors] = useState({});
   const [touched, setTouched] = useState({});
-  const [uploading, setUploading] = useState(false); 
+  const [uploading, setUploading] = useState({
+    photo: false,
+    passport: false,
+    aadharFront: false,
+    aadharBack: false
+  }); 
 
   const languages = formData.basicDetails.languages || [];
 
   const handleInputChange = (field, value) => {
-    // Update the form data
     onInputChange('basicDetails', field, value);
-
-    // Mark field as touched
     setTouched(prev => ({ ...prev, [field]: true }));
-
-    // Validate field
     const error = validateField(field, value);
     setErrors(prev => ({ ...prev, [field]: error }));
   };
@@ -44,56 +47,92 @@ const BasicDetailsStep = ({ formData, onInputChange }) => {
     setErrors(prev => ({ ...prev, [field]: error }));
   };
 
-  const handlePhotoUpload = async (e) => {
+  const handleDocumentUpload = async (e, documentType) => {
     const file = e.target.files[0];
     if (!file) return;
 
-    // Validate file
     const error = validateFile(file, 'PHOTO');
     if (error) {
-      setErrors(prev => ({ ...prev, photo: error }));
+      setErrors(prev => ({ ...prev, [documentType]: error }));
       return;
     }
 
     try {
-      setUploading(true);
+      setUploading(prev => ({ ...prev, [documentType]: true }));
 
-      // Create preview immediately
       const reader = new FileReader();
       reader.onloadend = () => {
-        setPhotoPreview(reader.result);
+        switch(documentType) {
+          case 'photo':
+            setPhotoPreview(reader.result);
+            break;
+          case 'passport':
+            setPassportPreview(reader.result);
+            break;
+          case 'aadharFront':
+            setAadharFrontPreview(reader.result);
+            break;
+          case 'aadharBack':
+            setAadharBackPreview(reader.result);
+            break;
+        }
       };
       reader.readAsDataURL(file);
 
-      // Upload to S3
       const formData = new FormData();
-      formData.append('photo', file);
+      formData.append('document', file);
 
-      const response = await api.post('/photos/upload', formData, {
+      const response = await api.post('/documents/upload', formData, {
         headers: {
           'Content-Type': 'multipart/form-data',
         },
       });
 
       if (response.data.success) {
-        // Save the S3 URL to the CV data
-        onInputChange('basicDetails', 'photo', response.data.data.url);
-        onInputChange('basicDetails', 'photoKey', response.data.data.key);
-        setErrors(prev => ({ ...prev, photo: '' }));
-        toast.success('Photo uploaded successfully!');
+        onInputChange('basicDetails', documentType, response.data.data.url);
+        onInputChange('basicDetails', `${documentType}Key`, response.data.data.key);
+        setErrors(prev => ({ ...prev, [documentType]: '' }));
+        toast.success(`${documentType === 'photo' ? 'Photo' : documentType === 'passport' ? 'Passport' : documentType === 'aadharFront' ? 'Aadhar Front' : 'Aadhar Back'} uploaded successfully!`);
       }
     } catch (error) {
-      console.error('Photo upload error:', error);
-      toast.error(error.response?.data?.message || 'Failed to upload photo');
-      setPhotoPreview(null);
+      console.error(`${documentType} upload error:`, error);
+      toast.error(error.response?.data?.message || `Failed to upload ${documentType}`);
+      
+      switch(documentType) {
+        case 'photo':
+          setPhotoPreview(null);
+          break;
+        case 'passport':
+          setPassportPreview(null);
+          break;
+        case 'aadharFront':
+          setAadharFrontPreview(null);
+          break;
+        case 'aadharBack':
+          setAadharBackPreview(null);
+          break;
+      }
     } finally {
-      setUploading(false);
+      setUploading(prev => ({ ...prev, [documentType]: false }));
     }
   };
 
-  const removePhoto = () => {
-    setPhotoPreview(null);
-    onInputChange('basicDetails', 'photo', null);
+  const removeDocument = (documentType) => {
+    switch(documentType) {
+      case 'photo':
+        setPhotoPreview(null);
+        break;
+      case 'passport':
+        setPassportPreview(null);
+        break;
+      case 'aadharFront':
+        setAadharFrontPreview(null);
+        break;
+      case 'aadharBack':
+        setAadharBackPreview(null);
+        break;
+    }
+    onInputChange('basicDetails', documentType, null);
   };
 
   const addLanguage = () => {
@@ -107,7 +146,6 @@ const BasicDetailsStep = ({ formData, onInputChange }) => {
     );
     onInputChange('basicDetails', 'languages', newLanguages);
 
-    // Validate the specific language entry
     const langErrors = validateLanguage(newLanguages[index]);
     setErrors(prev => ({
       ...prev,
@@ -119,7 +157,6 @@ const BasicDetailsStep = ({ formData, onInputChange }) => {
     const newLanguages = languages.filter((_, i) => i !== index);
     onInputChange('basicDetails', 'languages', newLanguages);
 
-    // Remove errors for this language
     setErrors(prev => {
       const newErrors = { ...prev };
       delete newErrors[`language_${index}`];
@@ -141,7 +178,6 @@ const BasicDetailsStep = ({ formData, onInputChange }) => {
       : '';
   };
 
-  // Get validation status for entire section
   const getSectionValidation = () => {
     const sectionErrors = validateFormSection('basicDetails', formData.basicDetails);
     return {
@@ -149,6 +185,70 @@ const BasicDetailsStep = ({ formData, onInputChange }) => {
       errors: sectionErrors
     };
   };
+
+  const DocumentUploadCard = ({ 
+    title, 
+    documentType, 
+    preview, 
+    isUploading, 
+    error,
+    required = false 
+  }) => (
+    <div className="bg-gray-50 rounded-lg p-4">
+      <h4 className="text-md font-semibold text-[#04445E] mb-3">
+        {title} {required && <span className="text-red-500">*</span>}
+      </h4>
+      
+      {!preview ? (
+        <div>
+          <label className="flex flex-col items-center justify-center w-32 h-32 border-2 border-dashed border-gray-300 rounded-lg cursor-pointer hover:bg-gray-100 transition-colors">
+            {isUploading ? (
+              <div className="text-center">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#169AB4] mx-auto mb-2"></div>
+                <span className="text-sm text-gray-500">Uploading...</span>
+              </div>
+            ) : (
+              <>
+                <Upload className="h-8 w-8 text-gray-400 mb-2" />
+                <span className="text-sm text-gray-500 text-center">Upload {title}</span>
+              </>
+            )}
+            <input
+              type="file"
+              className="hidden"
+              accept={FILE_CONSTRAINTS.PHOTO.ACCEPTED_EXTENSIONS}
+              onChange={(e) => handleDocumentUpload(e, documentType)}
+              disabled={isUploading}
+            />
+          </label>
+          {error && (
+            <p className="mt-2 text-sm text-red-600 flex items-center gap-1">
+              <AlertCircle className="h-4 w-4" />
+              {error}
+            </p>
+          )}
+        </div>
+      ) : (
+        <div className="relative w-32 h-32">
+          <img
+            src={preview}
+            alt={`${title} Preview`}
+            className="w-32 h-32 rounded-lg object-cover"
+          />
+          <button
+            onClick={() => removeDocument(documentType)}
+            className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1 hover:bg-red-600 transition-colors"
+          >
+            <X className="h-4 w-4" />
+          </button>
+        </div>
+      )}
+      
+      <p className="mt-2 text-sm text-gray-500">
+        Accepted formats: {FILE_CONSTRAINTS.PHOTO.ACCEPTED_EXTENSIONS}. Maximum size: {FILE_CONSTRAINTS.PHOTO.MAX_SIZE / (1024 * 1024)}MB
+      </p>
+    </div>
+  );
 
   return (
     <div className="space-y-6">
@@ -232,69 +332,6 @@ const BasicDetailsStep = ({ formData, onInputChange }) => {
             className={`${getFieldError('usmleId') ? 'border-red-500' : isFieldValid('usmleId') ? 'border-green-500' : ''}`}
           />
         </div>
-      </FormGrid>
-
-      <div className="space-y-4">
-        <h3 className="text-lg font-semibold text-[#04445E]">Address</h3>
-        <FormField
-          label="Address"
-          type="textarea"
-          value={formData.basicDetails.address || ''}
-          onChange={(value) => handleInputChange('address', value)}
-          onBlur={() => handleBlur('address')}
-          placeholder="Enter your complete address"
-          rows={3}
-          error={getFieldError('address')}
-        />
-      </div>
-
-      <FormGrid>
-        <div className="relative">
-          <FormField
-            label="Medical School"
-            type="text"
-            value={formData.basicDetails.medicalSchool || ''}
-            onChange={(value) => handleInputChange('medicalSchool', value)}
-            onBlur={() => handleBlur('medicalSchool')}
-            required
-            error={getFieldError('medicalSchool')}
-            className={`${getFieldError('medicalSchool') ? 'border-red-500' : isFieldValid('medicalSchool') ? 'border-green-500' : ''}`}
-          />
-          {isFieldValid('medicalSchool') && (
-            <div className="absolute right-3 top-8 text-green-500">✓</div>
-          )}
-        </div>
-
-        <div className="relative">
-          <FormField
-            label="Graduation Year"
-            type="number"
-            value={formData.basicDetails.graduationYear || ''}
-            onChange={(value) => handleInputChange('graduationYear', value)}
-            onBlur={() => handleBlur('graduationYear')}
-            min="1990"
-            max={new Date().getFullYear() + 10}
-            required
-            error={getFieldError('graduationYear')}
-            className={`${getFieldError('graduationYear') ? 'border-red-500' : isFieldValid('graduationYear') ? 'border-green-500' : ''}`}
-          />
-          {isFieldValid('graduationYear') && (
-            <div className="absolute right-3 top-8 text-green-500">✓</div>
-          )}
-        </div>
-
-        <div className="relative">
-          <FormField
-            label="MBBS Registration No."
-            type="text"
-            value={formData.basicDetails.mbbsRegNo || ''}
-            onChange={(value) => handleInputChange('mbbsRegNo', value.toUpperCase())}
-            onBlur={() => handleBlur('mbbsRegNo')}
-            placeholder="Enter your MBBS registration number"
-            error={getFieldError('mbbsRegNo')}
-            className={`${getFieldError('mbbsRegNo') ? 'border-red-500' : isFieldValid('mbbsRegNo') ? 'border-green-500' : ''}`}
-          />
-        </div>
 
         <div className="relative">
           <FormField
@@ -312,6 +349,20 @@ const BasicDetailsStep = ({ formData, onInputChange }) => {
           )}
         </div>
       </FormGrid>
+
+      <div className="space-y-4">
+        <h3 className="text-lg font-semibold text-[#04445E]">Address</h3>
+        <FormField
+          label="Address"
+          type="textarea"
+          value={formData.basicDetails.address || ''}
+          onChange={(value) => handleInputChange('address', value)}
+          onBlur={() => handleBlur('address')}
+          placeholder="Enter your complete address"
+          rows={3}
+          error={getFieldError('address')}
+        />
+      </div>
 
       <div className="space-y-4">
         <div className="flex items-center justify-between">
@@ -392,49 +443,45 @@ const BasicDetailsStep = ({ formData, onInputChange }) => {
         )}
       </div>
 
-      <div className="bg-gray-50 rounded-lg p-6">
-        <h3 className="text-lg font-semibold text-[#04445E] mb-4">Profile Photo</h3>
-
-        {!photoPreview ? (
-          <div>
-            <label className="flex flex-col items-center justify-center w-32 h-32 border-2 border-dashed border-gray-300 rounded-lg cursor-pointer hover:bg-gray-100 transition-colors">
-              <Upload className="h-8 w-8 text-gray-400 mb-2" />
-              <span className="text-sm text-gray-500 text-center">Upload Photo</span>
-              <input
-                type="file"
-                className="hidden"
-                accept={FILE_CONSTRAINTS.PHOTO.ACCEPTED_EXTENSIONS}
-                onChange={handlePhotoUpload}
-              />
-            </label>
-            {errors.photo && (
-              <p className="mt-2 text-sm text-red-600 flex items-center gap-1">
-                <AlertCircle className="h-4 w-4" />
-                {errors.photo}
-              </p>
-            )}
-          </div>
-        ) : (
-          <div className="relative w-32 h-32">
-            <img
-              src={photoPreview}
-              alt="Profile Preview"
-              className="w-32 h-32 rounded-lg object-cover"
-            />
-            <button
-              onClick={removePhoto}
-              className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1 hover:bg-red-600 transition-colors"
-            >
-              <X className="h-4 w-4" />
-            </button>
-          </div>
-        )}
-        <p className="mt-2 text-sm text-gray-500">
-          Accepted formats: {FILE_CONSTRAINTS.PHOTO.ACCEPTED_EXTENSIONS}. Maximum size: {FILE_CONSTRAINTS.PHOTO.MAX_SIZE / (1024 * 1024)}MB
-        </p>
+      <div className="space-y-6">
+        <h3 className="text-lg font-semibold text-[#04445E]">Document Uploads</h3>
+        
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          <DocumentUploadCard
+            title="Profile Photo"
+            documentType="photo"
+            preview={photoPreview}
+            isUploading={uploading.photo}
+            error={errors.photo}
+            required={true}
+          />
+          
+          <DocumentUploadCard
+            title="Passport"
+            documentType="passport"
+            preview={passportPreview}
+            isUploading={uploading.passport}
+            error={errors.passport}
+          />
+          
+          <DocumentUploadCard
+            title="Aadhar Front"
+            documentType="aadharFront"
+            preview={aadharFrontPreview}
+            isUploading={uploading.aadharFront}
+            error={errors.aadharFront}
+          />
+          
+          <DocumentUploadCard
+            title="Aadhar Back"
+            documentType="aadharBack"
+            preview={aadharBackPreview}
+            isUploading={uploading.aadharBack}
+            error={errors.aadharBack}
+          />
+        </div>
       </div>
 
-      {/* Section Validation Summary */}
       <div className="bg-blue-50 rounded-lg p-4">
         <div className="flex items-center gap-2 text-blue-800">
           <AlertCircle className="h-5 w-5" />
