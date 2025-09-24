@@ -4,6 +4,7 @@ import ViewCV from '../Dashboard/ViewCV/ViewCV';
 import Existingcv from '../Dashboard/ExistingCV/Existingcv';
 import SystematicReviews from '../Dashboard/SystematicReview/SystematicReviews';
 import Conferences from '../Dashboard/Conferences/Conferences';
+import Emrtraining from '../Dashboard/EMRTraining/Emrtraining';
 
 const MainContentRouter = ({ 
   activeSection, 
@@ -64,12 +65,11 @@ const MainContentRouter = ({
 
       case 'emr-training':
         return (
-          <div className="bg-white rounded-xl shadow-lg p-8">
-            <h2 className="text-2xl font-bold text-[#04445E] mb-4">EMR Training</h2>
-            <p className="text-gray-600">EMR Training component coming soon...</p>
-          </div>
+          <Emrtraining
+            onBack={() => onSectionChange('cv-builder')}
+            user={user}
+          />
         );
-
       default:
         return (
           <CVBuilder

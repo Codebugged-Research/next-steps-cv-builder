@@ -14,7 +14,6 @@ const UpcomingConferencesTab = () => {
       setLoading(true);
       setError(null);
       
-      // Fetch all conferences from your backend
       const response = await api.get('/conferences');
       
       if (response.data.success) {
@@ -91,10 +90,8 @@ const UpcomingConferencesTab = () => {
     );
   }
 
-  // Conferences loaded successfully
   return (
     <div className="space-y-6">
-      {/* Header with refresh button */}
       <div className="flex justify-between items-center">
         <div>
           <h2 className="text-xl font-semibold text-[#04445E]">Available Conferences</h2>

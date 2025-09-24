@@ -229,7 +229,6 @@ const PublicationTimeline = () => {
 
   return (
     <div className="w-full bg-white rounded-lg shadow-lg p-6 mb-8">
-      {/* Navigation Header */}
       <div className="flex items-center justify-between mb-6">
         <h2 className="text-xl font-bold text-gray-900">Publication Timeline</h2>
         <div className="flex items-center gap-4">
@@ -263,10 +262,8 @@ const PublicationTimeline = () => {
         </div>
       </div>
 
-      {/* Timeline */}
       <div className="mb-8">
         <div className="relative px-8">
-          {/* Timeline Line */}
           <div className="absolute top-8 left-16 right-16 h-1 bg-gray-200 rounded"></div>
           <div 
             className="absolute top-8 left-16 h-1 bg-[#04445E] rounded transition-all duration-500"
@@ -275,7 +272,6 @@ const PublicationTimeline = () => {
             }}
           ></div>
 
-          {/* Timeline Points */}
           <div className="flex justify-between relative">
             {currentStages.map((stage, index) => {
               const Icon = stage.icon;
@@ -320,7 +316,6 @@ const PublicationTimeline = () => {
         </div>
       </div>
 
-      {/* Content Panel */}
       <div className="bg-gradient-to-br from-blue-50 to-slate-50 rounded-lg p-6 border border-blue-100">
         <div className="flex items-start justify-between mb-6">
           <div>

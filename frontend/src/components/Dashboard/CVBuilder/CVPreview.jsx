@@ -178,7 +178,6 @@ const CVPreview = ({ cvData, onBack, onDownload }) => {
             </div>
           )}
 
-          {/* EMR & RCM Training */}
           {(cvData?.emrRcmTraining?.emrSystems?.length > 0 || cvData?.emrRcmTraining?.rcmTraining) && (
             <div className="mb-10">
               <h2 className="text-2xl font-bold text-[#04445E] mb-6 border-b-2 border-gray-200 pb-2">
@@ -200,7 +199,6 @@ const CVPreview = ({ cvData, onBack, onDownload }) => {
             </div>
           )}
 
-          {/* Achievements */}
           {cvData?.significantAchievements && (
             <div className="mb-10">
               <h2 className="text-2xl font-bold text-[#04445E] mb-6 border-b-2 border-gray-200 pb-2">
@@ -213,7 +211,6 @@ const CVPreview = ({ cvData, onBack, onDownload }) => {
           )}
         </div>
 
-        {/* Action Buttons */}
         <div className="flex justify-center gap-6">
           <button
             onClick={onBack}
