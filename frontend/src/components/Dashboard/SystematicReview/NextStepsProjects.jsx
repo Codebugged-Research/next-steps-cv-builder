@@ -6,16 +6,6 @@ const NextStepsProjects = () => {
   const [showJoinForm, setShowJoinForm] = useState(false);
   const [showNewForm, setShowNewForm] = useState(false);
 
-  const handleJoinProject = () => {
-    setShowJoinForm(true);
-    console.log('Join existing project clicked');
-  };
-
-  const handleStartNewProject = () => {
-    setShowNewForm(true);
-    console.log('Start new project clicked');
-  };
-
   return (
     <div className="bg-white rounded-xl shadow-lg mb-8">
       <div className="border-b border-gray-200 px-6 py-4">
@@ -29,20 +19,6 @@ const NextStepsProjects = () => {
             <p className="text-gray-600">Work with Next Steps team and peer groups</p>
           </div>
           <div className="flex gap-3">
-            <button
-              onClick={handleJoinProject}
-              className="flex items-center gap-2 px-4 py-2 border border-[#169AB4] text-[#169AB4] rounded-lg hover:bg-[#169AB4] hover:text-white transition-colors"
-            >
-              <Search className="h-4 w-4" />
-              Join Existing Project
-            </button>
-            <button
-              onClick={handleStartNewProject}
-              className="flex items-center gap-2 px-4 py-2 bg-[#169AB4] text-white rounded-lg hover:bg-[#147a8f] transition-colors"
-            >
-              <Plus className="h-4 w-4" />
-              Start New Project
-            </button>
           </div>
         </div>
 

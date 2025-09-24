@@ -3,7 +3,6 @@ import CVBuilder from '../Dashboard/CVBuilder/CVBuilder';
 import ViewCV from '../Dashboard/ViewCV/ViewCV';
 import Existingcv from '../Dashboard/ExistingCV/Existingcv';
 import SystematicReviews from '../Dashboard/SystematicReview/SystematicReviews';
-import CaseReports from '../Dashboard/CaseReports/CaseReports';
 import Conferences from '../Dashboard/Conferences/Conferences';
 
 const MainContentRouter = ({ 
@@ -42,14 +41,6 @@ const MainContentRouter = ({
       case 'systematic-reviews':
         return (
           <SystematicReviews
-            onBack={() => onSectionChange('cv-builder')}
-            user={user}
-          />
-        );
-
-      case 'case-reports':
-        return (
-          <CaseReports
             onBack={() => onSectionChange('cv-builder')}
             user={user}
           />

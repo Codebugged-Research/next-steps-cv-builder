@@ -1,5 +1,5 @@
 import React from 'react';
-import { BookOpen, FileText, Calendar, Heart, Award, ArrowRight, ChevronDown, ChevronRight, ChartSpline } from 'lucide-react';
+import { BookOpen, FileText, Calendar, Heart, Award, ArrowRight, ChevronDown, ChevronRight, ChartSpline, FileTextIcon } from 'lucide-react';
 
 const CVStrengtheningSection = ({
   activeSection,
@@ -12,32 +12,30 @@ const CVStrengtheningSection = ({
       id: 'systematic-reviews', 
       label: 'Publications', 
       icon: BookOpen,
-      description: 'Research and review medical literature'
-    },
-    { 
-      id: 'case-reports', 
-      label: 'Case Reports', 
-      icon: FileText,
-      description: 'Document and analyze clinical cases'
+      description: ''
     },
     { 
       id: 'conferences', 
       label: 'Conferences', 
       icon: Calendar,
-      description: 'Medical conferences and presentations'
+      description: ''
     },
-
+    {
+      id:'workshops',
+      label:'Workshops',
+      icon: FileTextIcon,
+      description:''
+    },
     { 
       id: 'emr-training', 
       label: 'EMR & RCM Training', 
       icon: Award,
-      description: 'Electronic Medical Records training'
+      description: ''
     },
   ];
 
   return (
     <div>
-      {/* Main CV Strengthening Program Item */}
       <button
         onClick={onTogglePrograms}
         className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg text-left transition-all duration-200 group ${
@@ -61,7 +59,6 @@ const CVStrengtheningSection = ({
         )}
       </button>
 
-      {/* Program Items Dropdown */}
       {showPrograms && (
         <div className="mt-2 ml-4 space-y-1 border-l-2 border-gray-100 pl-4">
           {programItems.map((item) => {
