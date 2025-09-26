@@ -46,7 +46,6 @@ const uploadGovCV = asyncHandler(async (req, res) => {
         throw new ApiError(400, "Government CV file is required");
     }
     
-    // File validation (GridFS middleware handles the actual storage)
     if (!req.file.gridfsId) {
         throw new ApiError(500, "File upload to GridFS failed");
     }
@@ -55,7 +54,7 @@ const uploadGovCV = asyncHandler(async (req, res) => {
         userId: userId,
         originalName: req.file.originalname,
         filename: req.file.gridfsFilename,
-        fileId: req.file.gridfsId, // GridFS file ID
+        fileId: req.file.gridfsId, 
         size: req.file.size,
         uploadDate: new Date(),
         type: 'government',
@@ -109,8 +108,6 @@ const downloadCVPDF = async (req, res) => {
         const userId = req.params.userId || req.user._id;
         
         const pdfBuffer = await generateCVPDF(userId);
-        
-        // Get user name for filename
         const cvData = await CV.findOne({ userId });
         const filename = `${cvData.basicDetails.fullName.replace(/\s+/g, '_')}_CV.pdf`;
         

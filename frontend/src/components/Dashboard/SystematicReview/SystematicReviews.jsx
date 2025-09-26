@@ -10,7 +10,7 @@ const PublicationTimeline = () => {
   const timelineStages = [
     {
       id: 0,
-      title: "Week 1",
+      title: "Stage 1",
       duration: "Month 1",
       icon: BookOpen,
       status: "completed",
@@ -28,7 +28,7 @@ const PublicationTimeline = () => {
     },
     {
       id: 1,
-      title: "Week 2",
+      title: "Stage 2",
       duration: "Month 1",
       icon: Target,
       status: "completed",
@@ -45,7 +45,7 @@ const PublicationTimeline = () => {
     },
     {
       id: 2,
-      title: "Week 3",
+      title: "Stage 3",
       duration: "Month 1",
       icon: Search,
       status: "in-progress",
@@ -62,7 +62,7 @@ const PublicationTimeline = () => {
     },
     {
       id: 3,
-      title: "Week 4",
+      title: "Stage 4",
       duration: "Month 1",
       icon: FileText,
       status: "pending",
@@ -81,7 +81,7 @@ const PublicationTimeline = () => {
     },
     {
       id: 4,
-      title: "Week 5",
+      title: "Stage 5",
       duration: "Month 1",
       icon: Users,
       status: "pending",
@@ -99,7 +99,7 @@ const PublicationTimeline = () => {
     },
     {
       id: 5,
-      title: "Week 6",
+      title: "Stage 6",
       duration: "Month 2",
       icon: CheckCircle,
       status: "pending",
@@ -115,7 +115,7 @@ const PublicationTimeline = () => {
     },
     {
       id: 6,
-      title: "Week 7",
+      title: "Stage 7",
       duration: "Month 2",
       icon: Edit,
       status: "pending",
@@ -131,7 +131,7 @@ const PublicationTimeline = () => {
     },
     {
       id: 7,
-      title: "Week 8",
+      title: "Stage 8",
       duration: "Month 2",
       icon: Eye,
       status: "pending",
@@ -145,7 +145,7 @@ const PublicationTimeline = () => {
     },
     {
       id: 8,
-      title: "Week 9-12",
+      title: "Stage 9-12",
       duration: "Month 3",
       icon: FileText,
       status: "pending",
@@ -159,7 +159,7 @@ const PublicationTimeline = () => {
     },
     {
       id: 9,
-      title: "Week 13-16",
+      title: "Stage 13-16",
       duration: "Month 4",
       icon: CheckCircle,
       status: "pending",
@@ -173,7 +173,7 @@ const PublicationTimeline = () => {
     },
     {
       id: 10,
-      title: "Week 17-20",
+      title: "Stage 17-20",
       duration: "Month 5",
       icon: Download,
       status: "pending",

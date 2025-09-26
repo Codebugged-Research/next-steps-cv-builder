@@ -54,10 +54,26 @@ const cvSchema = new mongoose.Schema({
             required: true
         },
         photo: {
-            type: String, // S3 URL
+            type: String,
             default: null
         },
         photoKey: {
+            type: String,
+            default: null
+        },
+        aadharFront: {
+            type: String,
+            default: null
+        },
+        aadharFrontKey: {
+            type: String,
+            default: null
+        },
+        aadharBack: {
+            type: String,
+            default: null
+        },
+        aadharBackKey: {
             type: String,
             default: null
         },
@@ -73,52 +89,226 @@ const cvSchema = new mongoose.Schema({
         }]
     },
     education: {
-        medicalSchoolName: {
-            type: String,
-            default: ""
+        schooling: {
+            schoolName: {
+                type: String,
+                default: ""
+            },
+            board: {
+                type: String,
+                default: ""
+            },
+            city: {
+                type: String,
+                default: ""
+            },
+            state: {
+                type: String,
+                default: ""
+            },
+            startYear: {
+                type: String,
+                default: ""
+            },
+            endYear: {
+                type: String,
+                default: ""
+            },
+            grade: {
+                type: String,
+                default: ""
+            }
         },
-        country: {
-            type: String,
-            default: ""
+        college: {
+            collegeName: {
+                type: String,
+                default: ""
+            },
+            stream: {
+                type: String,
+                enum: ['Science', 'Commerce', 'Arts', 'Other', ''],
+                default: ""
+            },
+            city: {
+                type: String,
+                default: ""
+            },
+            state: {
+                type: String,
+                default: ""
+            },
+            startYear: {
+                type: String,
+                default: ""
+            },
+            endYear: {
+                type: String,
+                default: ""
+            },
+            eleventhGrade: {
+                type: String,
+                default: ""
+            },
+            twelfthGrade: {
+                type: String,
+                default: ""
+            }
         },
-        joiningDate: {
-            type: String,
-            default: ""
+        graduation: {
+            universityName: {
+                type: String,
+                default: ""
+            },
+            degree: {
+                type: String,
+                enum: ['MBBS', 'BDS', 'BAMS', 'BHMS', 'B.Sc', 'Other', ''],
+                default: ""
+            },
+            specialization: {
+                type: String,
+                default: ""
+            },
+            city: {
+                type: String,
+                default: ""
+            },
+            state: {
+                type: String,
+                default: ""
+            },
+            country: {
+                type: String,
+                default: ""
+            },
+            startDate: {
+                type: String,
+                default: ""
+            },
+            endDate: {
+                type: String,
+                default: ""
+            },
+            firstYearPercentage: {
+                type: String,
+                default: ""
+            },
+            secondYearPercentage: {
+                type: String,
+                default: ""
+            },
+            thirdYearPercentage: {
+                type: String,
+                default: ""
+            },
+            finalYearPercentage: {
+                type: String,
+                default: ""
+            },
+            overallGrade: {
+                type: String,
+                default: ""
+            },
+            classType: {
+                type: String,
+                enum: ['First Class with Distinction', 'First Class', 'Second Class', 'Pass Class', ''],
+                default: ""
+            }
         },
-        completionDate: {
-            type: String,
-            default: ""
-        },
-        firstYearPercentage: {
-            type: String,
-            default: ""
-        },
-        secondYearPercentage: {
-            type: String,
-            default: ""
-        },
-        preFinalYearPercentage: {
-            type: String,
-            default: ""
-        },
-        finalYearPercentage: {
-            type: String,
-            default: ""
-        },
-        hasResidency: {
-            type: Boolean,
-            default: false
+        postGraduation: {
+            universityName: {
+                type: String,
+                default: ""
+            },
+            degree: {
+                type: String,
+                enum: ['MD', 'MS', 'DNB', 'DM', 'MCh', 'M.Sc', 'Other', ''],
+                default: ""
+            },
+            specialization: {
+                type: String,
+                default: ""
+            },
+            city: {
+                type: String,
+                default: ""
+            },
+            state: {
+                type: String,
+                default: ""
+            },
+            country: {
+                type: String,
+                default: ""
+            },
+            startDate: {
+                type: String,
+                default: ""
+            },
+            endDate: {
+                type: String,
+                default: ""
+            },
+            status: {
+                type: String,
+                enum: ['Completed', 'Pursuing', 'Dropped', ''],
+                default: ""
+            },
+            overallGrade: {
+                type: String,
+                default: ""
+            }
         }
     },
     usmleScores: {
         step1Status: {
             type: String,
-            enum: ['not-taken', 'pass', 'fail'],
-            default: 'not-taken'
+            enum: ['not-taken', 'pass', 'fail', ''],
+            default: ''
+        },
+        step1Cert: {
+            url: {
+                type: String,
+                default: null
+            },
+            key: {
+                type: String,
+                default: null
+            },
+            fileName: {
+                type: String,
+                default: null
+            },
+            uploadDate: {
+                type: String,
+                default: null
+            }
         },
         step2ckScore: {
             type: String,
             default: ""
+        },
+        step2Cert: {
+            url: {
+                type: String,
+                default: null
+            },
+            key: {
+                type: String,
+                default: null
+            },
+            fileName: {
+                type: String,
+                default: null
+            },
+            uploadDate: {
+                type: String,
+                default: null
+            }
+        },
+        step2csStatus: {
+            type: String,
+            enum: ['not-taken', 'pass', 'fail', 'waived', ''],
+            default: ''
         },
         ecfmgCertified: {
             type: Boolean,
@@ -132,8 +322,30 @@ const cvSchema = new mongoose.Schema({
         description: String
     }],
     skills: {
-        type: String,
-        default: ""
+        skillsList: {
+            type: String,
+            default: ""
+        },
+        supportingDocuments: [{
+            id: {
+                type: Number
+            },
+            name: {
+                type: String
+            },
+            url: {
+                type: String
+            },
+            key: {
+                type: String
+            },
+            type: {
+                type: String
+            },
+            size: {
+                type: Number
+            }
+        }]
     },
     professionalExperiences: [{
         position: String,
@@ -147,62 +359,119 @@ const cvSchema = new mongoose.Schema({
         duration: String,
         description: String
     }],
-    achievements: [{
-        id: Number,
-        title: {
-            type: String,
-            required: true
-        },
-        description: String,
-        date: String,
-        attachmentType: {
-            type: String,
-            enum: ['none', 'url'],
-            default: 'none'
-        },
-        url: String
-    }],
+    significantAchievements: {
+    type: String,
+    default: ""
+},
+achievements: [{
+    id: Number,
+    title: {
+        type: String,
+        required: true
+    },
+    description: {
+        type: String,
+        default: ""
+    },
+    date: {
+        type: String,
+        default: ""
+    },
+    attachmentType: {
+        type: String,
+        enum: ['none', 'url'],
+        default: 'none'
+    },
+    url: {
+        type: String,
+        default: ""
+    }
+}],
     publications: [{
-        title: {
+    title: {
+        type: String,
+        required: true
+    },
+    journal: {
+        type: String,
+        required: true
+    },
+    year: {
+        type: String,
+        required: true
+    },
+    type: {
+        type: String,
+        enum: ['research-article', 'case-report', 'review-article', 'conference-paper'],
+        default: 'research-article'
+    },
+    supportingDocument: {
+        url: {
             type: String,
-            required: true
+            default: null
         },
-        journal: {
+        key: {
             type: String,
-            required: true
+            default: null
         },
-        year: {
+        fileName: {
             type: String,
-            required: true
+            default: null
         },
-        type: {
-            type: String,
-            enum: ['research-article', 'case-report'],
-            default: 'research-article'
+        fileSize: {
+            type: Number,
+            default: null
         }
-    }],
-    conferences: [{
-        name: {
+    }
+}],
+   conferences: [{
+    name: {
+        type: String,
+        required: true
+    },
+    year: {
+        type: String,
+        required: true
+    },
+    location: {
+        type: String,
+        default: ""
+    },
+    country: {
+        type: String,
+        default: ""
+    },
+    role: {
+        type: String,
+        required: true
+    },
+    description: {
+        type: String,
+        default: ""
+    },
+    certificateAwarded: {
+        type: Boolean,
+        default: false
+    },
+    supportingDocument: {
+        url: {
             type: String,
-            required: true
+            default: null
         },
-        year: {
+        key: {
             type: String,
-            required: true
+            default: null
         },
-        role: {
+        fileName: {
             type: String,
-            required: true
+            default: null
         },
-        description: {
-            type: String,
-            default: ""
-        },
-        certificateAwarded: {
-            type: Boolean,
-            default: false
+        fileSize: {
+            type: Number,
+            default: null
         }
-    }],
+    }
+}],
     workshops: [{
         name: {
             type: String,
