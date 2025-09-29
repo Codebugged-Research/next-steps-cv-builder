@@ -287,14 +287,6 @@ const EducationStep = ({ formData, onInputChange }) => {
           onChange={(value) => onInputChange('education', 'graduation', { ...formData.education?.graduation, overallGrade: value })}
           placeholder="e.g., 8.5 CGPA or 85%"
         />
-        
-        <FormField
-          label="Class/Division"
-          type="select"
-          options={['First Class with Distinction', 'First Class', 'Second Class', 'Pass Class']}
-          value={formData.education?.graduation?.classType || ''}
-          onChange={(value) => onInputChange('education', 'graduation', { ...formData.education?.graduation, classType: value })}
-        />
       </FormGrid>
     </div>
   );
@@ -416,7 +408,7 @@ const EducationStep = ({ formData, onInputChange }) => {
       <div className="bg-white rounded-lg border border-gray-200 p-6">
         {renderActiveTab()}
       </div>
-
+{/* 
       <div className="bg-green-50 rounded-lg p-4">
         <div className="flex items-center gap-2 text-green-800">
           <GraduationCap className="h-5 w-5" />
@@ -425,7 +417,7 @@ const EducationStep = ({ formData, onInputChange }) => {
         <p className="text-green-700 text-sm mt-1">
           Complete all relevant education sections. Post-graduation is optional.
         </p>
-      </div>
+      </div> */}
     </div>
   );
 };

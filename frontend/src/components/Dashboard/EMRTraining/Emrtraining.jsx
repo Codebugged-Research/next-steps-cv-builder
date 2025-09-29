@@ -1,87 +1,14 @@
 import React, { useState } from 'react';
 import { Calendar, Play, Clock, Users, ExternalLink, CheckCircle, X } from 'lucide-react';
+import HipaaAgreementComponent from './HipaaAgreeement';
 
 const EmrTrainingComponent = () => {
   const [activeTab, setActiveTab] = useState('book');
   const [selectedMonth, setSelectedMonth] = useState('January');
   const [registrations, setRegistrations] = useState([]);
+  const [hasAgreedToTerms, setHasAgreedToTerms] = useState(false);
+  const [showAgreement, setShowAgreement] = useState(false);
 
-  const trainingSessions = {
-    // 'January': [
-    //   {
-    //     id: 1,
-    //     title: 'EMR Basics: Getting Started',
-    //     description: 'Learn the fundamentals of Electronic Medical Records, including navigation, patient lookup, and basic documentation.',
-    //     date: '15',
-    //     time: '10:00 AM - 12:00 PM',
-    //     instructor: 'Dr. Sarah Johnson',
-    //     capacity: 25,
-    //     enrolled: 18,
-    //     level: 'Beginner'
-    //   },
-    //   {
-    //     id: 2,
-    //     title: 'Advanced Charting Techniques',
-    //     description: 'Master advanced documentation features, templates, and efficient workflows for comprehensive patient care.',
-    //     date: '22',
-    //     time: '2:00 PM - 4:00 PM',
-    //     instructor: 'Dr. Michael Chen',
-    //     capacity: 20,
-    //     enrolled: 15,
-    //     level: 'Advanced'
-    //   },
-    //   {
-    //     id: 3,
-    //     title: 'Prescription Management',
-    //     description: 'Complete guide to electronic prescribing, drug interactions, and medication history management.',
-    //     date: '29',
-    //     time: '9:00 AM - 11:00 AM',
-    //     instructor: 'Dr. Emily Rodriguez',
-    //     capacity: 30,
-    //     enrolled: 22,
-    //     level: 'Intermediate'
-    //   }
-    // ],
-    // 'February': [
-    //   {
-    //     id: 4,
-    //     title: 'Lab Results Integration',
-    //     description: 'Learn to efficiently manage and interpret lab results within the EMR system.',
-    //     date: '5',
-    //     time: '11:00 AM - 1:00 PM',
-    //     instructor: 'Dr. James Wilson',
-    //     capacity: 25,
-    //     enrolled: 12,
-    //     level: 'Intermediate'
-    //   },
-    //   {
-    //     id: 5,
-    //     title: 'Patient Communication Tools',
-    //     description: 'Utilize EMR messaging, portal management, and patient engagement features effectively.',
-    //     date: '12',
-    //     time: '3:00 PM - 5:00 PM',
-    //     instructor: 'Dr. Lisa Thompson',
-    //     capacity: 20,
-    //     enrolled: 8,
-    //     level: 'Beginner'
-    //   }
-    // ],
-    // 'March': [
-    //   {
-    //     id: 6,
-    //     title: 'Billing & Documentation',
-    //     description: 'Master proper documentation for accurate billing and compliance requirements.',
-    //     date: '8',
-    //     time: '1:00 PM - 3:00 PM',
-    //     instructor: 'Dr. Robert Kim',
-    //     capacity: 30,
-    //     enrolled: 25,
-    //     level: 'Advanced'
-    //   }
-    // ]
-  };
-
-  // Sample recordings data
   const recordings = [
     {
       id: 1,
@@ -114,19 +41,27 @@ const EmrTrainingComponent = () => {
 
   const months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
 
-  const handleRegister = (sessionId) => {
-    const session = Object.values(trainingSessions).flat().find(s => s.id === sessionId);
-    if (session && !registrations.find(r => r.id === sessionId)) {
-      setRegistrations([...registrations, { 
-        ...session, 
-        registeredDate: new Date().toLocaleDateString(),
-        status: 'Registered'
-      }]);
+  const handleCancelRegistration = (sessionId) => {
+    setRegistrations(registrations.filter(r => r.id !== sessionId));
+  };
+
+  const handleShowBookingTab = () => {
+    if (!hasAgreedToTerms) {
+      setShowAgreement(true);
+    } else {
+      setActiveTab('book');
     }
   };
 
-  const handleCancelRegistration = (sessionId) => {
-    setRegistrations(registrations.filter(r => r.id !== sessionId));
+  const handleAgreementAccept = () => {
+    setHasAgreedToTerms(true);
+    setShowAgreement(false);
+    setActiveTab('book');
+  };
+
+  const handleAgreementDecline = () => {
+    setShowAgreement(false);
+    setActiveTab('recordings'); // Redirect to recordings tab
   };
 
   const getLevelColor = (level) => {
@@ -137,57 +72,6 @@ const EmrTrainingComponent = () => {
       default: return 'bg-gray-100 text-gray-800';
     }
   };
-
-  const TrainingCard = ({ session, showRegisterButton = true }) => (
-    <div className="border border-gray-200 rounded-lg p-6 hover:shadow-md transition-shadow bg-white flex flex-col h-full">
-      <div className="flex justify-between items-start mb-4">
-        <div className="flex-1">
-          <h3 className="text-xl font-bold text-[#04445E] mb-2">{session.title}</h3>
-          <span className={`inline-block px-2 py-1 rounded-full text-xs font-medium ${getLevelColor(session.level)}`}>
-            {session.level}
-          </span>
-        </div>
-      </div>
-      
-      <p className="text-gray-600 text-sm mb-4 leading-relaxed flex-grow">
-        {session.description}
-      </p>
-      
-      <div className="space-y-3 mb-6">
-        <div className="flex items-center gap-2 text-sm text-gray-600">
-          <Calendar className="h-4 w-4 text-[#169AB4]" />
-          <span>{selectedMonth} {session.date}, 2025 • {session.time}</span>
-        </div>
-        <div className="flex items-center gap-2 text-sm text-gray-600">
-          <Users className="h-4 w-4 text-[#169AB4]" />
-          <span>{session.enrolled}/{session.capacity} enrolled • {session.instructor}</span>
-        </div>
-      </div>
-      
-      {showRegisterButton && (
-        <div className="flex justify-end items-center mt-auto">
-          <button
-            onClick={() => handleRegister(session.id)}
-            disabled={registrations.find(r => r.id === session.id) || session.enrolled >= session.capacity}
-            className={`px-6 py-2 rounded-lg font-medium transition-colors ${
-              registrations.find(r => r.id === session.id) 
-                ? 'bg-green-100 text-green-800 cursor-not-allowed'
-                : session.enrolled >= session.capacity
-                ? 'bg-gray-100 text-gray-500 cursor-not-allowed'
-                : 'bg-[#169AB4] text-white hover:bg-[#147a8f]'
-            }`}
-          >
-            {registrations.find(r => r.id === session.id) 
-              ? 'Registered' 
-              : session.enrolled >= session.capacity 
-              ? 'Full' 
-              : 'Register Now'
-            }
-          </button>
-        </div>
-      )}
-    </div>
-  );
 
   const RecordingCard = ({ recording }) => (
     <div className="border border-gray-200 rounded-lg p-6 hover:shadow-md transition-shadow bg-white flex flex-col h-full">
@@ -265,9 +149,37 @@ const EmrTrainingComponent = () => {
 
   return (
     <div className="max-w-7xl mx-auto p-6">
+      {showAgreement && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-lg p-6 max-w-md w-full text-center">
+            <h3 className="text-lg font-semibold mb-4">Import Your HIPAA Agreement Component Here</h3>
+            <p className="text-gray-600 mb-6">Replace this placeholder with your separate HIPAA agreement JSX component.</p>
+            <HipaaAgreementComponent
+              onAccept={handleAgreementAccept}
+              onDecline={handleAgreementDecline}
+              onClose={() => setShowAgreement(false)}
+            />
+            <div className="flex gap-4 justify-center">
+              <button
+                onClick={handleAgreementDecline}
+                className="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50"
+              >
+                Decline
+              </button>
+              <button
+                onClick={handleAgreementAccept}
+                className="px-4 py-2 bg-[#169AB4] text-white rounded-lg hover:bg-[#147a8f]"
+              >
+                Accept
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+      
       <div className="flex border-b border-gray-200 mb-8">
         <button
-          onClick={() => setActiveTab('book')}
+          onClick={handleShowBookingTab}
           className={`px-6 py-3 font-medium border-b-2 transition-colors ${
             activeTab === 'book' 
               ? 'border-[#169AB4] text-[#169AB4]' 
@@ -275,6 +187,7 @@ const EmrTrainingComponent = () => {
           }`}
         >
           Book Training
+          {!hasAgreedToTerms && <span className="ml-2 text-xs text-red-500">*</span>}
         </button>
         <button
           onClick={() => setActiveTab('recordings')}
@@ -284,7 +197,7 @@ const EmrTrainingComponent = () => {
               : 'border-transparent text-gray-500 hover:text-gray-700'
           }`}
         >
-          View Recordings
+          Virtual Training
         </button>
         <button
           onClick={() => setActiveTab('registrations')}
@@ -298,9 +211,9 @@ const EmrTrainingComponent = () => {
         </button>
       </div>
 
-      {activeTab === 'book' && (
+      {activeTab === 'book' && hasAgreedToTerms && (
         <div>
-          {/* Month Selector */}
+          {/* Month Selector Only */}
           <div className="mb-8">
             <h2 className="text-xl font-semibold text-[#04445E] mb-4">Select Month</h2>
             <div className="flex flex-wrap gap-2">
@@ -320,17 +233,27 @@ const EmrTrainingComponent = () => {
             </div>
           </div>
 
-          {/* Training Sessions */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {trainingSessions[selectedMonth]?.map((session) => (
-              <TrainingCard key={session.id} session={session} />
-            )) || (
-              <div className="col-span-full text-center py-12 text-gray-500">
-                <Calendar className="h-12 w-12 mx-auto mb-4 text-gray-300" />
-                <p>No training sessions scheduled for {selectedMonth}</p>
-              </div>
-            )}
+          {/* Placeholder for training sessions - you can fetch/display data here */}
+          <div className="text-center py-12 text-gray-500">
+            <Calendar className="h-12 w-12 mx-auto mb-4 text-gray-300" />
+            <h3 className="text-lg font-semibold mb-2">Training Sessions for {selectedMonth}</h3>
+            <p>No training sessions currently available for {selectedMonth} 2025</p>
+            <p className="text-sm mt-2">Training sessions data can be fetched and displayed here</p>
           </div>
+        </div>
+      )}
+
+      {activeTab === 'book' && !hasAgreedToTerms && (
+        <div className="text-center py-12 text-gray-500">
+          <CheckCircle className="h-12 w-12 mx-auto mb-4 text-gray-300" />
+          <p className="mb-2">HIPAA Compliance Agreement Required</p>
+          <p className="text-sm">Please accept the terms and conditions to access training booking</p>
+          <button
+            onClick={() => setShowAgreement(true)}
+            className="mt-4 px-6 py-2 bg-[#169AB4] text-white rounded-lg hover:bg-[#147a8f] transition-colors font-medium"
+          >
+            Review Agreement
+          </button>
         </div>
       )}
 
@@ -347,7 +270,7 @@ const EmrTrainingComponent = () => {
 
       {activeTab === 'registrations' && (
         <div>
-          <h2 className="text-xl font-semibold text-[#04445E] mb-6">Your Registrations</h2>
+          <h2 className="text-xl font-semibold text-[[#04445E] mb-6">Your Registrations</h2>
           {registrations.length > 0 ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {registrations.map((registration) => (

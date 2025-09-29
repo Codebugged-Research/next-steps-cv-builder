@@ -354,7 +354,7 @@ const BasicDetailsStep = ({ formData, onInputChange }) => {
         <h3 className="text-lg font-semibold text-[#04445E]">Address</h3>
         <FormField
           label="Address"
-          type="textarea"
+          type="text"
           value={formData.basicDetails.address || ''}
           onChange={(value) => handleInputChange('address', value)}
           onBlur={() => handleBlur('address')}
@@ -481,7 +481,7 @@ const BasicDetailsStep = ({ formData, onInputChange }) => {
           />
         </div>
       </div>
-
+{/* 
       <div className="bg-blue-50 rounded-lg p-4">
         <div className="flex items-center gap-2 text-blue-800">
           <AlertCircle className="h-5 w-5" />
@@ -493,7 +493,7 @@ const BasicDetailsStep = ({ formData, onInputChange }) => {
             : "Please complete all required fields to proceed."
           }
         </p>
-      </div>
+      </div> */}
     </div>
   );
 };

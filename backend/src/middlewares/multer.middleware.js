@@ -3,7 +3,6 @@ import { GridFSBucket } from 'mongodb';
 import mongoose from 'mongoose';
 import { ApiError } from '../utils/ApiError.js';
 
-// Create GridFS bucket
 let bucket;
 mongoose.connection.once('open', () => {
     bucket = new GridFSBucket(mongoose.connection.db, {
@@ -11,7 +10,6 @@ mongoose.connection.once('open', () => {
     });
 });
 
-// GridFS storage for multer
 const gridFSStorage = multer.memoryStorage();
 
 const pdfFileFilter = (req, file, cb) => {
@@ -31,7 +29,6 @@ const documentFileFilter = (req, file, cb) => {
     }
 };
 
-// Middleware to save to GridFS after multer processes the file
 const saveToGridFS = (req, res, next) => {
     if (!req.file || !bucket) {
         return next();
