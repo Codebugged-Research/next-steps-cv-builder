@@ -27,7 +27,6 @@ const generateCVContent = (doc, cvData) => {
     const primaryColor = '#04445E';
     const secondaryColor = '#169AB4';
     
-    // Header Section
     doc.fontSize(24)
        .fillColor(primaryColor)
        .text(cvData.basicDetails.fullName, { align: 'center' });
@@ -42,8 +41,6 @@ const generateCVContent = (doc, cvData) => {
     
     doc.text(`${cvData.basicDetails.city}`, { align: 'center' })
        .moveDown(2);
-
-    // Personal Information Section
     addSection(doc, 'Personal Information', primaryColor);
     if (cvData.basicDetails.gender && cvData.basicDetails.gender !== '') {
         doc.fontSize(10).text(`Gender: ${capitalizeFirst(cvData.basicDetails.gender)}`);
