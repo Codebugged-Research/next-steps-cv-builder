@@ -27,7 +27,7 @@ const HipaaAgreementComponent = ({ onAccept, onDecline, onClose }) => {
               Electronic Medical Records (EMR) and Revenue Cycle Management (RCM) training conducted at Next Steps Career Corp.
             </p>
 
-            <div className="bg-gray-50 p-4 rounded-lg">
+            <div className="bg-gray-50 p-4 rounded-lg"> 
               <h3 className="font-semibold text-[#04445E] mb-2">1. Confidentiality and HIPAA Compliance:</h3>
               <p className="mb-2">
                 I understand that during my training, I may have access to sensitive Patient Health Information (PHI) 
