@@ -65,7 +65,7 @@ const EmrTrainingComponent = () => {
   };
 
   const getLevelColor = (level) => {
-    switch(level) {
+    switch (level) {
       case 'Beginner': return 'bg-green-100 text-green-800';
       case 'Intermediate': return 'bg-yellow-100 text-yellow-800';
       case 'Advanced': return 'bg-red-100 text-red-800';
@@ -83,7 +83,7 @@ const EmrTrainingComponent = () => {
           </span>
         </div>
       </div>
-      
+
       <div className="space-y-3 mb-6 flex-grow">
         <div className="flex items-center gap-2 text-sm text-gray-600">
           <Clock className="h-4 w-4 text-[#169AB4]" />
@@ -94,7 +94,7 @@ const EmrTrainingComponent = () => {
           <span>{recording.instructor} • {recording.views} views</span>
         </div>
       </div>
-      
+
       <div className="flex justify-end items-center mt-auto">
         <button className="flex items-center gap-2 px-6 py-2 bg-[#169AB4] text-white rounded-lg hover:bg-[#147a8f] transition-colors font-medium">
           <Play className="h-4 w-4" />
@@ -119,11 +119,11 @@ const EmrTrainingComponent = () => {
           </div>
         </div>
       </div>
-      
+
       <p className="text-gray-600 text-sm mb-4 leading-relaxed flex-grow">
         {registration.description}
       </p>
-      
+
       <div className="space-y-3 mb-6">
         <div className="flex items-center gap-2 text-sm text-gray-600">
           <Calendar className="h-4 w-4 text-[#169AB4]" />
@@ -134,7 +134,7 @@ const EmrTrainingComponent = () => {
           <span>Registered on {registration.registeredDate}</span>
         </div>
       </div>
-      
+
       <div className="flex justify-end items-center mt-auto">
         <button
           onClick={() => handleCancelRegistration(registration.id)}
@@ -176,36 +176,33 @@ const EmrTrainingComponent = () => {
           </div>
         </div>
       )}
-      
+
       <div className="flex border-b border-gray-200 mb-8">
         <button
           onClick={handleShowBookingTab}
-          className={`px-6 py-3 font-medium border-b-2 transition-colors ${
-            activeTab === 'book' 
-              ? 'border-[#169AB4] text-[#169AB4]' 
+          className={`px-6 py-3 font-medium border-b-2 transition-colors ${activeTab === 'book'
+              ? 'border-[#169AB4] text-[#169AB4]'
               : 'border-transparent text-gray-500 hover:text-gray-700'
-          }`}
+            }`}
         >
           Book Training
           {!hasAgreedToTerms && <span className="ml-2 text-xs text-red-500">*</span>}
         </button>
         <button
           onClick={() => setActiveTab('recordings')}
-          className={`px-6 py-3 font-medium border-b-2 transition-colors ${
-            activeTab === 'recordings' 
-              ? 'border-[#169AB4] text-[#169AB4]' 
+          className={`px-6 py-3 font-medium border-b-2 transition-colors ${activeTab === 'recordings'
+              ? 'border-[#169AB4] text-[#169AB4]'
               : 'border-transparent text-gray-500 hover:text-gray-700'
-          }`}
+            }`}
         >
           Virtual Training
         </button>
         <button
           onClick={() => setActiveTab('registrations')}
-          className={`px-6 py-3 font-medium border-b-2 transition-colors ${
-            activeTab === 'registrations' 
-              ? 'border-[#169AB4] text-[#169AB4]' 
+          className={`px-6 py-3 font-medium border-b-2 transition-colors ${activeTab === 'registrations'
+              ? 'border-[#169AB4] text-[#169AB4]'
               : 'border-transparent text-gray-500 hover:text-gray-700'
-          }`}
+            }`}
         >
           Your Registrations ({registrations.length})
         </button>
@@ -221,11 +218,10 @@ const EmrTrainingComponent = () => {
                 <button
                   key={month}
                   onClick={() => setSelectedMonth(month)}
-                  className={`px-4 py-2 rounded-lg font-medium transition-colors ${
-                    selectedMonth === month 
-                      ? 'bg-[#169AB4] text-white' 
+                  className={`px-4 py-2 rounded-lg font-medium transition-colors ${selectedMonth === month
+                      ? 'bg-[#169AB4] text-white'
                       : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                  }`}
+                    }`}
                 >
                   {month}
                 </button>
@@ -259,14 +255,20 @@ const EmrTrainingComponent = () => {
 
       {activeTab === 'recordings' && (
         <div>
-          <h2 className="text-xl font-semibold text-[#04445E] mb-6">Available Recordings</h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {recordings.map((recording) => (
-              <RecordingCard key={recording.id} recording={recording} />
-            ))}
-          </div>
+          <h2 className="text-xl font-semibold text-[#04445E] mb-6">
+            Available Recordings
+          </h2>
+          <a
+            href="https://app.nextstepscareer.com/"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="bg-[#04445E] text-white px-4 py-2 rounded-lg shadow hover:bg-[#06617f] transition"
+          >
+            Click here to access NextSteps App
+          </a>
         </div>
       )}
+
 
       {activeTab === 'registrations' && (
         <div>
