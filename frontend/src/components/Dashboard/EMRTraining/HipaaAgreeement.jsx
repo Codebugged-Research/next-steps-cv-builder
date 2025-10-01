@@ -15,7 +15,7 @@ const HipaaAgreementComponent = ({ onAccept, onDecline, onClose }) => {
       }
     } catch (error) {
       console.error('Error accepting HIPAA agreement:', error);
-      alert(error.response?.data?.message || 'Failed to save agreement. Please try again.');
+      alert('Failed to save agreement. Please try again.');
     } finally {
       setIsSubmitting(false);
     }
