@@ -1,6 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState,useEffect } from 'react';
 import { Calendar, Play, Clock, Users, ExternalLink, CheckCircle, X } from 'lucide-react';
 import HipaaAgreementComponent from './HipaaAgreeement';
+import api from '../../../utils/api.js';
 
 const EmrTrainingComponent = () => {
   const [activeTab, setActiveTab] = useState('book');
@@ -40,7 +41,22 @@ const EmrTrainingComponent = () => {
   ];
 
   const months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+  useEffect(() => {
+    const checkHipaaStatus = async () => {
+      try {
+        const response = await api.get('/users/hipaa-status');
+        if (response.data.success) {
+          setHasAgreedToTerms(response.data.data.isSigned);
+        }
+      } catch (error) {
+        console.error('Error checking HIPAA status:', error);
+      } finally {
+        setIsLoadingStatus(false);
+      }
+    };
 
+    checkHipaaStatus();
+  }, []);
   const handleCancelRegistration = (sessionId) => {
     setRegistrations(registrations.filter(r => r.id !== sessionId));
   };
@@ -61,7 +77,7 @@ const EmrTrainingComponent = () => {
 
   const handleAgreementDecline = () => {
     setShowAgreement(false);
-    setActiveTab('recordings'); // Redirect to recordings tab
+    setActiveTab('recordings'); 
   };
 
   const getLevelColor = (level) => {

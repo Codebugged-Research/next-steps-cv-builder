@@ -7,8 +7,7 @@ const HipaaAgreementComponent = ({ onAccept, onDecline, onClose }) => {
   const handleAccept = async () => {
     setIsSubmitting(true);
     try {
-      const response = await api.post('/hipaa/accept');
-      
+      const response = await api.post('/users/accept-hipaa');      
       if (response.data.success) {
         onAccept();
       } else {

@@ -109,7 +109,7 @@ const logoutUser = asyncHandler(async(req, res) => {
         req.user._id,
         {
             $unset: {
-                refreshToken: 1 // this removes the field from document
+                refreshToken: 1 
             }
         },
         {
@@ -128,5 +128,56 @@ const logoutUser = asyncHandler(async(req, res) => {
     .clearCookie("refreshToken", options)
     .json(new ApiResponse(200, {}, "User logged Out"))
 })
+
+const acceptHIPAAagreement = asyncHandler(async (req, res) => {
+    const user = await User.findById(req.user._id);
+    if (!user) {
+        throw new ApiError(404, "User not found");
+    }
+    if (user.hipaaAgreement.isSigned) {
+        return res
+            .status(200)
+            .json(new ApiResponse(
+                200,
+                {
+                    isSigned: user.hipaaAgreement.isSigned,
+                    signedAt: user.hipaaAgreement.signedAt
+                },
+                "HIPAA agreement already accepted"
+            ));
+    }
+    await user.signHipaaAgreement(req.ip);
+    return res
+        .status(200)
+        .json(new ApiResponse(
+            200,
+            {
+                isSigned: user.hipaaAgreement.isSigned,
+                signedAt: user.hipaaAgreement.signedAt,
+                version: user.hipaaAgreement.version
+            },
+            "HIPAA agreement accepted successfully"
+        ));
+});
+
+const getHIPAAstatus = asyncHandler(async (req, res) => {
+    const user = await User.findById(req.user._id);
     
-export { loginUser , getCurrentUser , registerUser , logoutUser };
+    if (!user) {
+        throw new ApiError(404, "User not found");
+    }
+
+    return res
+        .status(200)
+        .json(new ApiResponse(
+            200,
+            {
+                isSigned: user.hipaaAgreement.isSigned,
+                signedAt: user.hipaaAgreement.signedAt,
+                version: user.hipaaAgreement.version
+            },
+            "HIPAA status fetched successfully"
+        ));
+});
+
+export { loginUser , getCurrentUser , registerUser , logoutUser , acceptHIPAAagreement , getHIPAAstatus };
