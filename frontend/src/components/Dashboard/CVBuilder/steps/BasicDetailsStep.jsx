@@ -79,14 +79,10 @@ const BasicDetailsStep = ({ formData, onInputChange }) => {
       };
       reader.readAsDataURL(file);
 
-      const formData = new FormData();
-      formData.append('document', file);
+      const uploadFormData = new FormData();
+      uploadFormData.append('document', file);
 
-      const response = await api.post('/documents/upload', formData, {
-        headers: {
-          'Content-Type': 'multipart/form-data',
-        },
-      });
+      const response = await api.post('/documents/upload', uploadFormData);
 
       if (response.data.success) {
         onInputChange('basicDetails', documentType, response.data.data.url);
