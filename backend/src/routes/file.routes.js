@@ -11,6 +11,10 @@ router.route('/upload').post(
     uploadFile
 );
 
-router.route('/delete/:photoKey').delete(verifyJWT, deleteFile);
+router.delete(
+  '/delete/:fileKey',
+  verifyJWT,
+  deleteFile
+);
 
 export default router;
