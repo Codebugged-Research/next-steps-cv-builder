@@ -7,7 +7,7 @@ const router = Router();
 
 router.route('/upload').post(
     verifyJWT,
-    uploadPhoto.single('photo'),
+    uploadPhoto.single('document'),
     uploadFile
 );
 
