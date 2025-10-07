@@ -1,7 +1,7 @@
 import React, { useState,useEffect } from 'react';
 import { Calendar, Play, Clock, Users, ExternalLink, CheckCircle, X } from 'lucide-react';
 import HipaaAgreementComponent from './HipaaAgreeement';
-import api from '../../../utils/api.js';
+import api from '../../../services/api.js';
 
 const EmrTrainingComponent = () => {
   const [activeTab, setActiveTab] = useState('book');

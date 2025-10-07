@@ -3,7 +3,7 @@ import FormField from '../forms/FormField';
 import FormGrid from '../forms/FormGrid';
 import { Upload, X, User, Plus, Trash2, AlertCircle } from 'lucide-react';
 import { toast } from 'react-toastify'; 
-import api from '../../../../utils/api';
+import api from '../../../../services/api';
 import {
   GENDER_OPTIONS,
   LANGUAGE_OPTIONS,

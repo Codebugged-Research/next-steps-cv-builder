@@ -4,7 +4,7 @@ import FormField from '../forms/FormField';
 import FormGrid from '../forms/FormGrid';
 import { Upload, X, FileText, AlertCircle } from 'lucide-react';
 import { toast } from 'react-toastify';
-import api from '../../../../utils/api';
+import api from '../../../../services/api';
 import { validateFile } from '../../../../utils/validationRules';
 
 const PublicationsStep = ({ formData, onArrayAdd, onArrayRemove, onArrayUpdate }) => {

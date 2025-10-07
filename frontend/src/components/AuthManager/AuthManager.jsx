@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import Login from '../Login/Login';
 import Register from '../Register/Register';
 import DashboardLayout from '../Dashboard/Dashboard';
-import api from '../../utils/api';
+import api from '../../services/api.js';
 
 const AuthManager = () => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);

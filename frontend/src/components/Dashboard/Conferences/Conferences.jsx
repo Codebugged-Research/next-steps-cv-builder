@@ -3,7 +3,7 @@ import { ArrowLeft, BookOpen, Loader } from 'lucide-react';
 import { toast } from 'react-toastify';
 import ProjectHeader from '../../Common/ProjectHeader';
 import ConferenceTabs from './ConferenceTabs';
-import api from '../../../utils/api';
+import api from '../../../services/api';
 
 const Conferences = ({ onBack }) => {
     const [conferences, setConferences] = useState([]);

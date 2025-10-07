@@ -2,7 +2,7 @@ import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import ProgressBar from './ProgressBar';
 import StepContent from './StepContent';
 import NavigationControls from './NavigationControls';
-import api from '../../../utils/api.js';
+import api from '../../../services/api.js';
 import { toast } from 'react-toastify';
 import CVPreview from './CVPreview.jsx';
 

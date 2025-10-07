@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Upload, FileText, Check, X, ArrowLeft } from 'lucide-react';
 import { toast } from 'react-toastify';
-import api from '../../../utils/api';
+import api from '../../../services/api';
 
 const Existingcv = ({ onBack }) => {
   const [dragActive, setDragActive] = useState(false);

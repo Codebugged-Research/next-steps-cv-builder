@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { User, Mail, Phone, Lock, Eye, EyeOff, ArrowLeft, GraduationCap } from 'lucide-react';
-import api from '../../utils/api';
+import api from '../../services/api';
 
 const Register = ({ onRegister, onNavigateToLogin }) => {
   const [formData, setFormData] = useState({

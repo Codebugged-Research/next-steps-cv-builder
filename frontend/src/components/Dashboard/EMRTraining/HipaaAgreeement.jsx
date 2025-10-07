@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import api from '../../../utils/api.js';
+import api from '../../../services/api.js';
 import { toast } from 'react-toastify';
 
 const HipaaAgreementComponent = ({ onAccept, onDecline, onClose }) => {

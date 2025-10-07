@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Download, FileText, Edit, Calendar, Loader, AlertCircle, RefreshCw } from 'lucide-react';
 import { toast } from 'react-toastify';
-import api from '../../../utils/api';
+import api from '../../../services/api';
 
 const ViewCV = ({ onEdit }) => {
   const [cvData, setCvData] = useState(null);
