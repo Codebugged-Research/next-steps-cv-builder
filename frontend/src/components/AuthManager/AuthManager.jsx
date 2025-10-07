@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import Login from '../Login/Login';
-import Register from '../Register/Register';
+import Login from '../../pages/Login/Login.jsx';
+import Register from '../../pages/Register/Register.jsx';
 import DashboardLayout from '../Dashboard/Dashboard';
 import api from '../../services/api.js';
 
