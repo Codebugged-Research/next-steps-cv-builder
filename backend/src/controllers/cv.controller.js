@@ -2,7 +2,7 @@ import { CV } from "../models/cv.model.js";
 import { asyncHandler } from '../utils/asyncHandler.js';
 import { ApiError } from "../utils/ApiError.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
-import { generateCVPDF } from "../utils/generatepdf.js";
+import { generateCVPDF } from "../services/generatepdf.js";
 
 
 const createOrUpdateCV = asyncHandler(async (req, res) => {
