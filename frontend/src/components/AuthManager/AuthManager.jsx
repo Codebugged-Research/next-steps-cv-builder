@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import Login from '../../pages/Login/Login.jsx';
 import Register from '../../pages/Register/Register.jsx';
-import DashboardLayout from '../Dashboard/Dashboard';
+import DashboardLayout from '../../pages/Dashboard/Dashboard.jsx';
 import api from '../../services/api.js';
 
 const AuthManager = () => {
