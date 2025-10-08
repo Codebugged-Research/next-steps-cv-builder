@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Loader, AlertCircle, RefreshCw } from 'lucide-react';
 import { toast } from 'react-toastify';
 import api from '../../../services/api';
-import ConferenceCard from '../../Common/ConferenceCard';
+import ConferenceCard from '../../../components/Common/ConferenceCard';
 
 const UpcomingConferencesTab = () => {
   const [conferences, setConferences] = useState([]);

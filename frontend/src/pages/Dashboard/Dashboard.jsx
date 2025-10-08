@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
-import Header from './Header';
-import Footer from './Footer';
-import Sidebar from './Sidebar';
-import MainContentRouter from '../MainRouterComponent/MainRouterComponent';
+import Header from '../../components/Common/Header.jsx';
+import Footer from '../../components/Common/Footer.jsx';
+import Sidebar from '../Dashboard/Sidebar.jsx';
+import MainContentRouter from '../../components/MainRouterComponent/MainRouterComponent.jsx';
 
 const DashboardLayout = ({ user, onLogout }) => {
   const [activeSection, setActiveSection] = useState('cv-builder');

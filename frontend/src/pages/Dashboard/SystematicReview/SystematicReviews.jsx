@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { ArrowLeft, BookOpen, Search, FileText, Edit, CheckCircle, Eye, Download, Users, Calendar, Target, ChevronLeft, ChevronRight } from 'lucide-react';
-import ProjectHeader from '../../Common/ProjectHeader';
+import ProjectHeader from '../../../components/Common/ProjectHeader';
 
 const PublicationTimeline = () => {
   const [activeStage, setActiveStage] = useState(0);

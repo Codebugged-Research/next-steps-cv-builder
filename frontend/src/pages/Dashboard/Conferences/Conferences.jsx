@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { ArrowLeft, BookOpen, Loader } from 'lucide-react';
 import { toast } from 'react-toastify';
-import ProjectHeader from '../../Common/ProjectHeader';
+import ProjectHeader from '../../../components/Common/ProjectHeader';
 import ConferenceTabs from './ConferenceTabs';
 import api from '../../../services/api';
 

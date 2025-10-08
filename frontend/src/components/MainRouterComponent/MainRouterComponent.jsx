@@ -1,10 +1,10 @@
 
-import CVBuilder from '../Dashboard/CVBuilder/CVBuilder';
-import ViewCV from '../Dashboard/ViewCV/ViewCV';
-import Existingcv from '../Dashboard/ExistingCV/Existingcv';
-import SystematicReviews from '../Dashboard/SystematicReview/SystematicReviews';
-import Conferences from '../Dashboard/Conferences/Conferences';
-import Emrtraining from '../Dashboard/EMRTraining/Emrtraining';
+import CVBuilder from '../../pages/Dashboard/CVBuilder/CVBuilder.jsx';
+import ViewCV from '../../pages/Dashboard/ViewCV/ViewCV.jsx';
+import Existingcv from '../../pages/Dashboard//ExistingCV/Existingcv.jsx';
+import SystematicReviews from '../../pages/Dashboard/SystematicReview/SystematicReviews.jsx';
+import Conferences from '../../pages/Dashboard/Conferences/Conferences.jsx';
+import Emrtraining from '../../pages/Dashboard/EMRTraining/Emrtraining.jsx';
 
 const MainContentRouter = ({ 
   activeSection, 
