@@ -50,7 +50,6 @@ const ConferencesStep = ({ formData, onArrayAdd, onArrayRemove, onArrayUpdate })
           fileName: file.name,
           fileSize: file.size
         };
-
         onArrayUpdate('conferences', conferenceIndex, 'supportingDocument', documentData);
         setErrors(prev => ({ ...prev, [`conference_${conferenceIndex}`]: '' }));
         toast.success('Document uploaded successfully!');

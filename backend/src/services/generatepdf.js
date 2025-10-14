@@ -1,6 +1,6 @@
 import PDFDocument from 'pdfkit';
 import axios from 'axios';
-import { PDF_CONSTANTS } from '../constants/pdfConstants.js';
+import { PDF_CONSTANTS } from '../constants.js';
 
 const { COLORS, FONTS, SIZES, MARGINS, PAGE_LIMITS } = PDF_CONSTANTS;
 
