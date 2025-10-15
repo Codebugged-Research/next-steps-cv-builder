@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
 import FormField from '../forms/FormField';
 import FormGrid from '../forms/FormGrid';
 import { GraduationCap, School, BookOpen, Award } from 'lucide-react';
@@ -13,9 +13,17 @@ const EducationStep = ({ formData, onInputChange }) => {
     { id: 'postGraduation', label: 'Post Graduation', icon: Award }
   ];
 
-  const handleTabClick = (tabId) => {
+  const handleTabClick = useCallback((tabId) => {
     setActiveTab(tabId);
-  };
+  }, []);
+
+  const updateSubSection = useCallback((subsection, field, value) => {
+    const updatedSubsection = {
+      ...formData.education?.[subsection],
+      [field]: value
+    };
+    onInputChange('education', subsection, updatedSubsection);
+  }, [formData.education, onInputChange]);
 
   const TabButton = ({ tab, isActive }) => {
     const Icon = tab.icon;
@@ -41,7 +49,7 @@ const EducationStep = ({ formData, onInputChange }) => {
           label="School Name"
           type="text"
           value={formData.education?.schooling?.schoolName || ''}
-          onChange={(value) => onInputChange('education', 'schooling', { ...formData.education?.schooling, schoolName: value })}
+          onChange={(value) => updateSubSection('schooling', 'schoolName', value)}
           required
         />
         
@@ -49,7 +57,7 @@ const EducationStep = ({ formData, onInputChange }) => {
           label="Board"
           type="text"
           value={formData.education?.schooling?.board || ''}
-          onChange={(value) => onInputChange('education', 'schooling', { ...formData.education?.schooling, board: value })}
+          onChange={(value) => updateSubSection('schooling', 'board', value)}
           required
         />
         
@@ -57,7 +65,7 @@ const EducationStep = ({ formData, onInputChange }) => {
           label="City"
           type="text"
           value={formData.education?.schooling?.city || ''}
-          onChange={(value) => onInputChange('education', 'schooling', { ...formData.education?.schooling, city: value })}
+          onChange={(value) => updateSubSection('schooling', 'city', value)}
           required
         />
         
@@ -65,7 +73,7 @@ const EducationStep = ({ formData, onInputChange }) => {
           label="State"
           type="text"
           value={formData.education?.schooling?.state || ''}
-          onChange={(value) => onInputChange('education', 'schooling', { ...formData.education?.schooling, state: value })}
+          onChange={(value) => updateSubSection('schooling', 'state', value)}
           required
         />
         
@@ -73,7 +81,7 @@ const EducationStep = ({ formData, onInputChange }) => {
           label="Start Year"
           type="number"
           value={formData.education?.schooling?.startYear || ''}
-          onChange={(value) => onInputChange('education', 'schooling', { ...formData.education?.schooling, startYear: value })}
+          onChange={(value) => updateSubSection('schooling', 'startYear', value)}
           min="1990"
           max={new Date().getFullYear()}
           required
@@ -83,7 +91,7 @@ const EducationStep = ({ formData, onInputChange }) => {
           label="End Year"
           type="number"
           value={formData.education?.schooling?.endYear || ''}
-          onChange={(value) => onInputChange('education', 'schooling', { ...formData.education?.schooling, endYear: value })}
+          onChange={(value) => updateSubSection('schooling', 'endYear', value)}
           min="1990"
           max={new Date().getFullYear()}
           required
@@ -93,7 +101,7 @@ const EducationStep = ({ formData, onInputChange }) => {
           label="Grade/Percentage"
           type="text"
           value={formData.education?.schooling?.grade || ''}
-          onChange={(value) => onInputChange('education', 'schooling', { ...formData.education?.schooling, grade: value })}
+          onChange={(value) => updateSubSection('schooling', 'grade', value)}
           placeholder="e.g., 85% or A+"
         />
       </FormGrid>
@@ -107,7 +115,7 @@ const EducationStep = ({ formData, onInputChange }) => {
           label="College Name"
           type="text"
           value={formData.education?.college?.collegeName || ''}
-          onChange={(value) => onInputChange('education', 'college', { ...formData.education?.college, collegeName: value })}
+          onChange={(value) => updateSubSection('college', 'collegeName', value)}
           required
         />
         
@@ -116,7 +124,7 @@ const EducationStep = ({ formData, onInputChange }) => {
           type="select"
           options={['Science', 'Commerce', 'Arts', 'Other']}
           value={formData.education?.college?.stream || ''}
-          onChange={(value) => onInputChange('education', 'college', { ...formData.education?.college, stream: value })}
+          onChange={(value) => updateSubSection('college', 'stream', value)}
           required
         />
         
@@ -124,7 +132,7 @@ const EducationStep = ({ formData, onInputChange }) => {
           label="City"
           type="text"
           value={formData.education?.college?.city || ''}
-          onChange={(value) => onInputChange('education', 'college', { ...formData.education?.college, city: value })}
+          onChange={(value) => updateSubSection('college', 'city', value)}
           required
         />
         
@@ -132,7 +140,7 @@ const EducationStep = ({ formData, onInputChange }) => {
           label="State"
           type="text"
           value={formData.education?.college?.state || ''}
-          onChange={(value) => onInputChange('education', 'college', { ...formData.education?.college, state: value })}
+          onChange={(value) => updateSubSection('college', 'state', value)}
           required
         />
         
@@ -140,7 +148,7 @@ const EducationStep = ({ formData, onInputChange }) => {
           label="Start Year"
           type="number"
           value={formData.education?.college?.startYear || ''}
-          onChange={(value) => onInputChange('education', 'college', { ...formData.education?.college, startYear: value })}
+          onChange={(value) => updateSubSection('college', 'startYear', value)}
           min="1990"
           max={new Date().getFullYear()}
           required
@@ -150,7 +158,7 @@ const EducationStep = ({ formData, onInputChange }) => {
           label="End Year"
           type="number"
           value={formData.education?.college?.endYear || ''}
-          onChange={(value) => onInputChange('education', 'college', { ...formData.education?.college, endYear: value })}
+          onChange={(value) => updateSubSection('college', 'endYear', value)}
           min="1990"
           max={new Date().getFullYear()}
           required
@@ -162,7 +170,7 @@ const EducationStep = ({ formData, onInputChange }) => {
           label="11th Grade (%)"
           type="text"
           value={formData.education?.college?.eleventhGrade || ''}
-          onChange={(value) => onInputChange('education', 'college', { ...formData.education?.college, eleventhGrade: value })}
+          onChange={(value) => updateSubSection('college', 'eleventhGrade', value)}
           placeholder="e.g., 85%"
         />
         
@@ -170,7 +178,7 @@ const EducationStep = ({ formData, onInputChange }) => {
           label="12th Grade (%)"
           type="text"
           value={formData.education?.college?.twelfthGrade || ''}
-          onChange={(value) => onInputChange('education', 'college', { ...formData.education?.college, twelfthGrade: value })}
+          onChange={(value) => updateSubSection('college', 'twelfthGrade', value)}
           placeholder="e.g., 90%"
         />
       </div>
@@ -184,7 +192,7 @@ const EducationStep = ({ formData, onInputChange }) => {
           label="University/College Name"
           type="text"
           value={formData.education?.graduation?.universityName || ''}
-          onChange={(value) => onInputChange('education', 'graduation', { ...formData.education?.graduation, universityName: value })}
+          onChange={(value) => updateSubSection('graduation', 'universityName', value)}
           required
         />
         
@@ -193,7 +201,7 @@ const EducationStep = ({ formData, onInputChange }) => {
           type="select"
           options={['MBBS', 'BDS', 'BAMS', 'BHMS', 'B.Sc', 'Other']}
           value={formData.education?.graduation?.degree || ''}
-          onChange={(value) => onInputChange('education', 'graduation', { ...formData.education?.graduation, degree: value })}
+          onChange={(value) => updateSubSection('graduation', 'degree', value)}
           required
         />
         
@@ -201,14 +209,14 @@ const EducationStep = ({ formData, onInputChange }) => {
           label="Specialization"
           type="text"
           value={formData.education?.graduation?.specialization || ''}
-          onChange={(value) => onInputChange('education', 'graduation', { ...formData.education?.graduation, specialization: value })}
+          onChange={(value) => updateSubSection('graduation', 'specialization', value)}
         />
         
         <FormField
           label="City"
           type="text"
           value={formData.education?.graduation?.city || ''}
-          onChange={(value) => onInputChange('education', 'graduation', { ...formData.education?.graduation, city: value })}
+          onChange={(value) => updateSubSection('graduation', 'city', value)}
           required
         />
         
@@ -216,7 +224,7 @@ const EducationStep = ({ formData, onInputChange }) => {
           label="State"
           type="text"
           value={formData.education?.graduation?.state || ''}
-          onChange={(value) => onInputChange('education', 'graduation', { ...formData.education?.graduation, state: value })}
+          onChange={(value) => updateSubSection('graduation', 'state', value)}
           required
         />
         
@@ -224,7 +232,7 @@ const EducationStep = ({ formData, onInputChange }) => {
           label="Country"
           type="text"
           value={formData.education?.graduation?.country || ''}
-          onChange={(value) => onInputChange('education', 'graduation', { ...formData.education?.graduation, country: value })}
+          onChange={(value) => updateSubSection('graduation', 'country', value)}
           required
         />
         
@@ -232,7 +240,7 @@ const EducationStep = ({ formData, onInputChange }) => {
           label="Start Date"
           type="date"
           value={formData.education?.graduation?.startDate || ''}
-          onChange={(value) => onInputChange('education', 'graduation', { ...formData.education?.graduation, startDate: value })}
+          onChange={(value) => updateSubSection('graduation', 'startDate', value)}
           required
         />
         
@@ -240,7 +248,7 @@ const EducationStep = ({ formData, onInputChange }) => {
           label="End Date"
           type="date"
           value={formData.education?.graduation?.endDate || ''}
-          onChange={(value) => onInputChange('education', 'graduation', { ...formData.education?.graduation, endDate: value })}
+          onChange={(value) => updateSubSection('graduation', 'endDate', value)}
           required
         />
       </FormGrid>
@@ -250,7 +258,7 @@ const EducationStep = ({ formData, onInputChange }) => {
           label="1st Year (%)"
           type="text"
           value={formData.education?.graduation?.firstYearPercentage || ''}
-          onChange={(value) => onInputChange('education', 'graduation', { ...formData.education?.graduation, firstYearPercentage: value })}
+          onChange={(value) => updateSubSection('graduation', 'firstYearPercentage', value)}
           placeholder="e.g., 85%"
         />
         
@@ -258,7 +266,7 @@ const EducationStep = ({ formData, onInputChange }) => {
           label="2nd Year (%)"
           type="text"
           value={formData.education?.graduation?.secondYearPercentage || ''}
-          onChange={(value) => onInputChange('education', 'graduation', { ...formData.education?.graduation, secondYearPercentage: value })}
+          onChange={(value) => updateSubSection('graduation', 'secondYearPercentage', value)}
           placeholder="e.g., 87%"
         />
         
@@ -266,7 +274,7 @@ const EducationStep = ({ formData, onInputChange }) => {
           label="3rd Year (%)"
           type="text"
           value={formData.education?.graduation?.thirdYearPercentage || ''}
-          onChange={(value) => onInputChange('education', 'graduation', { ...formData.education?.graduation, thirdYearPercentage: value })}
+          onChange={(value) => updateSubSection('graduation', 'thirdYearPercentage', value)}
           placeholder="e.g., 89%"
         />
         
@@ -274,7 +282,7 @@ const EducationStep = ({ formData, onInputChange }) => {
           label="Final Year (%)"
           type="text"
           value={formData.education?.graduation?.finalYearPercentage || ''}
-          onChange={(value) => onInputChange('education', 'graduation', { ...formData.education?.graduation, finalYearPercentage: value })}
+          onChange={(value) => updateSubSection('graduation', 'finalYearPercentage', value)}
           placeholder="e.g., 91%"
         />
       </div>
@@ -284,8 +292,16 @@ const EducationStep = ({ formData, onInputChange }) => {
           label="Overall CGPA/Percentage"
           type="text"
           value={formData.education?.graduation?.overallGrade || ''}
-          onChange={(value) => onInputChange('education', 'graduation', { ...formData.education?.graduation, overallGrade: value })}
+          onChange={(value) => updateSubSection('graduation', 'overallGrade', value)}
           placeholder="e.g., 8.5 CGPA or 85%"
+        />
+        
+        <FormField
+          label="Class Type"
+          type="select"
+          options={['First Class with Distinction', 'First Class', 'Second Class', 'Pass Class']}
+          value={formData.education?.graduation?.classType || ''}
+          onChange={(value) => updateSubSection('graduation', 'classType', value)}
         />
       </FormGrid>
     </div>
@@ -304,7 +320,7 @@ const EducationStep = ({ formData, onInputChange }) => {
           label="University/Institute Name"
           type="text"
           value={formData.education?.postGraduation?.universityName || ''}
-          onChange={(value) => onInputChange('education', 'postGraduation', { ...formData.education?.postGraduation, universityName: value })}
+          onChange={(value) => updateSubSection('postGraduation', 'universityName', value)}
         />
         
         <FormField
@@ -312,49 +328,49 @@ const EducationStep = ({ formData, onInputChange }) => {
           type="select"
           options={['MD', 'MS', 'DNB', 'DM', 'MCh', 'M.Sc', 'Other']}
           value={formData.education?.postGraduation?.degree || ''}
-          onChange={(value) => onInputChange('education', 'postGraduation', { ...formData.education?.postGraduation, degree: value })}
+          onChange={(value) => updateSubSection('postGraduation', 'degree', value)}
         />
         
         <FormField
           label="Specialization"
           type="text"
           value={formData.education?.postGraduation?.specialization || ''}
-          onChange={(value) => onInputChange('education', 'postGraduation', { ...formData.education?.postGraduation, specialization: value })}
+          onChange={(value) => updateSubSection('postGraduation', 'specialization', value)}
         />
         
         <FormField
           label="City"
           type="text"
           value={formData.education?.postGraduation?.city || ''}
-          onChange={(value) => onInputChange('education', 'postGraduation', { ...formData.education?.postGraduation, city: value })}
+          onChange={(value) => updateSubSection('postGraduation', 'city', value)}
         />
         
         <FormField
           label="State"
           type="text"
           value={formData.education?.postGraduation?.state || ''}
-          onChange={(value) => onInputChange('education', 'postGraduation', { ...formData.education?.postGraduation, state: value })}
+          onChange={(value) => updateSubSection('postGraduation', 'state', value)}
         />
         
         <FormField
           label="Country"
           type="text"
           value={formData.education?.postGraduation?.country || ''}
-          onChange={(value) => onInputChange('education', 'postGraduation', { ...formData.education?.postGraduation, country: value })}
+          onChange={(value) => updateSubSection('postGraduation', 'country', value)}
         />
         
         <FormField
           label="Start Date"
           type="date"
           value={formData.education?.postGraduation?.startDate || ''}
-          onChange={(value) => onInputChange('education', 'postGraduation', { ...formData.education?.postGraduation, startDate: value })}
+          onChange={(value) => updateSubSection('postGraduation', 'startDate', value)}
         />
         
         <FormField
           label="End Date"
           type="date"
           value={formData.education?.postGraduation?.endDate || ''}
-          onChange={(value) => onInputChange('education', 'postGraduation', { ...formData.education?.postGraduation, endDate: value })}
+          onChange={(value) => updateSubSection('postGraduation', 'endDate', value)}
         />
         
         <FormField
@@ -362,14 +378,14 @@ const EducationStep = ({ formData, onInputChange }) => {
           type="select"
           options={['Completed', 'Pursuing', 'Dropped']}
           value={formData.education?.postGraduation?.status || ''}
-          onChange={(value) => onInputChange('education', 'postGraduation', { ...formData.education?.postGraduation, status: value })}
+          onChange={(value) => updateSubSection('postGraduation', 'status', value)}
         />
         
         <FormField
           label="Overall Grade/CGPA"
           type="text"
           value={formData.education?.postGraduation?.overallGrade || ''}
-          onChange={(value) => onInputChange('education', 'postGraduation', { ...formData.education?.postGraduation, overallGrade: value })}
+          onChange={(value) => updateSubSection('postGraduation', 'overallGrade', value)}
           placeholder="e.g., 8.5 CGPA or 85%"
         />
       </FormGrid>
@@ -408,16 +424,6 @@ const EducationStep = ({ formData, onInputChange }) => {
       <div className="bg-white rounded-lg border border-gray-200 p-6">
         {renderActiveTab()}
       </div>
-{/* 
-      <div className="bg-green-50 rounded-lg p-4">
-        <div className="flex items-center gap-2 text-green-800">
-          <GraduationCap className="h-5 w-5" />
-          <span className="font-medium">Education Progress</span>
-        </div>
-        <p className="text-green-700 text-sm mt-1">
-          Complete all relevant education sections. Post-graduation is optional.
-        </p>
-      </div> */}
     </div>
   );
 };

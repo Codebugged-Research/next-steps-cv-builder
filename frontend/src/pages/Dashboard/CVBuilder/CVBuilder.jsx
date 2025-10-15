@@ -16,15 +16,53 @@ const initialCVData = {
     city: ''
   },
   education: {
-    medicalSchoolName: '',
-    country: '',
-    joiningDate: '',
-    completionDate: '',
-    firstYearPercentage: '',
-    secondYearPercentage: '',
-    preFinalYearPercentage: '',
-    finalYearPercentage: '',
-    hasResidency: false
+    schooling: {
+      schoolName: '',
+      board: '',
+      city: '',
+      state: '',
+      startYear: '',
+      endYear: '',
+      grade: ''
+    },
+    college: {
+      collegeName: '',
+      stream: '',
+      city: '',
+      state: '',
+      startYear: '',
+      endYear: '',
+      eleventhGrade: '',
+      twelfthGrade: ''
+    },
+    graduation: {
+      universityName: '',
+      degree: '',
+      specialization: '',
+      city: '',
+      state: '',
+      country: '',
+      startDate: '',
+      endDate: '',
+      firstYearPercentage: '',
+      secondYearPercentage: '',
+      thirdYearPercentage: '',
+      finalYearPercentage: '',
+      overallGrade: '',
+      classType: ''
+    },
+    postGraduation: {
+      universityName: '',
+      degree: '',
+      specialization: '',
+      city: '',
+      state: '',
+      country: '',
+      startDate: '',
+      endDate: '',
+      status: '',
+      overallGrade: ''
+    }
   },
   usmleScores: {
     step1Status: 'not-taken',
@@ -60,7 +98,7 @@ const CVBuilder = ({ onPreview, user, onStepChange, currentStep, onStepComplete 
     const completed = [];
     const checks = [
       { condition: data.basicDetails?.fullName && data.basicDetails?.email, step: 1 },
-      { condition: data.education?.medicalSchoolName && data.education?.country, step: 2 },
+      { condition: data.education?.graduation?.universityName && data.education?.graduation?.country, step: 2 },
       { condition: data.usmleScores?.step1Status, step: 3 },
       { condition: data.clinicalExperiences?.length > 0, step: 4 },
       { condition: data.skills?.trim(), step: 5 },
@@ -116,36 +154,61 @@ const CVBuilder = ({ onPreview, user, onStepChange, currentStep, onStepComplete 
   }, [currentStep, internalCurrentStep]);
 
   const handleInputChange = useCallback((section, field, value) => {
-    const newData = section === 'skills' || section === 'significantAchievements'
-      ? { ...formData, [section]: value }
-      : { ...formData, [section]: { ...formData[section], [field]: value } };
-    
-    setFormData(newData);
-    setTimeout(() => updateCompletedSteps(newData), 100);
-  }, [formData, updateCompletedSteps]);
+    setFormData(prevData => {
+      let newData;
+      if (section === 'skills' || section === 'significantAchievements') {
+        newData = { ...prevData, [section]: value };
+      } else if (section === 'education') {
+        newData = {
+          ...prevData,
+          education: {
+            ...prevData.education,
+            [field]: value
+          }
+        };
+      } else {
+        newData = { 
+          ...prevData, 
+          [section]: { 
+            ...prevData[section], 
+            [field]: value 
+          } 
+        };
+      }
+      
+      setTimeout(() => updateCompletedSteps(newData), 100);
+      return newData;
+    });
+  }, [updateCompletedSteps]);
 
   const handleArrayAdd = useCallback((section, newItem) => {
-    const newData = { ...formData, [section]: [...(formData[section] || []), newItem] };
-    setFormData(newData);
-    setTimeout(() => updateCompletedSteps(newData), 100);
-  }, [formData, updateCompletedSteps]);
+    setFormData(prevData => {
+      const newData = { ...prevData, [section]: [...(prevData[section] || []), newItem] };
+      setTimeout(() => updateCompletedSteps(newData), 100);
+      return newData;
+    });
+  }, [updateCompletedSteps]);
 
   const handleArrayRemove = useCallback((section, index) => {
-    const newData = { ...formData, [section]: (formData[section] || []).filter((_, i) => i !== index) };
-    setFormData(newData);
-    setTimeout(() => updateCompletedSteps(newData), 100);
-  }, [formData, updateCompletedSteps]);
+    setFormData(prevData => {
+      const newData = { ...prevData, [section]: (prevData[section] || []).filter((_, i) => i !== index) };
+      setTimeout(() => updateCompletedSteps(newData), 100);
+      return newData;
+    });
+  }, [updateCompletedSteps]);
 
   const handleArrayUpdate = useCallback((section, index, field, value) => {
-    const newData = {
-      ...formData,
-      [section]: formData[section].map((item, i) =>
-        i === index ? { ...item, [field]: value } : item
-      )
-    };
-    setFormData(newData);
-    setTimeout(() => updateCompletedSteps(newData), 100);
-  }, [formData, updateCompletedSteps]);
+    setFormData(prevData => {
+      const newData = {
+        ...prevData,
+        [section]: prevData[section].map((item, i) =>
+          i === index ? { ...item, [field]: value } : item
+        )
+      };
+      setTimeout(() => updateCompletedSteps(newData), 100);
+      return newData;
+    });
+  }, [updateCompletedSteps]);
 
   const handleStepChange = useCallback((step) => {
     setInternalCurrentStep(step);
@@ -163,14 +226,63 @@ const CVBuilder = ({ onPreview, user, onStepChange, currentStep, onStepComplete 
   }, [activeStep, handleStepChange]);
 
   const handleSave = useCallback(async () => {
-    try {
-      await api.post('/cv/save', formData);
-      toast.success("CV Saved Successfully");
-    } catch (error) {
-      const errorMessage = error.response?.data?.message || 'Failed to save CV';
-      toast.error(errorMessage);
-    }
-  }, [formData]);
+    setFormData(prevData => {
+      if (!prevData.basicDetails.graduationYear || prevData.basicDetails.graduationYear.trim() === '') {
+        toast.error('Please enter your graduation year in Basic Details (Step 1)');
+        handleStepChange(1);
+        return prevData;
+      }
+      
+      if (!prevData.basicDetails.medicalSchool || prevData.basicDetails.medicalSchool.trim() === '') {
+        toast.error('Please enter your medical school in Basic Details (Step 1)');
+        handleStepChange(1);
+        return prevData;
+      }
+
+      if (!prevData.basicDetails.fullName || prevData.basicDetails.fullName.trim() === '') {
+        toast.error('Please enter your full name in Basic Details (Step 1)');
+        handleStepChange(1);
+        return prevData;
+      }
+
+      if (!prevData.basicDetails.email || prevData.basicDetails.email.trim() === '') {
+        toast.error('Please enter your email in Basic Details (Step 1)');
+        handleStepChange(1);
+        return prevData;
+      }
+
+      if (!prevData.basicDetails.phone || prevData.basicDetails.phone.trim() === '') {
+        toast.error('Please enter your phone number in Basic Details (Step 1)');
+        handleStepChange(1);
+        return prevData;
+      }
+
+      if (!prevData.basicDetails.city || prevData.basicDetails.city.trim() === '') {
+        toast.error('Please enter your city in Basic Details (Step 1)');
+        handleStepChange(1);
+        return prevData;
+      }
+      
+      if (!user?._id) {
+        toast.error('User not authenticated. Please login again.');
+        return prevData;
+      }
+
+      const dataToSave = {
+        ...prevData,
+        userId: user._id
+      };
+      
+      api.post('/cv/save', dataToSave)
+        .then(() => toast.success("CV Saved Successfully"))
+        .catch(error => {
+          const errorMessage = error.response?.data?.message || 'Failed to save CV';
+          toast.error(errorMessage);
+        });
+      
+      return prevData;
+    });
+  }, [user?._id, handleStepChange]);
 
   const handlePreview = useCallback(() => setShowPreview(true), []);
   const handleBackFromPreview = useCallback(() => setShowPreview(false), []);
