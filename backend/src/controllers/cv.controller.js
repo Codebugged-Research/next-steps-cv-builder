@@ -107,21 +107,58 @@ const downloadCVPDF = async (req, res) => {
     try {
         const userId = req.params.userId || req.user._id;
         
-        const pdfBuffer = await generateCVPDF(userId);
-        const cvData = await CV.findOne({ userId });
+        console.log('==========================================');
+        console.log('Downloading CV for userId:', userId);
+        
+        // FIX: Use 'userId' instead of 'user'
+        const cvData = await CV.findOne({ userId: userId });
+        
+        if (!cvData) {
+            console.log('❌ CV not found in database');
+            return res.status(404).json({
+                success: false,
+                message: 'CV not found for this user'
+            });
+        }
+        
+        console.log('✅ CV Data found');
+        
+        console.log('Generating PDF...');
+        const pdfBuffer = await generateCVPDF(cvData);
+        
+        console.log('✅ PDF generated successfully, buffer length:', pdfBuffer.length);
+        
+        // Check if basicDetails exists
+        if (!cvData.basicDetails || !cvData.basicDetails.fullName) {
+            console.log('❌ Missing basic details');
+            return res.status(400).json({
+                success: false,
+                message: 'CV is missing basic details'
+            });
+        }
+        
         const filename = `${cvData.basicDetails.fullName.replace(/\s+/g, '_')}_CV.pdf`;
+        console.log('Sending PDF with filename:', filename);
         
         res.setHeader('Content-Type', 'application/pdf');
         res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
         res.setHeader('Content-Length', pdfBuffer.length);
         
         res.send(pdfBuffer);
+        console.log('✅ PDF sent successfully');
+        console.log('==========================================');
         
     } catch (error) {
-        res.status(500).json({
-            success: false,
-            message: error.message
-        });
+        console.error('❌ Download CV Error Details:', error.message);
+        console.error('Error stack:', error.stack);
+        console.error('==========================================');
+        
+        if (!res.headersSent) {
+            res.status(500).json({
+                success: false,
+                message: error.message
+            });
+        }
     }
 };
 export {

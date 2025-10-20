@@ -5,8 +5,8 @@ import { uploadPDF, saveToGridFS } from '../middlewares/multer.middleware.js';
 const router = Router();
 
 router.route('/save').post(verifyJWT, createOrUpdateCV);
-router.route('/:userId').get(verifyJWT, getCV);
 router.route('/download/:userId').get(verifyJWT, downloadCVPDF);
+router.route('/:userId').get(verifyJWT, getCV);
 router.route('/upload-gov-csv').post(
     verifyJWT,
     uploadPDF.single('govCV'),

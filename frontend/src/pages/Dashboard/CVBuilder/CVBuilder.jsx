@@ -223,38 +223,19 @@ const CVBuilder = ({ onPreview, user, onStepChange, currentStep, onStepComplete 
   }, [activeStep, handleStepChange]);
 
   const handleSave = useCallback(async () => {
-    setFormData(prevData => {
-      const validations = [
-        { field: prevData.basicDetails.graduationYear, message: 'Please enter your graduation year in Basic Details (Step 1)' },
-        { field: prevData.basicDetails.medicalSchool, message: 'Please enter your medical school in Basic Details (Step 1)' },
-        { field: prevData.basicDetails.fullName, message: 'Please enter your full name in Basic Details (Step 1)' },
-        { field: prevData.basicDetails.email, message: 'Please enter your email in Basic Details (Step 1)' },
-        { field: prevData.basicDetails.phone, message: 'Please enter your phone number in Basic Details (Step 1)' },
-        { field: prevData.basicDetails.city, message: 'Please enter your city in Basic Details (Step 1)' }
-      ];
+  if (!user?._id) {
+    toast.error('User not authenticated. Please login again.');
+    return;
+  }
 
-      for (const { field, message } of validations) {
-        if (!field || field.trim() === '') {
-          toast.error(message);
-          handleStepChange(1);
-          return prevData;
-        }
-      }
-      
-      if (!user?._id) {
-        toast.error('User not authenticated. Please login again.');
-        return prevData;
-      }
+  try {
+    await api.post('/cv/save', { ...formData, userId: user._id });
+    toast.success("CV Saved Successfully");
+  } catch (error) {
+    toast.error(error.response?.data?.message || 'Failed to save CV');
+  }
+}, [user?._id, formData]);
 
-      api.post('/cv/save', { ...prevData, userId: user._id })
-        .then(() => toast.success("CV Saved Successfully"))
-        .catch(error => {
-          toast.error(error.response?.data?.message || 'Failed to save CV');
-        });
-      
-      return prevData;
-    });
-  }, [user?._id, handleStepChange]);
 
   const handlePreview = useCallback(() => setShowPreview(true), []);
   const handleBackFromPreview = useCallback(() => setShowPreview(false), []);

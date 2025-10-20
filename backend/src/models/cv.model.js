@@ -39,11 +39,6 @@ const cvSchema = new mongoose.Schema({
         },
         medicalSchool: {
             type: String,
-            required: true
-        },
-        graduationYear: {
-            type: String,
-            required: true
         },
         mbbsRegNo: {
             type: String,
