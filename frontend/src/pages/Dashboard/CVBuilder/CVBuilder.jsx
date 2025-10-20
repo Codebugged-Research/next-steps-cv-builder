@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback, useMemo } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import ProgressBar from './ProgressBar';
 import StepContent from './StepContent';
 import NavigationControls from './NavigationControls';
@@ -70,7 +70,10 @@ const initialCVData = {
     ecfmgCertified: false
   },
   clinicalExperiences: [],
-  skills: '',
+  skills: {
+    skillsList: '',
+    supportingDocuments: []
+  },
   professionalExperiences: [],
   volunteerExperiences: [],
   significantAchievements: '',
@@ -95,13 +98,12 @@ const CVBuilder = ({ onPreview, user, onStepChange, currentStep, onStepComplete 
   const activeStep = currentStep || internalCurrentStep;
 
   const calculateCompletedSteps = useCallback((data) => {
-    const completed = [];
     const checks = [
       { condition: data.basicDetails?.fullName && data.basicDetails?.email, step: 1 },
       { condition: data.education?.graduation?.universityName && data.education?.graduation?.country, step: 2 },
       { condition: data.usmleScores?.step1Status, step: 3 },
       { condition: data.clinicalExperiences?.length > 0, step: 4 },
-      { condition: data.skills?.trim(), step: 5 },
+      { condition: data.skills?.skillsList?.trim(), step: 5 },
       { condition: data.professionalExperiences?.length > 0, step: 6 },
       { condition: data.volunteerExperiences?.length > 0, step: 7 },
       { condition: data.significantAchievements?.trim(), step: 8 },
@@ -109,11 +111,7 @@ const CVBuilder = ({ onPreview, user, onStepChange, currentStep, onStepComplete 
       { condition: data.emrRcmTraining?.emrSystems?.length > 0 || data.emrRcmTraining?.rcmTraining, step: 10 }
     ];
     
-    checks.forEach(({ condition, step }) => {
-      if (condition) completed.push(step);
-    });
-    
-    return completed;
+    return checks.filter(({ condition }) => condition).map(({ step }) => step);
   }, []);
 
   const checkExistingCV = useCallback(async () => {
@@ -125,8 +123,16 @@ const CVBuilder = ({ onPreview, user, onStepChange, currentStep, onStepComplete 
     try {
       const response = await api.get(`/cv/${user._id}`);
       if (response.data.success) {
-        setFormData(response.data.data);
-        setCompletedSteps(calculateCompletedSteps(response.data.data));
+        const cvData = response.data.data;
+        
+        if (typeof cvData.skills === 'string') {
+          cvData.skills = { skillsList: cvData.skills, supportingDocuments: [] };
+        } else if (!cvData.skills) {
+          cvData.skills = { skillsList: '', supportingDocuments: [] };
+        }
+        
+        setFormData(cvData);
+        setCompletedSteps(calculateCompletedSteps(cvData));
       }
     } catch (error) {
     } finally {
@@ -155,31 +161,24 @@ const CVBuilder = ({ onPreview, user, onStepChange, currentStep, onStepComplete 
 
   const handleInputChange = useCallback((section, field, value) => {
     setFormData(prevData => {
-      let newData;
-      if (section === 'skills' || section === 'significantAchievements') {
-        newData = { ...prevData, [section]: value };
+      const newData = JSON.parse(JSON.stringify(prevData));
+
+      if (section === 'skills') {
+        if (!newData.skills) newData.skills = {};
+        newData.skills[field] = value;
+      } else if (section === 'significantAchievements') {
+        newData.significantAchievements = value;
       } else if (section === 'education') {
-        newData = {
-          ...prevData,
-          education: {
-            ...prevData.education,
-            [field]: value
-          }
-        };
+        if (!newData.education) newData.education = {};
+        newData.education[field] = value;
       } else {
-        newData = { 
-          ...prevData, 
-          [section]: { 
-            ...prevData[section], 
-            [field]: value 
-          } 
-        };
+        if (!newData[section]) newData[section] = {};
+        newData[section][field] = value;
       }
-      
-      setTimeout(() => updateCompletedSteps(newData), 100);
+
       return newData;
     });
-  }, [updateCompletedSteps]);
+  }, []);
 
   const handleArrayAdd = useCallback((section, newItem) => {
     setFormData(prevData => {
@@ -216,51 +215,30 @@ const CVBuilder = ({ onPreview, user, onStepChange, currentStep, onStepComplete 
   }, [onStepChange]);
 
   const handleNext = useCallback(() => {
-    const nextStep = Math.min(totalSteps, activeStep + 1);
-    handleStepChange(nextStep);
+    handleStepChange(Math.min(totalSteps, activeStep + 1));
   }, [totalSteps, activeStep, handleStepChange]);
 
   const handlePrevious = useCallback(() => {
-    const prevStep = Math.max(1, activeStep - 1);
-    handleStepChange(prevStep);
+    handleStepChange(Math.max(1, activeStep - 1));
   }, [activeStep, handleStepChange]);
 
   const handleSave = useCallback(async () => {
     setFormData(prevData => {
-      if (!prevData.basicDetails.graduationYear || prevData.basicDetails.graduationYear.trim() === '') {
-        toast.error('Please enter your graduation year in Basic Details (Step 1)');
-        handleStepChange(1);
-        return prevData;
-      }
-      
-      if (!prevData.basicDetails.medicalSchool || prevData.basicDetails.medicalSchool.trim() === '') {
-        toast.error('Please enter your medical school in Basic Details (Step 1)');
-        handleStepChange(1);
-        return prevData;
-      }
+      const validations = [
+        { field: prevData.basicDetails.graduationYear, message: 'Please enter your graduation year in Basic Details (Step 1)' },
+        { field: prevData.basicDetails.medicalSchool, message: 'Please enter your medical school in Basic Details (Step 1)' },
+        { field: prevData.basicDetails.fullName, message: 'Please enter your full name in Basic Details (Step 1)' },
+        { field: prevData.basicDetails.email, message: 'Please enter your email in Basic Details (Step 1)' },
+        { field: prevData.basicDetails.phone, message: 'Please enter your phone number in Basic Details (Step 1)' },
+        { field: prevData.basicDetails.city, message: 'Please enter your city in Basic Details (Step 1)' }
+      ];
 
-      if (!prevData.basicDetails.fullName || prevData.basicDetails.fullName.trim() === '') {
-        toast.error('Please enter your full name in Basic Details (Step 1)');
-        handleStepChange(1);
-        return prevData;
-      }
-
-      if (!prevData.basicDetails.email || prevData.basicDetails.email.trim() === '') {
-        toast.error('Please enter your email in Basic Details (Step 1)');
-        handleStepChange(1);
-        return prevData;
-      }
-
-      if (!prevData.basicDetails.phone || prevData.basicDetails.phone.trim() === '') {
-        toast.error('Please enter your phone number in Basic Details (Step 1)');
-        handleStepChange(1);
-        return prevData;
-      }
-
-      if (!prevData.basicDetails.city || prevData.basicDetails.city.trim() === '') {
-        toast.error('Please enter your city in Basic Details (Step 1)');
-        handleStepChange(1);
-        return prevData;
+      for (const { field, message } of validations) {
+        if (!field || field.trim() === '') {
+          toast.error(message);
+          handleStepChange(1);
+          return prevData;
+        }
       }
       
       if (!user?._id) {
@@ -268,16 +246,10 @@ const CVBuilder = ({ onPreview, user, onStepChange, currentStep, onStepComplete 
         return prevData;
       }
 
-      const dataToSave = {
-        ...prevData,
-        userId: user._id
-      };
-      
-      api.post('/cv/save', dataToSave)
+      api.post('/cv/save', { ...prevData, userId: user._id })
         .then(() => toast.success("CV Saved Successfully"))
         .catch(error => {
-          const errorMessage = error.response?.data?.message || 'Failed to save CV';
-          toast.error(errorMessage);
+          toast.error(error.response?.data?.message || 'Failed to save CV');
         });
       
       return prevData;
@@ -286,37 +258,9 @@ const CVBuilder = ({ onPreview, user, onStepChange, currentStep, onStepComplete 
 
   const handlePreview = useCallback(() => setShowPreview(true), []);
   const handleBackFromPreview = useCallback(() => setShowPreview(false), []);
-  
   const handleDownload = useCallback(() => {
     toast.info('PDF download functionality will be implemented soon');
   }, []);
-
-  const memoizedProgressBar = useMemo(() => (
-    <ProgressBar currentStep={activeStep} totalSteps={totalSteps} />
-  ), [activeStep, totalSteps]);
-
-  const memoizedStepContent = useMemo(() => (
-    <StepContent
-      currentStep={activeStep}
-      formData={formData}
-      onInputChange={handleInputChange}
-      onArrayAdd={handleArrayAdd}
-      onArrayRemove={handleArrayRemove}
-      onArrayUpdate={handleArrayUpdate}
-    />
-  ), [activeStep, formData, handleInputChange, handleArrayAdd, handleArrayRemove, handleArrayUpdate]);
-
-  const memoizedNavigationControls = useMemo(() => (
-    <NavigationControls
-      currentStep={activeStep}
-      totalSteps={totalSteps}
-      onPrevious={handlePrevious}
-      onNext={handleNext}
-      onSave={handleSave}
-      onPreview={handlePreview}
-      completedSteps={completedSteps}
-    />
-  ), [activeStep, totalSteps, handlePrevious, handleNext, handleSave, handlePreview, completedSteps]);
 
   if (loading) {
     return (
@@ -341,9 +285,24 @@ const CVBuilder = ({ onPreview, user, onStepChange, currentStep, onStepComplete 
 
   return (
     <div className="bg-white rounded-xl shadow-lg p-8">
-      {memoizedProgressBar}
-      {memoizedStepContent}
-      {memoizedNavigationControls}
+      <ProgressBar currentStep={activeStep} totalSteps={totalSteps} />
+      <StepContent
+        currentStep={activeStep}
+        formData={formData}
+        onInputChange={handleInputChange}
+        onArrayAdd={handleArrayAdd}
+        onArrayRemove={handleArrayRemove}
+        onArrayUpdate={handleArrayUpdate}
+      />
+      <NavigationControls
+        currentStep={activeStep}
+        totalSteps={totalSteps}
+        onPrevious={handlePrevious}
+        onNext={handleNext}
+        onSave={handleSave}
+        onPreview={handlePreview}
+        completedSteps={completedSteps}
+      />
     </div>
   );
 };

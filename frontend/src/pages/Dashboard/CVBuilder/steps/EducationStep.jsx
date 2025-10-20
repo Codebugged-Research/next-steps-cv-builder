@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useMemo } from 'react';
 import FormField from '../forms/FormField';
 import FormGrid from '../forms/FormGrid';
 import { GraduationCap, School, BookOpen, Award } from 'lucide-react';
@@ -18,11 +18,10 @@ const EducationStep = ({ formData, onInputChange }) => {
   }, []);
 
   const updateSubSection = useCallback((subsection, field, value) => {
-    const updatedSubsection = {
-      ...formData.education?.[subsection],
+    onInputChange('education', subsection, {
+      ...(formData.education?.[subsection] || {}),
       [field]: value
-    };
-    onInputChange('education', subsection, updatedSubsection);
+    });
   }, [formData.education, onInputChange]);
 
   const TabButton = ({ tab, isActive }) => {
@@ -42,7 +41,7 @@ const EducationStep = ({ formData, onInputChange }) => {
     );
   };
 
-  const SchoolingTab = () => (
+  const SchoolingTab = useMemo(() => (
     <div className="space-y-6">
       <FormGrid>
         <FormField
@@ -106,9 +105,9 @@ const EducationStep = ({ formData, onInputChange }) => {
         />
       </FormGrid>
     </div>
-  );
+  ), [formData.education?.schooling, updateSubSection]);
 
-  const CollegeTab = () => (
+  const CollegeTab = useMemo(() => (
     <div className="space-y-6">
       <FormGrid>
         <FormField
@@ -183,9 +182,9 @@ const EducationStep = ({ formData, onInputChange }) => {
         />
       </div>
     </div>
-  );
+  ), [formData.education?.college, updateSubSection]);
 
-  const GraduationTab = () => (
+  const GraduationTab = useMemo(() => (
     <div className="space-y-6">
       <FormGrid>
         <FormField
@@ -305,9 +304,9 @@ const EducationStep = ({ formData, onInputChange }) => {
         />
       </FormGrid>
     </div>
-  );
+  ), [formData.education?.graduation, updateSubSection]);
 
-  const PostGraduationTab = () => (
+  const PostGraduationTab = useMemo(() => (
     <div className="space-y-6">
       <div className="bg-blue-50 rounded-lg p-4 mb-6">
         <p className="text-blue-800 text-sm">
@@ -390,20 +389,20 @@ const EducationStep = ({ formData, onInputChange }) => {
         />
       </FormGrid>
     </div>
-  );
+  ), [formData.education?.postGraduation, updateSubSection]);
 
   const renderActiveTab = () => {
     switch (activeTab) {
       case 'schooling':
-        return <SchoolingTab />;
+        return SchoolingTab;
       case 'college':
-        return <CollegeTab />;
+        return CollegeTab;
       case 'graduation':
-        return <GraduationTab />;
+        return GraduationTab;
       case 'postGraduation':
-        return <PostGraduationTab />;
+        return PostGraduationTab;
       default:
-        return <SchoolingTab />;
+        return SchoolingTab;
     }
   };
 
