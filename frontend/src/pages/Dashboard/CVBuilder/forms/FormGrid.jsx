@@ -5,5 +5,4 @@ const FormGrid = ({ children, cols = 2 }) => (
     {children}
   </div>
 );
-
 export default FormGrid;
