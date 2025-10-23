@@ -14,7 +14,8 @@ const SkillsStep = ({ formData, onInputChange }) => {
   const handleDocumentUpload = async (e) => {
     const file = e.target.files[0];
     if (!file) return;
-
+    
+    
     const error = validateFile(file, 'DOCUMENT');
     if (error) {
       setErrors(prev => ({ ...prev, document: error }));
@@ -27,12 +28,13 @@ const SkillsStep = ({ formData, onInputChange }) => {
       const formDataObj = new FormData();
       formDataObj.append('document', file);
 
-      const response = await api.post('/skills/documents/upload', formDataObj, {
-        headers: {
-          'Content-Type': 'multipart/form-data',
-        },
-      });
+      const response = await api.post('/files/documents/upload', formDataObj, {
+  headers: {
+    'Content-Type': 'multipart/form-data',
+  },
+});
 
+      console.log('Document upload response:', response);
       if (response.data.success) {
         const newDocument = {
           id: Date.now(),

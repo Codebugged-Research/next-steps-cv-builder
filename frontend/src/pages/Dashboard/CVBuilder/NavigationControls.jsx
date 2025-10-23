@@ -1,7 +1,7 @@
 import React from 'react';
 import { ArrowRight, Download, FileText } from 'lucide-react';
 
-const NavigationControls = ({ currentStep, totalSteps, onPrevious, onNext, onSave, onPreview }) => (
+const NavigationControls = ({ currentStep, totalSteps, onPrevious, onNext, onSave, onSaveProgress }) => (
   <div className="flex justify-between items-center mt-8 pt-6 border-t border-gray-200">
     <button
       onClick={onPrevious}
@@ -14,20 +14,20 @@ const NavigationControls = ({ currentStep, totalSteps, onPrevious, onNext, onSav
     <div className="flex gap-4">
       {currentStep === totalSteps ? (
         <>
-          <button
+          {/* <button
             onClick={onSave}
             className="flex items-center gap-2 px-6 py-2 border border-[#169AB4] text-[#169AB4] rounded-lg hover:bg-[#169AB4] hover:text-white transition-colors"
           >
             <Download className="h-4 w-4" />
-            Save Progress
-          </button>
+            Download CV
+          </button> */}
 
           <button
-            onClick={onPreview}
+            onClick={onSaveProgress}
             className="flex items-center gap-2 px-6 py-2 bg-[#04445E] text-white rounded-lg hover:bg-[#033a4d] transition-colors"
           >
             <FileText className="h-4 w-4" />
-            Preview CV
+            Save Progress
           </button>
         </>
       ) : (

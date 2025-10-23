@@ -190,13 +190,13 @@ const ViewCV = ({ onEdit }) => {
       </div>
 
       <div className="flex justify-center gap-4">
-        <button
+        {/* <button
           onClick={() => onEdit && onEdit()}
           className="flex items-center gap-2 px-6 py-3 border border-[#169AB4] text-[#169AB4] rounded-lg hover:bg-[#169AB4] hover:text-white transition-colors"
         >
           <Edit className="h-4 w-4" />
           Edit CV
-        </button>
+        </button> */}
 
         <button
           onClick={handleDownload}

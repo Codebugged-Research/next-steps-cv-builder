@@ -12,6 +12,7 @@ AWS.config.update({
 });
 
 const s3 = new AWS.S3();
+
 const uploadPhoto = multer({
     storage: multerS3({
         s3: s3,
@@ -41,7 +42,41 @@ const uploadPhoto = multer({
     }
 });
 
-export { uploadPhoto, s3 };
+const uploadDocument = multer({
+  storage: multerS3({
+    s3,
+    bucket: process.env.S3_BUCKET_NAME,
+    key: (req, file, cb) => {
+      const fileName = `documents/${uuidv4()}-${file.originalname}`;
+      cb(null, fileName);
+    },
+    contentType: multerS3.AUTO_CONTENT_TYPE,
+    metadata: (req, file, cb) => {
+      cb(null, {
+        fieldName: file.fieldname,
+        userId: req.user._id.toString(),
+        uploadDate: new Date().toISOString(),
+      });
+    },
+  }),
+  limits: { fileSize: 5 * 1024 * 1024 },
+  fileFilter: (req, file, cb) => {
+    const allowedTypes = [
+      'image/jpeg',
+      'image/png',
+      'image/jpg',
+      'application/pdf',
+      'application/msword', // .doc
+      'application/vnd.openxmlformats-officedocument.wordprocessingml.document', // .docx
+    ];
+
+    if (allowedTypes.includes(file.mimetype)) cb(null, true);
+    else cb(new Error('Only image or document files are allowed'), false);
+  },
+});
+
+export { uploadPhoto, uploadDocument, s3 };
+
 
 
 

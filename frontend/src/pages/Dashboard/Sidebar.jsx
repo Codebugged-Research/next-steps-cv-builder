@@ -1,8 +1,8 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, use } from 'react';
 import { User, FileText, Heart, ArrowRight, CheckCircle, ChevronDown, ChevronRight, Eye } from 'lucide-react';
 import NavigationItem from './NavigationItem';
 import CVStrengtheningSection from './CVStrengtheningSection';
-
+import useHasCV from '../../hooks/useHasCV';
 const Sidebar = ({ 
   activeSection, 
   onSectionChange, 
@@ -15,9 +15,12 @@ const Sidebar = ({
   const [showPrograms, setShowPrograms] = useState(
     ['systematic-reviews', 'case-reports', 'conferences', 'workshops', 'emr-training'].includes(activeSection)
   );
+  
+  const { hasCV, loading } = useHasCV();
+
   const mainNavigationItems = [
     { id: 'cv-builder', label: 'CV Builder', icon: FileText },
-    { id: 'cv-status', label: 'Preview CV', icon: Eye },
+    ...(hasCV ? [{ id: 'cv-status', label: 'View CV', icon: Eye }] : []),
   ];
   
   const cvSteps = [

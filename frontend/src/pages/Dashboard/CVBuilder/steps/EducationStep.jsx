@@ -1,7 +1,7 @@
 import React, { useState, useCallback, useMemo } from 'react';
 import FormField from '../forms/FormField';
 import FormGrid from '../forms/FormGrid';
-import { GraduationCap, School, BookOpen, Award } from 'lucide-react';
+import { GraduationCap, School, BookOpen, Award, Building2, MapPin, Calendar, Hash, TrendingUp, Globe } from 'lucide-react';
 
 const EducationStep = ({ formData, onInputChange }) => {
   const [activeTab, setActiveTab] = useState('schooling');
@@ -44,65 +44,135 @@ const EducationStep = ({ formData, onInputChange }) => {
   const SchoolingTab = useMemo(() => (
     <div className="space-y-6">
       <FormGrid>
-        <FormField
-          label="School Name"
-          type="text"
-          value={formData.education?.schooling?.schoolName || ''}
-          onChange={(value) => updateSubSection('schooling', 'schoolName', value)}
-          required
-        />
+        <div className="relative">
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            School Name <span className="text-red-500">*</span>
+          </label>
+          <div className="relative">
+            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+              <School className="h-5 w-5 text-gray-400" />
+            </div>
+            <input
+              type="text"
+              value={formData.education?.schooling?.schoolName || ''}
+              onChange={(e) => updateSubSection('schooling', 'schoolName', e.target.value)}
+              className="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-[#169AB4] focus:border-transparent"
+              placeholder="Enter school name"
+            />
+          </div>
+        </div>
         
-        <FormField
-          label="Board"
-          type="text"
-          value={formData.education?.schooling?.board || ''}
-          onChange={(value) => updateSubSection('schooling', 'board', value)}
-          required
-        />
+        <div className="relative">
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            Board <span className="text-red-500">*</span>
+          </label>
+          <div className="relative">
+            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+              <Award className="h-5 w-5 text-gray-400" />
+            </div>
+            <input
+              type="text"
+              value={formData.education?.schooling?.board || ''}
+              onChange={(e) => updateSubSection('schooling', 'board', e.target.value)}
+              className="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-[#169AB4] focus:border-transparent"
+              placeholder="Enter board name"
+            />
+          </div>
+        </div>
         
-        <FormField
-          label="City"
-          type="text"
-          value={formData.education?.schooling?.city || ''}
-          onChange={(value) => updateSubSection('schooling', 'city', value)}
-          required
-        />
+        <div className="relative">
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            City <span className="text-red-500">*</span>
+          </label>
+          <div className="relative">
+            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+              <Building2 className="h-5 w-5 text-gray-400" />
+            </div>
+            <input
+              type="text"
+              value={formData.education?.schooling?.city || ''}
+              onChange={(e) => updateSubSection('schooling', 'city', e.target.value)}
+              className="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-[#169AB4] focus:border-transparent"
+              placeholder="Enter city"
+            />
+          </div>
+        </div>
         
-        <FormField
-          label="State"
-          type="text"
-          value={formData.education?.schooling?.state || ''}
-          onChange={(value) => updateSubSection('schooling', 'state', value)}
-          required
-        />
+        <div className="relative">
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            State <span className="text-red-500">*</span>
+          </label>
+          <div className="relative">
+            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+              <MapPin className="h-5 w-5 text-gray-400" />
+            </div>
+            <input
+              type="text"
+              value={formData.education?.schooling?.state || ''}
+              onChange={(e) => updateSubSection('schooling', 'state', e.target.value)}
+              className="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-[#169AB4] focus:border-transparent"
+              placeholder="Enter state"
+            />
+          </div>
+        </div>
         
-        <FormField
-          label="Start Year"
-          type="number"
-          value={formData.education?.schooling?.startYear || ''}
-          onChange={(value) => updateSubSection('schooling', 'startYear', value)}
-          min="1990"
-          max={new Date().getFullYear()}
-          required
-        />
+        <div className="relative">
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            Start Year <span className="text-red-500">*</span>
+          </label>
+          <div className="relative">
+            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+              <Calendar className="h-5 w-5 text-gray-400" />
+            </div>
+            <input
+              type="number"
+              value={formData.education?.schooling?.startYear || ''}
+              onChange={(e) => updateSubSection('schooling', 'startYear', e.target.value)}
+              min="1990"
+              max={new Date().getFullYear()}
+              className="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-[#169AB4] focus:border-transparent"
+              placeholder="Start year"
+            />
+          </div>
+        </div>
         
-        <FormField
-          label="End Year"
-          type="number"
-          value={formData.education?.schooling?.endYear || ''}
-          onChange={(value) => updateSubSection('schooling', 'endYear', value)}
-          min="1990"
-          max={new Date().getFullYear()}
-          required
-        />
+        <div className="relative">
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            End Year <span className="text-red-500">*</span>
+          </label>
+          <div className="relative">
+            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+              <Calendar className="h-5 w-5 text-gray-400" />
+            </div>
+            <input
+              type="number"
+              value={formData.education?.schooling?.endYear || ''}
+              onChange={(e) => updateSubSection('schooling', 'endYear', e.target.value)}
+              min="1990"
+              max={new Date().getFullYear()}
+              className="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-[#169AB4] focus:border-transparent"
+              placeholder="End year"
+            />
+          </div>
+        </div>
         
-        <FormField
-          label="Grade/Percentage"
-          type="text"
-          value={formData.education?.schooling?.grade || ''}
-          onChange={(value) => updateSubSection('schooling', 'grade', value)}
-          placeholder="e.g., 85% or A+"
-        />
+        <div className="relative">
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            Grade/Percentage
+          </label>
+          <div className="relative">
+            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+              <TrendingUp className="h-5 w-5 text-gray-400" />
+            </div>
+            <input
+              type="text"
+              value={formData.education?.schooling?.grade || ''}
+              onChange={(e) => updateSubSection('schooling', 'grade', e.target.value)}
+              className="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-[#169AB4] focus:border-transparent"
+              placeholder="e.g., 85% or A+"
+            />
+          </div>
+        </div>
       </FormGrid>
     </div>
   ), [formData.education?.schooling, updateSubSection]);
@@ -110,76 +180,159 @@ const EducationStep = ({ formData, onInputChange }) => {
   const CollegeTab = useMemo(() => (
     <div className="space-y-6">
       <FormGrid>
-        <FormField
-          label="College Name"
-          type="text"
-          value={formData.education?.college?.collegeName || ''}
-          onChange={(value) => updateSubSection('college', 'collegeName', value)}
-          required
-        />
+        <div className="relative">
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            College Name <span className="text-red-500">*</span>
+          </label>
+          <div className="relative">
+            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+              <BookOpen className="h-5 w-5 text-gray-400" />
+            </div>
+            <input
+              type="text"
+              value={formData.education?.college?.collegeName || ''}
+              onChange={(e) => updateSubSection('college', 'collegeName', e.target.value)}
+              className="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-[#169AB4] focus:border-transparent"
+              placeholder="Enter college name"
+            />
+          </div>
+        </div>
         
-        <FormField
-          label="Stream"
-          type="select"
-          options={['Science', 'Commerce', 'Arts', 'Other']}
-          value={formData.education?.college?.stream || ''}
-          onChange={(value) => updateSubSection('college', 'stream', value)}
-          required
-        />
+        <div className="relative">
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            Stream <span className="text-red-500">*</span>
+          </label>
+          <div className="relative">
+            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+              <Award className="h-5 w-5 text-gray-400" />
+            </div>
+            <select
+              value={formData.education?.college?.stream || ''}
+              onChange={(e) => updateSubSection('college', 'stream', e.target.value)}
+              className="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-[#169AB4] focus:border-transparent"
+            >
+              <option value="">Select Stream</option>
+              <option value="Science">Science</option>
+              <option value="Commerce">Commerce</option>
+              <option value="Arts">Arts</option>
+              <option value="Other">Other</option>
+            </select>
+          </div>
+        </div>
         
-        <FormField
-          label="City"
-          type="text"
-          value={formData.education?.college?.city || ''}
-          onChange={(value) => updateSubSection('college', 'city', value)}
-          required
-        />
+        <div className="relative">
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            City <span className="text-red-500">*</span>
+          </label>
+          <div className="relative">
+            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+              <Building2 className="h-5 w-5 text-gray-400" />
+            </div>
+            <input
+              type="text"
+              value={formData.education?.college?.city || ''}
+              onChange={(e) => updateSubSection('college', 'city', e.target.value)}
+              className="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-[#169AB4] focus:border-transparent"
+              placeholder="Enter city"
+            />
+          </div>
+        </div>
         
-        <FormField
-          label="State"
-          type="text"
-          value={formData.education?.college?.state || ''}
-          onChange={(value) => updateSubSection('college', 'state', value)}
-          required
-        />
+        <div className="relative">
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            State <span className="text-red-500">*</span>
+          </label>
+          <div className="relative">
+            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+              <MapPin className="h-5 w-5 text-gray-400" />
+            </div>
+            <input
+              type="text"
+              value={formData.education?.college?.state || ''}
+              onChange={(e) => updateSubSection('college', 'state', e.target.value)}
+              className="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-[#169AB4] focus:border-transparent"
+              placeholder="Enter state"
+            />
+          </div>
+        </div>
         
-        <FormField
-          label="Start Year"
-          type="number"
-          value={formData.education?.college?.startYear || ''}
-          onChange={(value) => updateSubSection('college', 'startYear', value)}
-          min="1990"
-          max={new Date().getFullYear()}
-          required
-        />
+        <div className="relative">
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            Start Year <span className="text-red-500">*</span>
+          </label>
+          <div className="relative">
+            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+              <Calendar className="h-5 w-5 text-gray-400" />
+            </div>
+            <input
+              type="number"
+              value={formData.education?.college?.startYear || ''}
+              onChange={(e) => updateSubSection('college', 'startYear', e.target.value)}
+              min="1990"
+              max={new Date().getFullYear()}
+              className="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-[#169AB4] focus:border-transparent"
+              placeholder="Start year"
+            />
+          </div>
+        </div>
         
-        <FormField
-          label="End Year"
-          type="number"
-          value={formData.education?.college?.endYear || ''}
-          onChange={(value) => updateSubSection('college', 'endYear', value)}
-          min="1990"
-          max={new Date().getFullYear()}
-          required
-        />
+        <div className="relative">
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            End Year <span className="text-red-500">*</span>
+          </label>
+          <div className="relative">
+            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+              <Calendar className="h-5 w-5 text-gray-400" />
+            </div>
+            <input
+              type="number"
+              value={formData.education?.college?.endYear || ''}
+              onChange={(e) => updateSubSection('college', 'endYear', e.target.value)}
+              min="1990"
+              max={new Date().getFullYear()}
+              className="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-[#169AB4] focus:border-transparent"
+              placeholder="End year"
+            />
+          </div>
+        </div>
       </FormGrid>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <FormField
-          label="11th Grade (%)"
-          type="text"
-          value={formData.education?.college?.eleventhGrade || ''}
-          onChange={(value) => updateSubSection('college', 'eleventhGrade', value)}
-          placeholder="e.g., 85%"
-        />
+        <div className="relative">
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            11th Grade (%)
+          </label>
+          <div className="relative">
+            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+              <TrendingUp className="h-5 w-5 text-gray-400" />
+            </div>
+            <input
+              type="text"
+              value={formData.education?.college?.eleventhGrade || ''}
+              onChange={(e) => updateSubSection('college', 'eleventhGrade', e.target.value)}
+              className="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-[#169AB4] focus:border-transparent"
+              placeholder="e.g., 85%"
+            />
+          </div>
+        </div>
         
-        <FormField
-          label="12th Grade (%)"
-          type="text"
-          value={formData.education?.college?.twelfthGrade || ''}
-          onChange={(value) => updateSubSection('college', 'twelfthGrade', value)}
-          placeholder="e.g., 90%"
-        />
+        <div className="relative">
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            12th Grade (%)
+          </label>
+          <div className="relative">
+            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+              <TrendingUp className="h-5 w-5 text-gray-400" />
+            </div>
+            <input
+              type="text"
+              value={formData.education?.college?.twelfthGrade || ''}
+              onChange={(e) => updateSubSection('college', 'twelfthGrade', e.target.value)}
+              className="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-[#169AB4] focus:border-transparent"
+              placeholder="e.g., 90%"
+            />
+          </div>
+        </div>
       </div>
     </div>
   ), [formData.education?.college, updateSubSection]);
@@ -187,121 +340,269 @@ const EducationStep = ({ formData, onInputChange }) => {
   const GraduationTab = useMemo(() => (
     <div className="space-y-6">
       <FormGrid>
-        <FormField
-          label="University/College Name"
-          type="text"
-          value={formData.education?.graduation?.universityName || ''}
-          onChange={(value) => updateSubSection('graduation', 'universityName', value)}
-          required
-        />
+        <div className="relative">
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            University/College Name <span className="text-red-500">*</span>
+          </label>
+          <div className="relative">
+            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+              <GraduationCap className="h-5 w-5 text-gray-400" />
+            </div>
+            <input
+              type="text"
+              value={formData.education?.graduation?.universityName || ''}
+              onChange={(e) => updateSubSection('graduation', 'universityName', e.target.value)}
+              className="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-[#169AB4] focus:border-transparent"
+              placeholder="Enter university/college name"
+            />
+          </div>
+        </div>
         
-        <FormField
-          label="Degree"
-          type="select"
-          options={['MBBS', 'BDS', 'BAMS', 'BHMS', 'B.Sc', 'Other']}
-          value={formData.education?.graduation?.degree || ''}
-          onChange={(value) => updateSubSection('graduation', 'degree', value)}
-          required
-        />
+        <div className="relative">
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            Degree <span className="text-red-500">*</span>
+          </label>
+          <div className="relative">
+            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+              <Award className="h-5 w-5 text-gray-400" />
+            </div>
+            <select
+              value={formData.education?.graduation?.degree || ''}
+              onChange={(e) => updateSubSection('graduation', 'degree', e.target.value)}
+              className="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-[#169AB4] focus:border-transparent"
+            >
+              <option value="">Select Degree</option>
+              <option value="MBBS">MBBS</option>
+              <option value="BDS">BDS</option>
+              <option value="BAMS">BAMS</option>
+              <option value="BHMS">BHMS</option>
+              <option value="B.Sc">B.Sc</option>
+              <option value="Other">Other</option>
+            </select>
+          </div>
+        </div>
         
-        <FormField
-          label="Specialization"
-          type="text"
-          value={formData.education?.graduation?.specialization || ''}
-          onChange={(value) => updateSubSection('graduation', 'specialization', value)}
-        />
+        <div className="relative">
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            Specialization
+          </label>
+          <div className="relative">
+            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+              <BookOpen className="h-5 w-5 text-gray-400" />
+            </div>
+            <input
+              type="text"
+              value={formData.education?.graduation?.specialization || ''}
+              onChange={(e) => updateSubSection('graduation', 'specialization', e.target.value)}
+              className="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-[#169AB4] focus:border-transparent"
+              placeholder="Enter specialization"
+            />
+          </div>
+        </div>
         
-        <FormField
-          label="City"
-          type="text"
-          value={formData.education?.graduation?.city || ''}
-          onChange={(value) => updateSubSection('graduation', 'city', value)}
-          required
-        />
+        <div className="relative">
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            City <span className="text-red-500">*</span>
+          </label>
+          <div className="relative">
+            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+              <Building2 className="h-5 w-5 text-gray-400" />
+            </div>
+            <input
+              type="text"
+              value={formData.education?.graduation?.city || ''}
+              onChange={(e) => updateSubSection('graduation', 'city', e.target.value)}
+              className="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-[#169AB4] focus:border-transparent"
+              placeholder="Enter city"
+            />
+          </div>
+        </div>
         
-        <FormField
-          label="State"
-          type="text"
-          value={formData.education?.graduation?.state || ''}
-          onChange={(value) => updateSubSection('graduation', 'state', value)}
-          required
-        />
+        <div className="relative">
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            State <span className="text-red-500">*</span>
+          </label>
+          <div className="relative">
+            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+              <MapPin className="h-5 w-5 text-gray-400" />
+            </div>
+            <input
+              type="text"
+              value={formData.education?.graduation?.state || ''}
+              onChange={(e) => updateSubSection('graduation', 'state', e.target.value)}
+              className="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-[#169AB4] focus:border-transparent"
+              placeholder="Enter state"
+            />
+          </div>
+        </div>
         
-        <FormField
-          label="Country"
-          type="text"
-          value={formData.education?.graduation?.country || ''}
-          onChange={(value) => updateSubSection('graduation', 'country', value)}
-          required
-        />
+        <div className="relative">
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            Country <span className="text-red-500">*</span>
+          </label>
+          <div className="relative">
+            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+              <Globe className="h-5 w-5 text-gray-400" />
+            </div>
+            <input
+              type="text"
+              value={formData.education?.graduation?.country || ''}
+              onChange={(e) => updateSubSection('graduation', 'country', e.target.value)}
+              className="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-[#169AB4] focus:border-transparent"
+              placeholder="Enter country"
+            />
+          </div>
+        </div>
         
-        <FormField
-          label="Start Date"
-          type="date"
-          value={formData.education?.graduation?.startDate || ''}
-          onChange={(value) => updateSubSection('graduation', 'startDate', value)}
-          required
-        />
+        <div className="relative">
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            Start Date <span className="text-red-500">*</span>
+          </label>
+          <div className="relative">
+            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+              <Calendar className="h-5 w-5 text-gray-400" />
+            </div>
+            <input
+              type="date"
+              value={formData.education?.graduation?.startDate || ''}
+              onChange={(e) => updateSubSection('graduation', 'startDate', e.target.value)}
+              className="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-[#169AB4] focus:border-transparent"
+            />
+          </div>
+        </div>
         
-        <FormField
-          label="End Date"
-          type="date"
-          value={formData.education?.graduation?.endDate || ''}
-          onChange={(value) => updateSubSection('graduation', 'endDate', value)}
-          required
-        />
+        <div className="relative">
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            End Date <span className="text-red-500">*</span>
+          </label>
+          <div className="relative">
+            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+              <Calendar className="h-5 w-5 text-gray-400" />
+            </div>
+            <input
+              type="date"
+              value={formData.education?.graduation?.endDate || ''}
+              onChange={(e) => updateSubSection('graduation', 'endDate', e.target.value)}
+              className="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-[#169AB4] focus:border-transparent"
+            />
+          </div>
+        </div>
       </FormGrid>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        <FormField
-          label="1st Year (%)"
-          type="text"
-          value={formData.education?.graduation?.firstYearPercentage || ''}
-          onChange={(value) => updateSubSection('graduation', 'firstYearPercentage', value)}
-          placeholder="e.g., 85%"
-        />
+        <div className="relative">
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            1st Year (%)
+          </label>
+          <div className="relative">
+            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+              <Hash className="h-5 w-5 text-gray-400" />
+            </div>
+            <input
+              type="text"
+              value={formData.education?.graduation?.firstYearPercentage || ''}
+              onChange={(e) => updateSubSection('graduation', 'firstYearPercentage', e.target.value)}
+              className="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-[#169AB4] focus:border-transparent"
+              placeholder="e.g., 85%"
+            />
+          </div>
+        </div>
         
-        <FormField
-          label="2nd Year (%)"
-          type="text"
-          value={formData.education?.graduation?.secondYearPercentage || ''}
-          onChange={(value) => updateSubSection('graduation', 'secondYearPercentage', value)}
-          placeholder="e.g., 87%"
-        />
+        <div className="relative">
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            2nd Year (%)
+          </label>
+          <div className="relative">
+            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+              <Hash className="h-5 w-5 text-gray-400" />
+            </div>
+            <input
+              type="text"
+              value={formData.education?.graduation?.secondYearPercentage || ''}
+              onChange={(e) => updateSubSection('graduation', 'secondYearPercentage', e.target.value)}
+              className="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-[#169AB4] focus:border-transparent"
+              placeholder="e.g., 87%"
+            />
+          </div>
+        </div>
         
-        <FormField
-          label="3rd Year (%)"
-          type="text"
-          value={formData.education?.graduation?.thirdYearPercentage || ''}
-          onChange={(value) => updateSubSection('graduation', 'thirdYearPercentage', value)}
-          placeholder="e.g., 89%"
-        />
+        <div className="relative">
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            3rd Year (%)
+          </label>
+          <div className="relative">
+            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+              <Hash className="h-5 w-5 text-gray-400" />
+            </div>
+            <input
+              type="text"
+              value={formData.education?.graduation?.thirdYearPercentage || ''}
+              onChange={(e) => updateSubSection('graduation', 'thirdYearPercentage', e.target.value)}
+              className="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-[#169AB4] focus:border-transparent"
+              placeholder="e.g., 89%"
+            />
+          </div>
+        </div>
         
-        <FormField
-          label="Final Year (%)"
-          type="text"
-          value={formData.education?.graduation?.finalYearPercentage || ''}
-          onChange={(value) => updateSubSection('graduation', 'finalYearPercentage', value)}
-          placeholder="e.g., 91%"
-        />
+        <div className="relative">
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            Final Year (%)
+          </label>
+          <div className="relative">
+            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+              <Hash className="h-5 w-5 text-gray-400" />
+            </div>
+            <input
+              type="text"
+              value={formData.education?.graduation?.finalYearPercentage || ''}
+              onChange={(e) => updateSubSection('graduation', 'finalYearPercentage', e.target.value)}
+              className="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-[#169AB4] focus:border-transparent"
+              placeholder="e.g., 91%"
+            />
+          </div>
+        </div>
       </div>
 
       <FormGrid>
-        <FormField
-          label="Overall CGPA/Percentage"
-          type="text"
-          value={formData.education?.graduation?.overallGrade || ''}
-          onChange={(value) => updateSubSection('graduation', 'overallGrade', value)}
-          placeholder="e.g., 8.5 CGPA or 85%"
-        />
+        <div className="relative">
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            Overall CGPA/Percentage
+          </label>
+          <div className="relative">
+            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+              <TrendingUp className="h-5 w-5 text-gray-400" />
+            </div>
+            <input
+              type="text"
+              value={formData.education?.graduation?.overallGrade || ''}
+              onChange={(e) => updateSubSection('graduation', 'overallGrade', e.target.value)}
+              className="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-[#169AB4] focus:border-transparent"
+              placeholder="e.g., 8.5 CGPA or 85%"
+            />
+          </div>
+        </div>
         
-        <FormField
-          label="Class Type"
-          type="select"
-          options={['First Class with Distinction', 'First Class', 'Second Class', 'Pass Class']}
-          value={formData.education?.graduation?.classType || ''}
-          onChange={(value) => updateSubSection('graduation', 'classType', value)}
-        />
+        <div className="relative">
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            Class Type
+          </label>
+          <div className="relative">
+            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+              <Award className="h-5 w-5 text-gray-400" />
+            </div>
+            <select
+              value={formData.education?.graduation?.classType || ''}
+              onChange={(e) => updateSubSection('graduation', 'classType', e.target.value)}
+              className="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-[#169AB4] focus:border-transparent"
+            >
+              <option value="">Select Class Type</option>
+              <option value="First Class with Distinction">First Class with Distinction</option>
+              <option value="First Class">First Class</option>
+              <option value="Second Class">Second Class</option>
+              <option value="Pass Class">Pass Class</option>
+            </select>
+          </div>
+        </div>
       </FormGrid>
     </div>
   ), [formData.education?.graduation, updateSubSection]);
@@ -315,78 +616,193 @@ const EducationStep = ({ formData, onInputChange }) => {
       </div>
 
       <FormGrid>
-        <FormField
-          label="University/Institute Name"
-          type="text"
-          value={formData.education?.postGraduation?.universityName || ''}
-          onChange={(value) => updateSubSection('postGraduation', 'universityName', value)}
-        />
+        <div className="relative">
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            University/Institute Name
+          </label>
+          <div className="relative">
+            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+              <GraduationCap className="h-5 w-5 text-gray-400" />
+            </div>
+            <input
+              type="text"
+              value={formData.education?.postGraduation?.universityName || ''}
+              onChange={(e) => updateSubSection('postGraduation', 'universityName', e.target.value)}
+              className="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-[#169AB4] focus:border-transparent"
+              placeholder="Enter university/institute name"
+            />
+          </div>
+        </div>
         
-        <FormField
-          label="Degree"
-          type="select"
-          options={['MD', 'MS', 'DNB', 'DM', 'MCh', 'M.Sc', 'Other']}
-          value={formData.education?.postGraduation?.degree || ''}
-          onChange={(value) => updateSubSection('postGraduation', 'degree', value)}
-        />
+        <div className="relative">
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            Degree
+          </label>
+          <div className="relative">
+            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+              <Award className="h-5 w-5 text-gray-400" />
+            </div>
+            <select
+              value={formData.education?.postGraduation?.degree || ''}
+              onChange={(e) => updateSubSection('postGraduation', 'degree', e.target.value)}
+              className="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-[#169AB4] focus:border-transparent"
+            >
+              <option value="">Select Degree</option>
+              <option value="MD">MD</option>
+              <option value="MS">MS</option>
+              <option value="DNB">DNB</option>
+              <option value="DM">DM</option>
+              <option value="MCh">MCh</option>
+              <option value="M.Sc">M.Sc</option>
+              <option value="Other">Other</option>
+            </select>
+          </div>
+        </div>
         
-        <FormField
-          label="Specialization"
-          type="text"
-          value={formData.education?.postGraduation?.specialization || ''}
-          onChange={(value) => updateSubSection('postGraduation', 'specialization', value)}
-        />
+        <div className="relative">
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            Specialization
+          </label>
+          <div className="relative">
+            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+              <BookOpen className="h-5 w-5 text-gray-400" />
+            </div>
+            <input
+              type="text"
+              value={formData.education?.postGraduation?.specialization || ''}
+              onChange={(e) => updateSubSection('postGraduation', 'specialization', e.target.value)}
+              className="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-[#169AB4] focus:border-transparent"
+              placeholder="Enter specialization"
+            />
+          </div>
+        </div>
         
-        <FormField
-          label="City"
-          type="text"
-          value={formData.education?.postGraduation?.city || ''}
-          onChange={(value) => updateSubSection('postGraduation', 'city', value)}
-        />
+        <div className="relative">
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            City
+          </label>
+          <div className="relative">
+            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+              <Building2 className="h-5 w-5 text-gray-400" />
+            </div>
+            <input
+              type="text"
+              value={formData.education?.postGraduation?.city || ''}
+              onChange={(e) => updateSubSection('postGraduation', 'city', e.target.value)}
+              className="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-[#169AB4] focus:border-transparent"
+              placeholder="Enter city"
+            />
+          </div>
+        </div>
         
-        <FormField
-          label="State"
-          type="text"
-          value={formData.education?.postGraduation?.state || ''}
-          onChange={(value) => updateSubSection('postGraduation', 'state', value)}
-        />
+        <div className="relative">
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            State
+          </label>
+          <div className="relative">
+            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+              <MapPin className="h-5 w-5 text-gray-400" />
+            </div>
+            <input
+              type="text"
+              value={formData.education?.postGraduation?.state || ''}
+              onChange={(e) => updateSubSection('postGraduation', 'state', e.target.value)}
+              className="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-[#169AB4] focus:border-transparent"
+              placeholder="Enter state"
+            />
+          </div>
+        </div>
         
-        <FormField
-          label="Country"
-          type="text"
-          value={formData.education?.postGraduation?.country || ''}
-          onChange={(value) => updateSubSection('postGraduation', 'country', value)}
-        />
+        <div className="relative">
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            Country
+          </label>
+          <div className="relative">
+            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+              <Globe className="h-5 w-5 text-gray-400" />
+            </div>
+            <input
+              type="text"
+              value={formData.education?.postGraduation?.country || ''}
+              onChange={(e) => updateSubSection('postGraduation', 'country', e.target.value)}
+              className="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-[#169AB4] focus:border-transparent"
+              placeholder="Enter country"
+            />
+          </div>
+        </div>
         
-        <FormField
-          label="Start Date"
-          type="date"
-          value={formData.education?.postGraduation?.startDate || ''}
-          onChange={(value) => updateSubSection('postGraduation', 'startDate', value)}
-        />
+        <div className="relative">
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            Start Date
+          </label>
+          <div className="relative">
+            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+              <Calendar className="h-5 w-5 text-gray-400" />
+            </div>
+            <input
+              type="date"
+              value={formData.education?.postGraduation?.startDate || ''}
+              onChange={(e) => updateSubSection('postGraduation', 'startDate', e.target.value)}
+              className="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-[#169AB4] focus:border-transparent"
+            />
+          </div>
+        </div>
         
-        <FormField
-          label="End Date"
-          type="date"
-          value={formData.education?.postGraduation?.endDate || ''}
-          onChange={(value) => updateSubSection('postGraduation', 'endDate', value)}
-        />
+        <div className="relative">
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            End Date
+          </label>
+          <div className="relative">
+            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+              <Calendar className="h-5 w-5 text-gray-400" />
+            </div>
+            <input
+              type="date"
+              value={formData.education?.postGraduation?.endDate || ''}
+              onChange={(e) => updateSubSection('postGraduation', 'endDate', e.target.value)}
+              className="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-[#169AB4] focus:border-transparent"
+            />
+          </div>
+        </div>
         
-        <FormField
-          label="Status"
-          type="select"
-          options={['Completed', 'Pursuing', 'Dropped']}
-          value={formData.education?.postGraduation?.status || ''}
-          onChange={(value) => updateSubSection('postGraduation', 'status', value)}
-        />
+        <div className="relative">
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            Status
+          </label>
+          <div className="relative">
+            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+              <Award className="h-5 w-5 text-gray-400" />
+            </div>
+            <select
+              value={formData.education?.postGraduation?.status || ''}
+              onChange={(e) => updateSubSection('postGraduation', 'status', e.target.value)}
+              className="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-[#169AB4] focus:border-transparent"
+            >
+              <option value="">Select Status</option>
+              <option value="Completed">Completed</option>
+              <option value="Pursuing">Pursuing</option>
+              <option value="Dropped">Dropped</option>
+            </select>
+          </div>
+        </div>
         
-        <FormField
-          label="Overall Grade/CGPA"
-          type="text"
-          value={formData.education?.postGraduation?.overallGrade || ''}
-          onChange={(value) => updateSubSection('postGraduation', 'overallGrade', value)}
-          placeholder="e.g., 8.5 CGPA or 85%"
-        />
+        <div className="relative">
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            Overall Grade/CGPA
+          </label>
+          <div className="relative">
+            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+              <TrendingUp className="h-5 w-5 text-gray-400" />
+            </div>
+            <input
+              type="text"
+              value={formData.education?.postGraduation?.overallGrade || ''}
+              onChange={(e) => updateSubSection('postGraduation', 'overallGrade', e.target.value)}
+              className="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-[#169AB4] focus:border-transparent"
+              placeholder="e.g., 8.5 CGPA or 85%"
+            />
+          </div>
+        </div>
       </FormGrid>
     </div>
   ), [formData.education?.postGraduation, updateSubSection]);

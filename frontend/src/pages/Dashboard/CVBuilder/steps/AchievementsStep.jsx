@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import FormField from '../forms/FormField';
-import { Plus, X, Link, Upload } from 'lucide-react';
+import { Plus, X, Link, Upload, Award, Calendar, FileText, ExternalLink } from 'lucide-react';
 
 const AchievementsStep = ({ formData, onInputChange, onArrayAdd, onArrayRemove, onArrayUpdate }) => {
   const [newAchievement, setNewAchievement] = useState({
@@ -8,7 +8,7 @@ const AchievementsStep = ({ formData, onInputChange, onArrayAdd, onArrayRemove, 
     description: '',
     date: '',
     url: '',
-    attachmentType: 'none' // 'none', 'url', 'file'
+    attachmentType: 'none'
   });
 
   const handleAddAchievement = () => {
@@ -38,27 +38,34 @@ const AchievementsStep = ({ formData, onInputChange, onArrayAdd, onArrayRemove, 
     <div className="space-y-6">
       <h2 className="text-2xl font-bold text-[#04445E] mb-6">Significant Achievements</h2>
       
-      {/* General Achievements Text Area */}
       <div className="bg-gray-50 p-6 rounded-lg">
-        <FormField
-          label="General Achievements Summary"
-          type="textarea"
-          value={formData.significantAchievements || ''}
-          onChange={(value) => onInputChange('significantAchievements', '', value)}
-          placeholder="Provide a general overview of your achievements, awards, honors, etc."
-          rows={4}
-        />
+        <label className="block text-sm font-medium text-gray-700 mb-1">
+          General Achievements Summary
+        </label>
+        <div className="relative">
+          <div className="absolute top-3 left-3 pointer-events-none">
+            <FileText className="h-5 w-5 text-gray-400" />
+          </div>
+          <textarea
+            value={formData.significantAchievements || ''}
+            onChange={(e) => onInputChange('significantAchievements', '', e.target.value)}
+            className="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-[#169AB4] focus:border-transparent"
+            placeholder="Provide a general overview of your achievements, awards, honors, etc."
+            rows={4}
+          />
+        </div>
       </div>
 
-      {/* Individual Achievements with Attachments */}
       <div className="space-y-4">
         <h3 className="text-lg font-semibold text-[#04445E]">Detailed Achievements</h3>
         
-        {/* Existing Achievements */}
         {achievements.map((achievement, index) => (
           <div key={achievement.id || index} className="bg-white border border-gray-200 rounded-lg p-4">
             <div className="flex justify-between items-start mb-4">
-              <h4 className="font-medium text-[#04445E]">{achievement.title}</h4>
+              <h4 className="font-medium text-[#04445E] flex items-center gap-2">
+                <Award className="h-5 w-5 text-[#169AB4]" />
+                {achievement.title}
+              </h4>
               <button
                 onClick={() => handleRemoveAchievement(index)}
                 className="text-red-500 hover:text-red-700 p-1"
@@ -68,31 +75,60 @@ const AchievementsStep = ({ formData, onInputChange, onArrayAdd, onArrayRemove, 
             </div>
             
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-              <FormField
-                label="Achievement Title"
-                value={achievement.title}
-                onChange={(value) => handleUpdateAchievement(index, 'title', value)}
-                placeholder="e.g., Dean's List, Research Award"
-              />
+              <div className="relative">
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Achievement Title
+                </label>
+                <div className="relative">
+                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                    <Award className="h-5 w-5 text-gray-400" />
+                  </div>
+                  <input
+                    type="text"
+                    value={achievement.title}
+                    onChange={(e) => handleUpdateAchievement(index, 'title', e.target.value)}
+                    className="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-[#169AB4] focus:border-transparent"
+                    placeholder="e.g., Dean's List, Research Award"
+                  />
+                </div>
+              </div>
               
-              <FormField
-                label="Date Received"
-                type="date"
-                value={achievement.date}
-                onChange={(value) => handleUpdateAchievement(index, 'date', value)}
-              />
+              <div className="relative">
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Date Received
+                </label>
+                <div className="relative">
+                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                    <Calendar className="h-5 w-5 text-gray-400" />
+                  </div>
+                  <input
+                    type="date"
+                    value={achievement.date}
+                    onChange={(e) => handleUpdateAchievement(index, 'date', e.target.value)}
+                    className="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-[#169AB4] focus:border-transparent"
+                  />
+                </div>
+              </div>
             </div>
             
-            <FormField
-              label="Description"
-              type="textarea"
-              value={achievement.description}
-              onChange={(value) => handleUpdateAchievement(index, 'description', value)}
-              placeholder="Brief description of the achievement"
-              rows={2}
-            />
+            <div className="relative mb-4">
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Description
+              </label>
+              <div className="relative">
+                <div className="absolute top-3 left-3 pointer-events-none">
+                  <FileText className="h-5 w-5 text-gray-400" />
+                </div>
+                <textarea
+                  value={achievement.description}
+                  onChange={(e) => handleUpdateAchievement(index, 'description', e.target.value)}
+                  className="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-[#169AB4] focus:border-transparent"
+                  placeholder="Brief description of the achievement"
+                  rows={2}
+                />
+              </div>
+            </div>
             
-            {/* Attachment Options */}
             <div className="mt-4 space-y-3">
               <label className="text-sm font-medium text-gray-700">Supporting Evidence</label>
               
@@ -124,12 +160,23 @@ const AchievementsStep = ({ formData, onInputChange, onArrayAdd, onArrayRemove, 
               </div>
               
               {achievement.attachmentType === 'url' && (
-                <FormField
-                  label="URL/Drive Link"
-                  value={achievement.url || ''}
-                  onChange={(value) => handleUpdateAchievement(index, 'url', value)}
-                  placeholder="https://drive.google.com/... or any supporting URL"
-                />
+                <div className="relative">
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    URL/Drive Link
+                  </label>
+                  <div className="relative">
+                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                      <ExternalLink className="h-5 w-5 text-gray-400" />
+                    </div>
+                    <input
+                      type="text"
+                      value={achievement.url || ''}
+                      onChange={(e) => handleUpdateAchievement(index, 'url', e.target.value)}
+                      className="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-[#169AB4] focus:border-transparent"
+                      placeholder="https://drive.google.com/... or any supporting URL"
+                    />
+                  </div>
+                </div>
               )}
             </div>
           </div>
@@ -139,31 +186,60 @@ const AchievementsStep = ({ formData, onInputChange, onArrayAdd, onArrayRemove, 
           <h4 className="font-medium text-[#04445E] mb-4">Add New Achievement</h4>
           
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-            <FormField
-              label="Achievement Title"
-              value={newAchievement.title}
-              onChange={(value) => setNewAchievement(prev => ({ ...prev, title: value }))}
-              placeholder="e.g., Dean's List, Research Award"
-            />
+            <div className="relative">
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Achievement Title
+              </label>
+              <div className="relative">
+                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                  <Award className="h-5 w-5 text-gray-400" />
+                </div>
+                <input
+                  type="text"
+                  value={newAchievement.title}
+                  onChange={(e) => setNewAchievement(prev => ({ ...prev, title: e.target.value }))}
+                  className="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-[#169AB4] focus:border-transparent"
+                  placeholder="e.g., Dean's List, Research Award"
+                />
+              </div>
+            </div>
             
-            <FormField
-              label="Date Received"
-              type="date"
-              value={newAchievement.date}
-              onChange={(value) => setNewAchievement(prev => ({ ...prev, date: value }))}
-            />
+            <div className="relative">
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Date Received
+              </label>
+              <div className="relative">
+                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                  <Calendar className="h-5 w-5 text-gray-400" />
+                </div>
+                <input
+                  type="date"
+                  value={newAchievement.date}
+                  onChange={(e) => setNewAchievement(prev => ({ ...prev, date: e.target.value }))}
+                  className="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-[#169AB4] focus:border-transparent"
+                />
+              </div>
+            </div>
           </div>
           
-          <FormField
-            label="Description"
-            type="textarea"
-            value={newAchievement.description}
-            onChange={(value) => setNewAchievement(prev => ({ ...prev, description: value }))}
-            placeholder="Brief description of the achievement"
-            rows={2}
-          />
+          <div className="relative mb-4">
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Description
+            </label>
+            <div className="relative">
+              <div className="absolute top-3 left-3 pointer-events-none">
+                <FileText className="h-5 w-5 text-gray-400" />
+              </div>
+              <textarea
+                value={newAchievement.description}
+                onChange={(e) => setNewAchievement(prev => ({ ...prev, description: e.target.value }))}
+                className="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-[#169AB4] focus:border-transparent"
+                placeholder="Brief description of the achievement"
+                rows={2}
+              />
+            </div>
+          </div>
           
-          {/* Attachment Options for New Achievement */}
           <div className="mt-4 space-y-3">
             <label className="text-sm font-medium text-gray-700">Supporting Evidence</label>
             
@@ -195,12 +271,23 @@ const AchievementsStep = ({ formData, onInputChange, onArrayAdd, onArrayRemove, 
             </div>
             
             {newAchievement.attachmentType === 'url' && (
-              <FormField
-                label="URL/Drive Link"
-                value={newAchievement.url}
-                onChange={(value) => setNewAchievement(prev => ({ ...prev, url: value }))}
-                placeholder="https://drive.google.com/... or any supporting URL"
-              />
+              <div className="relative">
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  URL/Drive Link
+                </label>
+                <div className="relative">
+                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                    <ExternalLink className="h-5 w-5 text-gray-400" />
+                  </div>
+                  <input
+                    type="text"
+                    value={newAchievement.url}
+                    onChange={(e) => setNewAchievement(prev => ({ ...prev, url: e.target.value }))}
+                    className="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-[#169AB4] focus:border-transparent"
+                    placeholder="https://drive.google.com/... or any supporting URL"
+                  />
+                </div>
+              </div>
             )}
           </div>
           

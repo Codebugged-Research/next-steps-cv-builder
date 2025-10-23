@@ -50,7 +50,12 @@ export const FILE_CONSTRAINTS = {
     MAX_SIZE: 10 * 1024 * 1024, // 10MB
     ACCEPTED_TYPES: ['application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'],
     ACCEPTED_EXTENSIONS: '.pdf,.doc,.docx'
-  }
+  },
+  DOCUMENT: {   
+    MAX_SIZE: 5 * 1024 * 1024, // 5 MB
+    ACCEPTED_TYPES: ['application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document', 'image/jpeg', 'image/png'],
+    ACCEPTED_EXTENSIONS: '.pdf, .doc, .docx, .jpg, .jpeg, .png',
+  },
 };
 
 export const YEAR_RANGE = {

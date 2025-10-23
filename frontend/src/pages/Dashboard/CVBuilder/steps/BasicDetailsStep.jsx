@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import FormField from '../forms/FormField';
 import FormGrid from '../forms/FormGrid';
-import { Upload, X, User, Plus, Trash2, AlertCircle } from 'lucide-react';
+import { Upload, X, User, Plus, Trash2, AlertCircle, Mail, Phone, MapPin, Globe, IdCard, Building2, FileText } from 'lucide-react';
 import { toast } from 'react-toastify'; 
 import api from '../../../../services/api';
 import {
@@ -30,7 +30,7 @@ const BasicDetailsStep = ({ formData, onInputChange }) => {
     aadharFront: false,
     aadharBack: false
   }); 
-
+  
   const languages = formData.basicDetails.languages || [];
 
   const handleInputChange = (field, value) => {
@@ -59,7 +59,7 @@ const BasicDetailsStep = ({ formData, onInputChange }) => {
 
     try {
       setUploading(prev => ({ ...prev, [documentType]: true }));
-
+      
       const reader = new FileReader();
       reader.onloadend = () => {
         switch(documentType) {
@@ -81,9 +81,9 @@ const BasicDetailsStep = ({ formData, onInputChange }) => {
 
       const uploadFormData = new FormData();
       uploadFormData.append('document', file);
-
+      
       const response = await api.post('/documents/upload', uploadFormData);
-
+      
       if (response.data.success) {
         onInputChange('basicDetails', documentType, response.data.data.url);
         onInputChange('basicDetails', `${documentType}Key`, response.data.data.key);
@@ -91,7 +91,6 @@ const BasicDetailsStep = ({ formData, onInputChange }) => {
         toast.success(`${documentType === 'photo' ? 'Photo' : documentType === 'passport' ? 'Passport' : documentType === 'aadharFront' ? 'Aadhar Front' : 'Aadhar Back'} uploaded successfully!`);
       }
     } catch (error) {
-      console.error(`${documentType} upload error:`, error);
       toast.error(error.response?.data?.message || `Failed to upload ${documentType}`);
       
       switch(documentType) {
@@ -141,7 +140,7 @@ const BasicDetailsStep = ({ formData, onInputChange }) => {
       i === index ? { ...lang, [field]: value } : lang
     );
     onInputChange('basicDetails', 'languages', newLanguages);
-
+    
     const langErrors = validateLanguage(newLanguages[index]);
     setErrors(prev => ({
       ...prev,
@@ -152,7 +151,7 @@ const BasicDetailsStep = ({ formData, onInputChange }) => {
   const removeLanguage = (index) => {
     const newLanguages = languages.filter((_, i) => i !== index);
     onInputChange('basicDetails', 'languages', newLanguages);
-
+    
     setErrors(prev => {
       const newErrors = { ...prev };
       delete newErrors[`language_${index}`];
@@ -172,14 +171,6 @@ const BasicDetailsStep = ({ formData, onInputChange }) => {
     return errors[`language_${index}`] && errors[`language_${index}`][field]
       ? errors[`language_${index}`][field]
       : '';
-  };
-
-  const getSectionValidation = () => {
-    const sectionErrors = validateFormSection('basicDetails', formData.basicDetails);
-    return {
-      isValid: Object.keys(sectionErrors).length === 0,
-      errors: sectionErrors
-    };
   };
 
   const DocumentUploadCard = ({ 
@@ -249,115 +240,215 @@ const BasicDetailsStep = ({ formData, onInputChange }) => {
   return (
     <div className="space-y-6">
       <h2 className="text-2xl font-bold text-[#04445E] mb-6">Basic Details</h2>
-
+      
       <FormGrid>
         <div className="relative">
-          <FormField
-            label="Full Name"
-            type="text"
-            value={formData.basicDetails.fullName || ''}
-            onChange={(value) => handleInputChange('fullName', value)}
-            onBlur={() => handleBlur('fullName')}
-            required
-            error={getFieldError('fullName')}
-            className={`${getFieldError('fullName') ? 'border-red-500' : isFieldValid('fullName') ? 'border-green-500' : ''}`}
-          />
-          {isFieldValid('fullName') && (
-            <div className="absolute right-3 top-8 text-green-500">✓</div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            Full Name <span className="text-red-500">*</span>
+          </label>
+          <div className="relative">
+            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+              <User className="h-5 w-5 text-gray-400" />
+            </div>
+            <input
+              type="text"
+              value={formData.basicDetails.fullName || ''}
+              onChange={(e) => handleInputChange('fullName', e.target.value)}
+              onBlur={() => handleBlur('fullName')}
+              className={`w-full pl-10 pr-10 py-2 border rounded-md focus:ring-2 focus:ring-[#169AB4] focus:border-transparent ${
+                getFieldError('fullName') ? 'border-red-500' : isFieldValid('fullName') ? 'border-green-500' : 'border-gray-300'
+              }`}
+              placeholder="Enter your full name"
+            />
+            {isFieldValid('fullName') && (
+              <div className="absolute inset-y-0 right-0 pr-3 flex items-center text-green-500">✓</div>
+            )}
+          </div>
+          {getFieldError('fullName') && (
+            <p className="mt-1 text-sm text-red-600">{getFieldError('fullName')}</p>
           )}
         </div>
 
         <div className="relative">
-          <FormField
-            label="Email"
-            type="email"
-            value={formData.basicDetails.email || ''}
-            onChange={(value) => handleInputChange('email', value)}
-            onBlur={() => handleBlur('email')}
-            required
-            error={getFieldError('email')}
-            className={`${getFieldError('email') ? 'border-red-500' : isFieldValid('email') ? 'border-green-500' : ''}`}
-          />
-          {isFieldValid('email') && (
-            <div className="absolute right-3 top-8 text-green-500">✓</div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            Email <span className="text-red-500">*</span>
+          </label>
+          <div className="relative">
+            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+              <Mail className="h-5 w-5 text-gray-400" />
+            </div>
+            <input
+              type="email"
+              value={formData.basicDetails.email || ''}
+              onChange={(e) => handleInputChange('email', e.target.value)}
+              onBlur={() => handleBlur('email')}
+              className={`w-full pl-10 pr-10 py-2 border rounded-md focus:ring-2 focus:ring-[#169AB4] focus:border-transparent ${
+                getFieldError('email') ? 'border-red-500' : isFieldValid('email') ? 'border-green-500' : 'border-gray-300'
+              }`}
+              placeholder="Enter your email"
+            />
+            {isFieldValid('email') && (
+              <div className="absolute inset-y-0 right-0 pr-3 flex items-center text-green-500">✓</div>
+            )}
+          </div>
+          {getFieldError('email') && (
+            <p className="mt-1 text-sm text-red-600">{getFieldError('email')}</p>
           )}
         </div>
 
         <div className="relative">
-          <FormField
-            label="Phone"
-            type="tel"
-            value={formData.basicDetails.phone || ''}
-            onChange={(value) => handleInputChange('phone', value)}
-            onBlur={() => handleBlur('phone')}
-            required
-            error={getFieldError('phone')}
-            className={`${getFieldError('phone') ? 'border-red-500' : isFieldValid('phone') ? 'border-green-500' : ''}`}
-          />
-          {isFieldValid('phone') && (
-            <div className="absolute right-3 top-8 text-green-500">✓</div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            Phone <span className="text-red-500">*</span>
+          </label>
+          <div className="relative">
+            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+              <Phone className="h-5 w-5 text-gray-400" />
+            </div>
+            <input
+              type="tel"
+              value={formData.basicDetails.phone || ''}
+              onChange={(e) => handleInputChange('phone', e.target.value)}
+              onBlur={() => handleBlur('phone')}
+              className={`w-full pl-10 pr-10 py-2 border rounded-md focus:ring-2 focus:ring-[#169AB4] focus:border-transparent ${
+                getFieldError('phone') ? 'border-red-500' : isFieldValid('phone') ? 'border-green-500' : 'border-gray-300'
+              }`}
+              placeholder="Enter your phone number"
+            />
+            {isFieldValid('phone') && (
+              <div className="absolute inset-y-0 right-0 pr-3 flex items-center text-green-500">✓</div>
+            )}
+          </div>
+          {getFieldError('phone') && (
+            <p className="mt-1 text-sm text-red-600">{getFieldError('phone')}</p>
           )}
         </div>
 
-        <FormField
-          label="Gender"
-          type="select"
-          options={GENDER_OPTIONS}
-          value={formData.basicDetails.gender || ''}
-          onChange={(value) => handleInputChange('gender', value)}
-        />
-
-        <FormField
-          label="Nationality"
-          type="text"
-          value={formData.basicDetails.nationality || ''}
-          onChange={(value) => handleInputChange('nationality', value)}
-          onBlur={() => handleBlur('nationality')}
-          error={getFieldError('nationality')}
-        />
-
         <div className="relative">
-          <FormField
-            label="USMLE ID"
-            type="text"
-            value={formData.basicDetails.usmleId || ''}
-            onChange={(value) => handleInputChange('usmleId', value.toUpperCase())}
-            onBlur={() => handleBlur('usmleId')}
-            placeholder="Enter your USMLE ID"
-            error={getFieldError('usmleId')}
-            className={`${getFieldError('usmleId') ? 'border-red-500' : isFieldValid('usmleId') ? 'border-green-500' : ''}`}
-          />
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            Gender
+          </label>
+          <div className="relative">
+            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+              <User className="h-5 w-5 text-gray-400" />
+            </div>
+            <select
+              value={formData.basicDetails.gender || ''}
+              onChange={(e) => handleInputChange('gender', e.target.value)}
+              className="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-[#169AB4] focus:border-transparent"
+            >
+              {GENDER_OPTIONS.map(option => (
+                <option key={option.value} value={option.value}>
+                  {option.label}
+                </option>
+              ))}
+            </select>
+          </div>
         </div>
 
         <div className="relative">
-          <FormField
-            label="City"
-            type="text"
-            value={formData.basicDetails.city || ''}
-            onChange={(value) => handleInputChange('city', value)}
-            onBlur={() => handleBlur('city')}
-            required
-            error={getFieldError('city')}
-            className={`${getFieldError('city') ? 'border-red-500' : isFieldValid('city') ? 'border-green-500' : ''}`}
-          />
-          {isFieldValid('city') && (
-            <div className="absolute right-3 top-8 text-green-500">✓</div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            Nationality
+          </label>
+          <div className="relative">
+            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+              <Globe className="h-5 w-5 text-gray-400" />
+            </div>
+            <input
+              type="text"
+              value={formData.basicDetails.nationality || ''}
+              onChange={(e) => handleInputChange('nationality', e.target.value)}
+              onBlur={() => handleBlur('nationality')}
+              className={`w-full pl-10 pr-3 py-2 border rounded-md focus:ring-2 focus:ring-[#169AB4] focus:border-transparent ${
+                getFieldError('nationality') ? 'border-red-500' : 'border-gray-300'
+              }`}
+              placeholder="Enter your nationality"
+            />
+          </div>
+          {getFieldError('nationality') && (
+            <p className="mt-1 text-sm text-red-600">{getFieldError('nationality')}</p>
+          )}
+        </div>
+
+        <div className="relative">
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            USMLE ID
+          </label>
+          <div className="relative">
+            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+              <IdCard className="h-5 w-5 text-gray-400" />
+            </div>
+            <input
+              type="text"
+              value={formData.basicDetails.usmleId || ''}
+              onChange={(e) => handleInputChange('usmleId', e.target.value.toUpperCase())}
+              onBlur={() => handleBlur('usmleId')}
+              className={`w-full pl-10 pr-10 py-2 border rounded-md focus:ring-2 focus:ring-[#169AB4] focus:border-transparent ${
+                getFieldError('usmleId') ? 'border-red-500' : isFieldValid('usmleId') ? 'border-green-500' : 'border-gray-300'
+              }`}
+              placeholder="Enter your USMLE ID"
+            />
+            {isFieldValid('usmleId') && (
+              <div className="absolute inset-y-0 right-0 pr-3 flex items-center text-green-500">✓</div>
+            )}
+          </div>
+          {getFieldError('usmleId') && (
+            <p className="mt-1 text-sm text-red-600">{getFieldError('usmleId')}</p>
+          )}
+        </div>
+
+        <div className="relative">
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            City <span className="text-red-500">*</span>
+          </label>
+          <div className="relative">
+            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+              <Building2 className="h-5 w-5 text-gray-400" />
+            </div>
+            <input
+              type="text"
+              value={formData.basicDetails.city || ''}
+              onChange={(e) => handleInputChange('city', e.target.value)}
+              onBlur={() => handleBlur('city')}
+              className={`w-full pl-10 pr-10 py-2 border rounded-md focus:ring-2 focus:ring-[#169AB4] focus:border-transparent ${
+                getFieldError('city') ? 'border-red-500' : isFieldValid('city') ? 'border-green-500' : 'border-gray-300'
+              }`}
+              placeholder="Enter your city"
+            />
+            {isFieldValid('city') && (
+              <div className="absolute inset-y-0 right-0 pr-3 flex items-center text-green-500">✓</div>
+            )}
+          </div>
+          {getFieldError('city') && (
+            <p className="mt-1 text-sm text-red-600">{getFieldError('city')}</p>
           )}
         </div>
       </FormGrid>
 
       <div className="space-y-4">
         <h3 className="text-lg font-semibold text-[#04445E]">Address</h3>
-        <FormField
-          label="Address"
-          type="text"
-          value={formData.basicDetails.address || ''}
-          onChange={(value) => handleInputChange('address', value)}
-          onBlur={() => handleBlur('address')}
-          placeholder="Enter your complete address"
-          rows={3}
-          error={getFieldError('address')}
-        />
+        <div className="relative">
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            Address
+          </label>
+          <div className="relative">
+            <div className="absolute top-3 left-3 pointer-events-none">
+              <MapPin className="h-5 w-5 text-gray-400" />
+            </div>
+            <textarea
+              value={formData.basicDetails.address || ''}
+              onChange={(e) => handleInputChange('address', e.target.value)}
+              onBlur={() => handleBlur('address')}
+              className={`w-full pl-10 pr-3 py-2 border rounded-md focus:ring-2 focus:ring-[#169AB4] focus:border-transparent ${
+                getFieldError('address') ? 'border-red-500' : 'border-gray-300'
+              }`}
+              placeholder="Enter your complete address"
+              rows={3}
+            />
+          </div>
+          {getFieldError('address') && (
+            <p className="mt-1 text-sm text-red-600">{getFieldError('address')}</p>
+          )}
+        </div>
       </div>
 
       <div className="space-y-4">
@@ -371,7 +462,7 @@ const BasicDetailsStep = ({ formData, onInputChange }) => {
             Add Language
           </button>
         </div>
-
+        
         {languages.length === 0 ? (
           <div className="text-center py-8 text-gray-500">
             <User className="h-12 w-12 mx-auto mb-3 text-gray-300" />
@@ -389,8 +480,9 @@ const BasicDetailsStep = ({ formData, onInputChange }) => {
                     <select
                       value={lang.language}
                       onChange={(e) => updateLanguage(index, 'language', e.target.value)}
-                      className={`w-full px-3 py-2 border rounded-md focus:ring-2 focus:ring-[#169AB4] focus:border-transparent ${getLanguageError(index, 'language') ? 'border-red-300' : 'border-gray-300'
-                        }`}
+                      className={`w-full px-3 py-2 border rounded-md focus:ring-2 focus:ring-[#169AB4] focus:border-transparent ${
+                        getLanguageError(index, 'language') ? 'border-red-300' : 'border-gray-300'
+                      }`}
                     >
                       <option value="">Select Language</option>
                       {LANGUAGE_OPTIONS.map(language => (
@@ -403,7 +495,7 @@ const BasicDetailsStep = ({ formData, onInputChange }) => {
                       <p className="mt-1 text-sm text-red-600">{getLanguageError(index, 'language')}</p>
                     )}
                   </div>
-
+                  
                   <div className="flex-1">
                     <label className="block text-sm font-medium text-gray-700 mb-1">
                       Fluency Level <span className="text-red-500">*</span>
@@ -411,8 +503,9 @@ const BasicDetailsStep = ({ formData, onInputChange }) => {
                     <select
                       value={lang.fluency}
                       onChange={(e) => updateLanguage(index, 'fluency', e.target.value)}
-                      className={`w-full px-3 py-2 border rounded-md focus:ring-2 focus:ring-[#169AB4] focus:border-transparent ${getLanguageError(index, 'fluency') ? 'border-red-300' : 'border-gray-300'
-                        }`}
+                      className={`w-full px-3 py-2 border rounded-md focus:ring-2 focus:ring-[#169AB4] focus:border-transparent ${
+                        getLanguageError(index, 'fluency') ? 'border-red-300' : 'border-gray-300'
+                      }`}
                     >
                       {FLUENCY_OPTIONS.map(option => (
                         <option key={option.value} value={option.value}>
@@ -424,7 +517,7 @@ const BasicDetailsStep = ({ formData, onInputChange }) => {
                       <p className="mt-1 text-sm text-red-600">{getLanguageError(index, 'fluency')}</p>
                     )}
                   </div>
-
+                  
                   <button
                     onClick={() => removeLanguage(index)}
                     className="p-2 text-red-500 hover:bg-red-50 rounded-lg transition-colors"
@@ -477,19 +570,6 @@ const BasicDetailsStep = ({ formData, onInputChange }) => {
           />
         </div>
       </div>
-{/* 
-      <div className="bg-blue-50 rounded-lg p-4">
-        <div className="flex items-center gap-2 text-blue-800">
-          <AlertCircle className="h-5 w-5" />
-          <span className="font-medium">Section Status</span>
-        </div>
-        <p className="text-blue-700 text-sm mt-1">
-          {getSectionValidation().isValid
-            ? "All required fields are completed and valid!"
-            : "Please complete all required fields to proceed."
-          }
-        </p>
-      </div> */}
     </div>
   );
 };

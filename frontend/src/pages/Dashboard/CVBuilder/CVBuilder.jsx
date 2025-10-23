@@ -5,6 +5,7 @@ import NavigationControls from './NavigationControls';
 import api from '../../../services/api.js';
 import { toast } from 'react-toastify';
 import CVPreview from './CVPreview.jsx';
+import SaveProgressModal from '../../../components/Common/SaveProgressModal.jsx';
 
 const initialCVData = {
   basicDetails: {
@@ -93,7 +94,8 @@ const CVBuilder = ({ onPreview, user, onStepChange, currentStep, onStepComplete 
   const [showPreview, setShowPreview] = useState(false);
   const [loading, setLoading] = useState(true);
   const [completedSteps, setCompletedSteps] = useState([]);
-  
+  const [showSaveModal, setShowSaveModal] = useState(false);
+
   const totalSteps = 10;
   const activeStep = currentStep || internalCurrentStep;
 
@@ -110,7 +112,7 @@ const CVBuilder = ({ onPreview, user, onStepChange, currentStep, onStepComplete 
       { condition: data.publications?.length > 0 || data.conferences?.length > 0, step: 9 },
       { condition: data.emrRcmTraining?.emrSystems?.length > 0 || data.emrRcmTraining?.rcmTraining, step: 10 }
     ];
-    
+
     return checks.filter(({ condition }) => condition).map(({ step }) => step);
   }, []);
 
@@ -124,13 +126,13 @@ const CVBuilder = ({ onPreview, user, onStepChange, currentStep, onStepComplete 
       const response = await api.get(`/cv/${user._id}`);
       if (response.data.success) {
         const cvData = response.data.data;
-        
+
         if (typeof cvData.skills === 'string') {
           cvData.skills = { skillsList: cvData.skills, supportingDocuments: [] };
         } else if (!cvData.skills) {
           cvData.skills = { skillsList: '', supportingDocuments: [] };
         }
-        
+
         setFormData(cvData);
         setCompletedSteps(calculateCompletedSteps(cvData));
       }
@@ -143,7 +145,7 @@ const CVBuilder = ({ onPreview, user, onStepChange, currentStep, onStepComplete 
   const updateCompletedSteps = useCallback((newData) => {
     const newCompleted = calculateCompletedSteps(newData);
     setCompletedSteps(newCompleted);
-    
+
     if (onStepComplete && newCompleted.includes(activeStep) && !completedSteps.includes(activeStep)) {
       onStepComplete(activeStep);
     }
@@ -158,6 +160,18 @@ const CVBuilder = ({ onPreview, user, onStepChange, currentStep, onStepComplete 
       setInternalCurrentStep(currentStep);
     }
   }, [currentStep, internalCurrentStep]);
+
+  const handleSaveProgress = () => {
+    setShowSaveModal(true);
+  };
+
+  const confirmSaveProgress = async () => {
+    setShowSaveModal(false);
+    await handleSave();
+    handleNext();
+  };
+
+  const cancelSaveProgress = () => setShowSaveModal(false);
 
   const handleInputChange = useCallback((section, field, value) => {
     setFormData(prevData => {
@@ -223,18 +237,18 @@ const CVBuilder = ({ onPreview, user, onStepChange, currentStep, onStepComplete 
   }, [activeStep, handleStepChange]);
 
   const handleSave = useCallback(async () => {
-  if (!user?._id) {
-    toast.error('User not authenticated. Please login again.');
-    return;
-  }
+    if (!user?._id) {
+      toast.error('User not authenticated. Please login again.');
+      return;
+    }
 
-  try {
-    await api.post('/cv/save', { ...formData, userId: user._id });
-    toast.success("CV Saved Successfully");
-  } catch (error) {
-    toast.error(error.response?.data?.message || 'Failed to save CV');
-  }
-}, [user?._id, formData]);
+    try {
+      await api.post('/cv/save', { ...formData, userId: user._id });
+      toast.success("CV Saved Successfully");
+    } catch (error) {
+      toast.error(error.response?.data?.message || 'Failed to save CV');
+    }
+  }, [user?._id, formData]);
 
 
   const handlePreview = useCallback(() => setShowPreview(true), []);
@@ -255,9 +269,9 @@ const CVBuilder = ({ onPreview, user, onStepChange, currentStep, onStepComplete 
 
   if (showPreview) {
     return (
-      <CVPreview 
-        cvData={formData} 
-        onClose={handleBackFromPreview} 
+      <CVPreview
+        cvData={formData}
+        onClose={handleBackFromPreview}
         onBack={handleBackFromPreview}
         onDownload={handleDownload}
       />
@@ -280,9 +294,14 @@ const CVBuilder = ({ onPreview, user, onStepChange, currentStep, onStepComplete 
         totalSteps={totalSteps}
         onPrevious={handlePrevious}
         onNext={handleNext}
-        onSave={handleSave}
+        onSaveProgress={handleSaveProgress}
         onPreview={handlePreview}
         completedSteps={completedSteps}
+      />
+      <SaveProgressModal
+        open={showSaveModal}
+        onConfirm={confirmSaveProgress}
+        onCancel={cancelSaveProgress}
       />
     </div>
   );
