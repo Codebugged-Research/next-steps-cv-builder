@@ -160,7 +160,7 @@ const EMRTrainingStep = ({ formData, onInputChange, onArrayAdd, onArrayRemove, o
         </button>
       </div>
 
-      {formData.workExperience?.length === 0 && (
+      {(!formData.workExperience || formData.workExperience.length === 0) && (
         <div className="text-center py-8 text-gray-500">
           <Briefcase className="h-12 w-12 mx-auto mb-3 text-gray-300" />
           <p>No work experience added yet</p>
@@ -168,7 +168,7 @@ const EMRTrainingStep = ({ formData, onInputChange, onArrayAdd, onArrayRemove, o
         </div>
       )}
 
-      {formData.workExperience?.map((experience, index) => (
+      {formData.workExperience && formData.workExperience.length > 0 && formData.workExperience.map((experience, index) => (
         <div key={index} className="border border-gray-200 rounded-lg p-6">
           <FormGrid>
             <FormField

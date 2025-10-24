@@ -48,7 +48,11 @@ const userSchema = new mongoose.Schema({
             type: String,
             default: '1.0'
         }
-    }
+    },
+    conferenceRegistrations: [{
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'ConferenceRegistration'
+    }]
 }, {
     timestamps: true
 });

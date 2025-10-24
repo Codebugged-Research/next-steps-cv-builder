@@ -5,6 +5,7 @@ import Existingcv from '../../pages/Dashboard//ExistingCV/Existingcv.jsx';
 import SystematicReviews from '../../pages/Dashboard/SystematicReview/SystematicReviews.jsx';
 import Conferences from '../../pages/Dashboard/Conferences/Conferences.jsx';
 import Emrtraining from '../../pages/Dashboard/EMRTraining/Emrtraining.jsx';
+import WorkshopsComponent from '../../pages/Dashboard/Workshops/Workshops.jsx';
 
 const MainContentRouter = ({ 
   activeSection, 
@@ -57,10 +58,10 @@ const MainContentRouter = ({
 
       case 'workshops':
         return (
-          <div className="bg-white rounded-xl shadow-lg p-8">
-            <h2 className="text-2xl font-bold text-[#04445E] mb-4">Workshops</h2>
-            <p className="text-gray-600">Workshops component coming soon...</p>
-          </div>
+          <WorkshopsComponent
+            onBack={() => onSectionChange('cv-builder')}
+            user={user}
+          />
         );
 
       case 'emr-training':

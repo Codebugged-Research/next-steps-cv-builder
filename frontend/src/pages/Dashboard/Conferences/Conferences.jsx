@@ -14,7 +14,6 @@ const Conferences = ({ onBack }) => {
         registered: 0
     });
 
-    // Fetch conferences from backend
     const fetchConferences = async () => {
         try {
             setLoading(true);
@@ -35,27 +34,23 @@ const Conferences = ({ onBack }) => {
         }
     };
 
-    // Fetch user registrations (you'll need to implement this endpoint)
     const fetchRegistrations = async () => {
         try {
-            // Uncomment when you have the registration endpoint
-            // const response = await api.get('/conferences/registrations');
-            // if (response.data.success) {
-            //     setRegistrations(response.data.data);
-            //     setStats(prev => ({
-            //         ...prev,
-            //         registered: response.data.data.length
-            //     }));
-            // }
-            
-            // For now, use empty array
+            const response = await api.get('/conferences/registrations');
+            if (response.data.success) {
+                setRegistrations(response.data.data);
+                setStats(prev => ({
+                    ...prev,
+                    registered: response.data.data.length
+                }));
+            }
+        } catch (error) {
+            console.error('Error fetching registrations:', error);
             setRegistrations([]);
             setStats(prev => ({
                 ...prev,
                 registered: 0
             }));
-        } catch (error) {
-            console.error('Error fetching registrations:', error);
         }
     };
 
@@ -94,6 +89,7 @@ const Conferences = ({ onBack }) => {
                 <ConferenceTabs
                     upcomingConferences={conferences}
                     registrations={registrations}
+                    onRefreshRegistrations={fetchRegistrations}
                 />
             </div>
         </div>

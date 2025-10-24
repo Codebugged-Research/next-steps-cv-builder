@@ -8,6 +8,7 @@ const UpcomingConferencesTab = () => {
   const [conferences, setConferences] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [bookingLoading, setBookingLoading] = useState(null);
 
   const fetchConferences = async () => {
     try {
@@ -33,16 +34,31 @@ const UpcomingConferencesTab = () => {
     fetchConferences();
   }, []);
 
-  const handleRegister = (conferenceId) => {
-    console.log('Register for conference:', conferenceId);
-    toast.info('Registration functionality will be implemented soon!');
+  const handleRegister = async (conferenceId) => {
+    try {
+      setBookingLoading(conferenceId);
+      
+      const response = await api.post(`/conferences/${conferenceId}/register`);
+      
+      if (response.data.success) {
+        toast.success('Successfully registered for the conference!');
+        fetchConferences();
+      } else {
+        toast.error(response.data.message || 'Registration failed');
+      }
+    } catch (error) {
+      console.error('Error registering for conference:', error);
+      const errorMessage = error.response?.data?.message || 'Failed to register. Please try again.';
+      toast.error(errorMessage);
+    } finally {
+      setBookingLoading(null);
+    }
   };
 
   const handleRefresh = () => {
     fetchConferences();
   };
 
-  // Loading state
   if (loading) {
     return (
       <div className="flex flex-col items-center justify-center py-12">
@@ -53,7 +69,6 @@ const UpcomingConferencesTab = () => {
     );
   }
 
-  // Error state
   if (error) {
     return (
       <div className="flex flex-col items-center justify-center py-12">
@@ -71,7 +86,6 @@ const UpcomingConferencesTab = () => {
     );
   }
 
-  // No conferences found
   if (conferences.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center py-12">
@@ -106,13 +120,13 @@ const UpcomingConferencesTab = () => {
         </button>
       </div>
 
-      {/* Conferences Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {conferences.map((conference) => (
           <ConferenceCard
             key={conference._id}
             conference={conference}
             onRegister={handleRegister}
+            isLoading={bookingLoading === conference._id}
           />
         ))}
       </div>

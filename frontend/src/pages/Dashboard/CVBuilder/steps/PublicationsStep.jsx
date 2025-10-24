@@ -171,6 +171,27 @@ const PublicationsStep = ({ formData, onArrayAdd, onArrayRemove, onArrayUpdate }
     </div>
   );
 
+  if (formData.publications.length === 0) {
+    return (
+      <div className="space-y-6">
+        <div className="flex items-center justify-between">
+          <h2 className="text-2xl font-bold text-[#04445E]">Publications</h2>
+          <button
+            onClick={() => onArrayAdd('publications', newPublication)}
+            className="flex items-center gap-2 px-4 py-2 bg-[#169AB4] text-white rounded-lg hover:bg-[#147a8f] transition-colors"
+          >
+            <FileText className="h-4 w-4" />
+            Add Publication
+          </button>
+        </div>
+        <div className="text-center py-8 text-gray-500">
+          <p>No publications added yet</p>
+          <p className="text-sm">Click "Add Publication" to get started</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <ArrayFieldManager
       title="Publications"
