@@ -10,22 +10,22 @@ const WorkshopsComponent = () => {
         <button
           onClick={() => setActiveTab('acls')}
           className={`px-6 py-3 font-medium border-b-2 transition-colors ${
+            activeTab === 'bls'
+              ? 'border-[#169AB4] text-[#169AB4]'
+              : 'border-transparent text-gray-500 hover:text-gray-700'
+          }`}
+        >
+        BLS Training
+        </button>
+        <button
+          onClick={() => setActiveTab('bcls')}
+          className={`px-6 py-3 font-medium border-b-2 transition-colors ${
             activeTab === 'acls'
               ? 'border-[#169AB4] text-[#169AB4]'
               : 'border-transparent text-gray-500 hover:text-gray-700'
           }`}
         >
-        ACLS Training
-        </button>
-        <button
-          onClick={() => setActiveTab('bcls')}
-          className={`px-6 py-3 font-medium border-b-2 transition-colors ${
-            activeTab === 'bcls'
-              ? 'border-[#169AB4] text-[#169AB4]'
-              : 'border-transparent text-gray-500 hover:text-gray-700'
-          }`}
-        >
-          BCLS Training
+          ACLS Training
         </button>
       </div>
 

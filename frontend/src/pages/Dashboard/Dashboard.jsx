@@ -1,14 +1,38 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Header from '../../components/Common/Header.jsx';
 import Footer from '../../components/Common/Footer.jsx';
 import Sidebar from '../Dashboard/Sidebar.jsx';
 import MainContentRouter from '../../components/MainRouterComponent/MainRouterComponent.jsx';
 
 const DashboardLayout = ({ user, onLogout }) => {
-  const [activeSection, setActiveSection] = useState('cv-builder');
-  const [currentCVStep, setCurrentCVStep] = useState(1);
-  const [completedSteps, setCompletedSteps] = useState([]);
+  const [activeSection, setActiveSection] = useState(() => {
+    return localStorage.getItem('activeSection') || 'cv-builder';
+  });
+  
+  const [currentCVStep, setCurrentCVStep] = useState(() => {
+    const saved = localStorage.getItem('currentCVStep');
+    return saved ? parseInt(saved, 10) : 1;
+  });
+  
+  const [completedSteps, setCompletedSteps] = useState(() => {
+    const saved = localStorage.getItem('completedSteps');
+    return saved ? JSON.parse(saved) : [];
+  });
+
   console.log('DashboardLayout user prop:', user);
+
+  useEffect(() => {
+    localStorage.setItem('activeSection', activeSection);
+  }, [activeSection]);
+
+  useEffect(() => {
+    localStorage.setItem('currentCVStep', currentCVStep.toString());
+  }, [currentCVStep]);
+
+  useEffect(() => {
+    localStorage.setItem('completedSteps', JSON.stringify(completedSteps));
+  }, [completedSteps]);
+
   const handleSectionChange = (section) => {
     setActiveSection(section);
     if (section === 'cv-builder' && activeSection !== 'cv-builder') {
@@ -29,7 +53,6 @@ const DashboardLayout = ({ user, onLogout }) => {
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col">
       <Header user={user} onLogout={onLogout} />
-
       <div className="flex-1 max-w-full w-full px-4 sm:px-6 lg:px-8 py-8">
         <div className="flex gap-8 h-full">
           <Sidebar
@@ -51,7 +74,6 @@ const DashboardLayout = ({ user, onLogout }) => {
           />
         </div>
       </div>
-
       <Footer />
     </div>
   );

@@ -59,12 +59,17 @@ const Conferences = ({ onBack }) => {
         fetchRegistrations();
     }, []);
 
+    const getAvailableConferences = () => {
+        const registeredConferenceIds = registrations.map(reg => reg.conference?._id);
+        return conferences.filter(conf => !registeredConferenceIds.includes(conf._id));
+    };
+
     const headerConfig = {
         icon: BookOpen,
         title: 'Conferences & Events',
         subtitle: 'Find below the list of upcoming conferences and events',
         stats: [
-            { value: stats.available.toString(), label: 'Available Conferences' },
+            { value: getAvailableConferences().length.toString(), label: 'Available Conferences' },
             { value: stats.registered.toString(), label: 'Your Registrations' },
         ]
     };
@@ -87,7 +92,7 @@ const Conferences = ({ onBack }) => {
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 <ProjectHeader {...headerConfig} />
                 <ConferenceTabs
-                    upcomingConferences={conferences}
+                    upcomingConferences={getAvailableConferences()}
                     registrations={registrations}
                     onRefreshRegistrations={fetchRegistrations}
                 />

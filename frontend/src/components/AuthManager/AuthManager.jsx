@@ -3,6 +3,7 @@ import Login from '../../pages/Login/Login.jsx';
 import Register from '../../pages/Register/Register.jsx';
 import DashboardLayout from '../../pages/Dashboard/Dashboard.jsx';
 import api from '../../services/api.js';
+import { toast } from 'react-toastify';
 
 const AuthManager = () => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -12,10 +13,31 @@ const AuthManager = () => {
 
   useEffect(() => {
     initializeAuth();
+    
+    const handleSessionExpired = () => {
+      handleSessionExpiration();
+    };
+    
+    window.addEventListener('session-expired', handleSessionExpired);
+    
+    return () => {
+      window.removeEventListener('session-expired', handleSessionExpired);
+    };
   }, []);
 
   const initializeAuth = async () => {
     try {
+      const sessionExpired = localStorage.getItem('sessionExpired') === 'true';
+      if (sessionExpired) {
+        localStorage.removeItem('sessionExpired');
+        toast.info('Please login to continue', {
+          position: 'top-center',
+          autoClose: 3000,
+        });
+        setLoading(false);
+        return;
+      }
+
       const wasLoggedOut = localStorage.getItem('wasLoggedOut') === 'true';
       
       if (wasLoggedOut) {
@@ -34,7 +56,6 @@ const AuthManager = () => {
       setUser(userData);
       setIsAuthenticated(true);
 
-      // Verify token is still valid
       const response = await api.get('/users/current-user', { withCredentials: true });
       
       if (response.data.success) {
@@ -47,7 +68,6 @@ const AuthManager = () => {
         throw new Error('Token invalid');
       }
     } catch (error) {
-      // Clear invalid data
       localStorage.removeItem('user');
       localStorage.removeItem('wasLoggedOut');
       setIsAuthenticated(false);
@@ -57,6 +77,17 @@ const AuthManager = () => {
     }
   };
 
+  const handleSessionExpiration = () => {
+    localStorage.removeItem('user');
+    localStorage.removeItem('activeSection');
+    localStorage.removeItem('currentCVStep');
+    localStorage.removeItem('completedSteps');
+    
+    setUser(null);
+    setIsAuthenticated(false);
+    setShowRegister(false);
+  };
+
   const handleLogin = (userData) => {
     const actualUser = userData.user || userData;
     setUser(actualUser);
@@ -64,6 +95,7 @@ const AuthManager = () => {
     setShowRegister(false);
     localStorage.setItem('user', JSON.stringify(userData));
     localStorage.removeItem('wasLoggedOut');
+    localStorage.removeItem('sessionExpired');
   };
 
   const handleRegister = (userData) => {
@@ -71,17 +103,22 @@ const AuthManager = () => {
     setIsAuthenticated(true);
     setShowRegister(false);
     localStorage.setItem('user', JSON.stringify(userData));
-    localStorage.removeItem('wasLoggedOut'); 
+    localStorage.removeItem('wasLoggedOut');
+    localStorage.removeItem('sessionExpired');
   };
 
   const handleLogout = async () => {
     try {
       await api.post('/users/logout');
+      toast.success('Logged out successfully');
     } catch (error) {
       console.error('Logout error:', error);
     } finally {
       localStorage.setItem('wasLoggedOut', 'true');
       localStorage.removeItem('user');
+      localStorage.removeItem('activeSection');
+      localStorage.removeItem('currentCVStep');
+      localStorage.removeItem('completedSteps');
       setUser(null);
       setIsAuthenticated(false);
     }

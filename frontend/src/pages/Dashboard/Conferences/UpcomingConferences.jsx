@@ -1,38 +1,11 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Loader, AlertCircle, RefreshCw } from 'lucide-react';
 import { toast } from 'react-toastify';
 import api from '../../../services/api';
 import ConferenceCard from '../../../components/Common/ConferenceCard';
 
-const UpcomingConferencesTab = () => {
-  const [conferences, setConferences] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+const UpcomingConferencesTab = ({ conferences, onRefreshRegistrations, loading, error, onRefresh }) => {
   const [bookingLoading, setBookingLoading] = useState(null);
-
-  const fetchConferences = async () => {
-    try {
-      setLoading(true);
-      setError(null);
-      
-      const response = await api.get('/conferences');
-      
-      if (response.data.success) {
-        setConferences(response.data.data);
-      } else {
-        setError(response.data.message || 'Failed to fetch conferences');
-      }
-    } catch (error) {
-      console.error('Error fetching conferences:', error);
-      setError(error.response?.data?.message || 'Failed to load conferences. Please try again.');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    fetchConferences();
-  }, []);
 
   const handleRegister = async (conferenceId) => {
     try {
@@ -42,7 +15,9 @@ const UpcomingConferencesTab = () => {
       
       if (response.data.success) {
         toast.success('Successfully registered for the conference!');
-        fetchConferences();
+        if (onRefreshRegistrations) {
+          onRefreshRegistrations();
+        }
       } else {
         toast.error(response.data.message || 'Registration failed');
       }
@@ -53,10 +28,6 @@ const UpcomingConferencesTab = () => {
     } finally {
       setBookingLoading(null);
     }
-  };
-
-  const handleRefresh = () => {
-    fetchConferences();
   };
 
   if (loading) {
@@ -76,7 +47,7 @@ const UpcomingConferencesTab = () => {
         <h3 className="text-lg font-semibold text-red-800 mb-2">Failed to Load Conferences</h3>
         <p className="text-red-600 mb-6 text-center">{error}</p>
         <button
-          onClick={handleRefresh}
+          onClick={onRefresh}
           className="flex items-center gap-2 px-6 py-3 bg-[#169AB4] text-white rounded-lg hover:bg-[#147a8f] transition-colors"
         >
           <RefreshCw className="h-4 w-4" />
@@ -91,9 +62,9 @@ const UpcomingConferencesTab = () => {
       <div className="flex flex-col items-center justify-center py-12">
         <div className="text-center">
           <h3 className="text-lg font-semibold text-[#04445E] mb-2">No Conferences Available</h3>
-          <p className="text-gray-600 mb-6">No conferences are currently available. Check back later for updates.</p>
+          <p className="text-gray-600 mb-6">No conferences are currently available or you have already registered for all conferences.</p>
           <button
-            onClick={handleRefresh}
+            onClick={onRefresh}
             className="flex items-center gap-2 px-6 py-3 bg-[#169AB4] text-white rounded-lg hover:bg-[#147a8f] transition-colors"
           >
             <RefreshCw className="h-4 w-4" />
@@ -112,7 +83,7 @@ const UpcomingConferencesTab = () => {
           <p className="text-gray-600">Found {conferences.length} conferences</p>
         </div>
         <button
-          onClick={handleRefresh}
+          onClick={onRefresh}
           className="flex items-center gap-2 px-4 py-2 text-[#169AB4] border border-[#169AB4] rounded-lg hover:bg-[#169AB4] hover:text-white transition-colors"
         >
           <RefreshCw className="h-4 w-4" />

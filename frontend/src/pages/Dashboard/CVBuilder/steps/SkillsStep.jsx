@@ -164,14 +164,6 @@ const SkillsStep = ({ formData, onInputChange }) => {
                     </div>
                     
                     <div className="flex items-center gap-2">
-                      <a
-                        href={doc.url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-sm text-[#169AB4] hover:text-[#147a8f] underline"
-                      >
-                        View
-                      </a>
                       <button
                         onClick={() => removeDocument(doc.id)}
                         className="p-1 text-red-500 hover:bg-red-50 rounded"
