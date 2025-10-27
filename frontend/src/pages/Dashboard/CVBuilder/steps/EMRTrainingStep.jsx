@@ -8,8 +8,6 @@ const EMRTrainingStep = ({ formData, onInputChange, onArrayAdd, onArrayRemove, o
 
   const tabs = [
     { id: 'emrRcm', label: 'EMR & RCM Training'},
-    { id: 'aclsBls', label: 'ACLS/BLS Training' },
-    { id: 'workExperience', label: 'Work Experience'}
   ];
 
   const emrSystems = ['Epic', 'Cerner', 'Allscripts', 'eClinicalWorks', 'NextGen', 'Other'];
@@ -86,66 +84,69 @@ const EMRTrainingStep = ({ formData, onInputChange, onArrayAdd, onArrayRemove, o
     </div>
   );
 
-  const ACLSBLSTab = () => (
-    <div className="space-y-6">
-      <FormGrid>
-        <FormField
-          label="ACLS Certification"
-          type="checkbox"
-          value={formData.aclsBls?.aclsCertified || false}
-          onChange={(value) => onInputChange('aclsBls', 'aclsCertified', value)}
-        />
+  // const ACLSBLSTab = () => (
+  //   <div className="space-y-6">
+  //     <FormGrid>
+  //       <FormField
+  //         label="ACLS Certification"
+  //         type="checkbox"
+  //         value={formData.aclsBls?.aclsCertified || false}
+  //         onChange={(value) => onInputChange('aclsBls', 'aclsCertified', value)}
+  //       />
 
-        <FormField
-          label="BLS Certification"
-          type="checkbox"
-          value={formData.aclsBls?.blsCertified || false}
-          onChange={(value) => onInputChange('aclsBls', 'blsCertified', value)}
-        />
-      </FormGrid>
+  //       <FormField
+  //         label="BLS Certification"
+  //         type="checkbox"
+  //         value={formData.aclsBls?.blsCertified || false}
+  //         onChange={(value) => onInputChange('aclsBls', 'blsCertified', value)}
+  //       />
+  //     </FormGrid>
 
-      {formData.aclsBls?.aclsCertified && (
-        <FormGrid>
-          <FormField
-            label="ACLS Issue Date"
-            type="date"
-            value={formData.aclsBls?.aclsIssueDate || ''}
-            onChange={(value) => onInputChange('aclsBls', 'aclsIssueDate', value)}
-          />
-          <FormField
-            label="ACLS Expiry Date"
-            type="date"
-            value={formData.aclsBls?.aclsExpiryDate || ''}
-            onChange={(value) => onInputChange('aclsBls', 'aclsExpiryDate', value)}
-          />
-        </FormGrid>
-      )}
+  //     {formData.aclsBls?.aclsCertified && (
+  //       <FormGrid>
+  //         <FormField
+  //           label="ACLS Issue Date"
+  //           type="date"
+  //           value={formData.aclsBls?.aclsIssueDate || ''}
+  //           onChange={(value) => onInputChange('aclsBls', 'aclsIssueDate', value)}
+  //         />
+  //         <FormField
+  //           label="ACLS Expiry Date"
+  //           type="date"
+  //           value={formData.aclsBls?.aclsExpiryDate || ''}
+  //           onChange={(value) => onInputChange('aclsBls', 'aclsExpiryDate', value)}
+  //         />
+  //       </FormGrid>
+  //     )}
 
-      {formData.aclsBls?.blsCertified && (
-        <FormGrid>
-          <FormField
-            label="BLS Issue Date"
-            type="date"
-            value={formData.aclsBls?.blsIssueDate || ''}
-            onChange={(value) => onInputChange('aclsBls', 'blsIssueDate', value)}
-          />
-          <FormField
-            label="BLS Expiry Date"
-            type="date"
-            value={formData.aclsBls?.blsExpiryDate || ''}
-            onChange={(value) => onInputChange('aclsBls', 'blsExpiryDate', value)}
-          />
-        </FormGrid>
-      )}
+  //     {formData.aclsBls?.blsCertified && (
+  //       <FormGrid>
+  //         <FormField
+  //           label="BLS Issue Date"
+  //           type="date"
+  //           value={formData.aclsBls?.blsIssueDate || ''}
+  //           onChange={(value) => onInputChange('aclsBls', 'blsIssueDate', value)}
+  //         />
+  //         <FormField
+  //           label="BLS Expiry Date"
+  //           type="date"
+  //           value={formData.aclsBls?.blsExpiryDate || ''}
+  //           onChange={(value) => onInputChange('aclsBls', 'blsExpiryDate', value)}
+  //         />
+  //       </FormGrid>
+  //     )}
 
-      <FormField
-        label="Certification Provider"
-        value={formData.aclsBls?.provider || ''}
-        onChange={(value) => onInputChange('aclsBls', 'provider', value)}
-        placeholder="e.g., American Heart Association"
-      />
-    </div>
-  );
+  //      <FormField
+  //     label="Certification Provider"
+  //     value={formData.aclsBls?.provider || ''}
+  //     onChange={(value) => {
+  //       console.log('FormField onChange called with:', value);
+  //       onInputChange('aclsBls', 'provider', value);
+  //     }}
+  //     placeholder="e.g., American Heart Association"
+  //   />
+  //   </div>
+  // );
 
   const WorkExperienceTab = () => (
     <div className="space-y-6">

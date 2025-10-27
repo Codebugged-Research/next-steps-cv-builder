@@ -32,7 +32,8 @@ const Sidebar = ({
     { id: 6, label: 'Publications', shortLabel: 'Publications' },
     { id: 7, label: 'Conferences', shortLabel: 'Conferences' },
     { id: 8, label: 'EMR & RCM', shortLabel: 'EMR & RCM' },
-    { id: 9, label: 'Review', shortLabel: 'Review' }
+    { id: 9, label: 'Workshops', shortLabel: 'Workshops' },
+    { id: 10, label: 'Review', shortLabel: 'Review' }
   ];
 
   const handleCVBuilderClick = () => {

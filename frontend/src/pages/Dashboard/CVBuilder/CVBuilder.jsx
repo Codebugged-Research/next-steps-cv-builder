@@ -85,7 +85,17 @@ const initialCVData = {
     emrSystems: [],
     rcmTraining: false,
     duration: ''
-  }
+  },
+  aclsBls: {
+    aclsCertified: false,
+    blsCertified: false,
+    aclsIssueDate: '',
+    aclsExpiryDate: '',
+    blsIssueDate: '',
+    blsExpiryDate: '',
+    provider: ''
+  },
+  workExperience: []
 };
 
 const CVBuilder = ({ onPreview, user, onStepChange, currentStep, onStepComplete }) => {
@@ -96,7 +106,7 @@ const CVBuilder = ({ onPreview, user, onStepChange, currentStep, onStepComplete 
   const [completedSteps, setCompletedSteps] = useState([]);
   const [showSaveModal, setShowSaveModal] = useState(false);
 
-  const totalSteps = 10;
+  const totalSteps = 11;
   const activeStep = currentStep || internalCurrentStep;
 
   const calculateCompletedSteps = useCallback((data) => {
@@ -109,8 +119,9 @@ const CVBuilder = ({ onPreview, user, onStepChange, currentStep, onStepComplete 
       { condition: data.professionalExperiences?.length > 0, step: 6 },
       { condition: data.volunteerExperiences?.length > 0, step: 7 },
       { condition: data.significantAchievements?.trim(), step: 8 },
-      { condition: data.publications?.length > 0 || data.conferences?.length > 0, step: 9 },
-      { condition: data.emrRcmTraining?.emrSystems?.length > 0 || data.emrRcmTraining?.rcmTraining, step: 10 }
+      { condition: data.workshops?.length > 0, step: 9 },
+      { condition: data.publications?.length > 0 || data.conferences?.length > 0, step: 10 },
+      { condition: data.emrRcmTraining?.emrSystems?.length > 0 || data.emrRcmTraining?.rcmTraining, step: 11 }
     ];
 
     return checks.filter(({ condition }) => condition).map(({ step }) => step);
