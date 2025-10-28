@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useCallback, useMemo } from 'react';
 import FormField from '../forms/FormField';
 import FormGrid from '../forms/FormGrid';
 import { Plus, Trash2, Heart, Award } from 'lucide-react';
@@ -22,9 +22,13 @@ const WorkshopsStep = ({ formData, onInputChange, onArrayAdd, onArrayRemove, onA
     certificateReceived: false
   };
 
-  const handleTabClick = (tabId) => {
+  const handleTabClick = useCallback((tabId) => {
     setActiveTab(tabId);
-  };
+  }, []);
+
+  const updateAclsBls = useCallback((field, value) => {
+    onInputChange('aclsBls', field, value);
+  }, [onInputChange]);
 
   const TabButton = ({ tab, isActive }) => {
     return (
@@ -41,19 +45,25 @@ const WorkshopsStep = ({ formData, onInputChange, onArrayAdd, onArrayRemove, onA
     );
   };
 
-  const BLSTab = () => (
+  const BLSTab = useMemo(() => (
     <div className="space-y-6">
       <div className="flex items-center gap-3 mb-4">
         <Heart className="h-6 w-6 text-[#169AB4]" />
         <h3 className="text-lg font-semibold text-[#04445E]">Basic Life Support (BLS)</h3>
       </div>
 
-      <FormField
-        label="I am BLS Certified"
-        type="checkbox"
-        value={formData.aclsBls?.blsCertified || false}
-        onChange={(value) => onInputChange('aclsBls', 'blsCertified', value)}
-      />
+      <div className="flex items-center gap-3">
+        <input
+          type="checkbox"
+          id="bls-certified"
+          checked={formData.aclsBls?.blsCertified || false}
+          onChange={(e) => updateAclsBls('blsCertified', e.target.checked)}
+          className="w-4 h-4 text-[#169AB4] focus:ring-[#169AB4] rounded"
+        />
+        <label htmlFor="bls-certified" className="text-sm font-medium text-gray-700">
+          I am BLS Certified
+        </label>
+      </div>
 
       {formData.aclsBls?.blsCertified && (
         <div className="space-y-6 mt-6 p-6 bg-gray-50 rounded-lg">
@@ -62,14 +72,14 @@ const WorkshopsStep = ({ formData, onInputChange, onArrayAdd, onArrayRemove, onA
               label="Issue Date"
               type="date"
               value={formData.aclsBls?.blsIssueDate || ''}
-              onChange={(value) => onInputChange('aclsBls', 'blsIssueDate', value)}
+              onChange={(value) => updateAclsBls('blsIssueDate', value)}
               required
             />
             <FormField
               label="Expiry Date"
               type="date"
               value={formData.aclsBls?.blsExpiryDate || ''}
-              onChange={(value) => onInputChange('aclsBls', 'blsExpiryDate', value)}
+              onChange={(value) => updateAclsBls('blsExpiryDate', value)}
               required
             />
           </FormGrid>
@@ -77,7 +87,7 @@ const WorkshopsStep = ({ formData, onInputChange, onArrayAdd, onArrayRemove, onA
           <FormField
             label="Certification Provider"
             value={formData.aclsBls?.blsProvider || ''}
-            onChange={(value) => onInputChange('aclsBls', 'blsProvider', value)}
+            onChange={(value) => updateAclsBls('blsProvider', value)}
             placeholder="e.g., American Heart Association, Red Cross"
             required
           />
@@ -85,7 +95,7 @@ const WorkshopsStep = ({ formData, onInputChange, onArrayAdd, onArrayRemove, onA
           <FormField
             label="Certificate Number (Optional)"
             value={formData.aclsBls?.blsCertificateNumber || ''}
-            onChange={(value) => onInputChange('aclsBls', 'blsCertificateNumber', value)}
+            onChange={(value) => updateAclsBls('blsCertificateNumber', value)}
             placeholder="Enter certificate number if available"
           />
         </div>
@@ -99,21 +109,27 @@ const WorkshopsStep = ({ formData, onInputChange, onArrayAdd, onArrayRemove, onA
         </div>
       )}
     </div>
-  );
+  ), [formData.aclsBls, updateAclsBls]);
 
-  const ACLSTab = () => (
+  const ACLSTab = useMemo(() => (
     <div className="space-y-6">
       <div className="flex items-center gap-3 mb-4">
         <Heart className="h-6 w-6 text-[#169AB4]" />
         <h3 className="text-lg font-semibold text-[#04445E]">Advanced Cardiac Life Support (ACLS)</h3>
       </div>
 
-      <FormField
-        label="I am ACLS Certified"
-        type="checkbox"
-        value={formData.aclsBls?.aclsCertified || false}
-        onChange={(value) => onInputChange('aclsBls', 'aclsCertified', value)}
-      />
+      <div className="flex items-center gap-3">
+        <input
+          type="checkbox"
+          id="acls-certified"
+          checked={formData.aclsBls?.aclsCertified || false}
+          onChange={(e) => updateAclsBls('aclsCertified', e.target.checked)}
+          className="w-4 h-4 text-[#169AB4] focus:ring-[#169AB4] rounded"
+        />
+        <label htmlFor="acls-certified" className="text-sm font-medium text-gray-700">
+          I am ACLS Certified
+        </label>
+      </div>
 
       {formData.aclsBls?.aclsCertified && (
         <div className="space-y-6 mt-6 p-6 bg-gray-50 rounded-lg">
@@ -122,14 +138,14 @@ const WorkshopsStep = ({ formData, onInputChange, onArrayAdd, onArrayRemove, onA
               label="Issue Date"
               type="date"
               value={formData.aclsBls?.aclsIssueDate || ''}
-              onChange={(value) => onInputChange('aclsBls', 'aclsIssueDate', value)}
+              onChange={(value) => updateAclsBls('aclsIssueDate', value)}
               required
             />
             <FormField
               label="Expiry Date"
               type="date"
               value={formData.aclsBls?.aclsExpiryDate || ''}
-              onChange={(value) => onInputChange('aclsBls', 'aclsExpiryDate', value)}
+              onChange={(value) => updateAclsBls('aclsExpiryDate', value)}
               required
             />
           </FormGrid>
@@ -137,7 +153,7 @@ const WorkshopsStep = ({ formData, onInputChange, onArrayAdd, onArrayRemove, onA
           <FormField
             label="Certification Provider"
             value={formData.aclsBls?.aclsProvider || ''}
-            onChange={(value) => onInputChange('aclsBls', 'aclsProvider', value)}
+            onChange={(value) => updateAclsBls('aclsProvider', value)}
             placeholder="e.g., American Heart Association"
             required
           />
@@ -145,7 +161,7 @@ const WorkshopsStep = ({ formData, onInputChange, onArrayAdd, onArrayRemove, onA
           <FormField
             label="Certificate Number (Optional)"
             value={formData.aclsBls?.aclsCertificateNumber || ''}
-            onChange={(value) => onInputChange('aclsBls', 'aclsCertificateNumber', value)}
+            onChange={(value) => updateAclsBls('aclsCertificateNumber', value)}
             placeholder="Enter certificate number if available"
           />
         </div>
@@ -159,9 +175,9 @@ const WorkshopsStep = ({ formData, onInputChange, onArrayAdd, onArrayRemove, onA
         </div>
       )}
     </div>
-  );
+  ), [formData.aclsBls, updateAclsBls]);
 
-  const WorkshopsTab = () => (
+  const WorkshopsTab = useMemo(() => (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <h3 className="text-lg font-semibold text-[#04445E]">Workshops & Certifications</h3>
@@ -224,7 +240,7 @@ const WorkshopsStep = ({ formData, onInputChange, onArrayAdd, onArrayRemove, onA
                 id={`certificate-${index}`}
                 checked={workshop.certificateReceived || false}
                 onChange={(e) => onArrayUpdate('workshops', index, 'certificateReceived', e.target.checked)}
-                className="text-[#169AB4] focus:ring-[#169AB4]"
+                className="w-4 h-4 text-[#169AB4] focus:ring-[#169AB4] rounded"
               />
               <label htmlFor={`certificate-${index}`} className="text-sm font-medium text-gray-700">
                 Certificate Received
@@ -251,18 +267,18 @@ const WorkshopsStep = ({ formData, onInputChange, onArrayAdd, onArrayRemove, onA
         </div>
       ))}
     </div>
-  );
+  ), [formData.workshops, onArrayAdd, onArrayRemove, onArrayUpdate]);
 
   const renderActiveTab = () => {
     switch (activeTab) {
       case 'bls':
-        return <BLSTab />;
+        return BLSTab;
       case 'acls':
-        return <ACLSTab />;
+        return ACLSTab;
       case 'workshops':
-        return <WorkshopsTab />;
+        return WorkshopsTab;
       default:
-        return <BLSTab />;
+        return BLSTab;
     }
   };
 
