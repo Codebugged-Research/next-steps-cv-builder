@@ -3,7 +3,6 @@ import { Calendar, CheckCircle } from 'lucide-react';
 import api from '../../../services/api.js';
 
 const WorkshopsComponent = () => {
-  const [activeTab, setActiveTab] = useState('bls');
   const [selectedMonth, setSelectedMonth] = useState(null);
   const [hasAgreedToTerms, setHasAgreedToTerms] = useState(false);
   const [showAgreement, setShowAgreement] = useState(false);
@@ -33,15 +32,6 @@ const WorkshopsComponent = () => {
     checkHipaaStatus();
   }, []);
 
-  const handleTabClick = (tab) => {
-    if (!hasAgreedToTerms) {
-      setShowAgreement(true);
-    } else {
-      setActiveTab(tab);
-      setSelectedMonth(null); // Reset month selection when switching tabs
-    }
-  };
-
   const handleAgreementAccept = () => {
     setHasAgreedToTerms(true);
     setShowAgreement(false);
@@ -66,30 +56,14 @@ const WorkshopsComponent = () => {
         />
       )}
 
-      {/* Tab Navigation */}
-      <div className="flex border-b border-gray-200 mb-8">
-        <button
-          onClick={() => handleTabClick('bls')}
-          className={`px-6 py-3 font-medium border-b-2 transition-colors ${
-            activeTab === 'bls'
-              ? 'border-[#169AB4] text-[#169AB4]'
-              : 'border-transparent text-gray-500 hover:text-gray-700'
-          }`}
-        >
-          BLS Training
-          {!hasAgreedToTerms && <span className="ml-2 text-xs text-red-500">*</span>}
-        </button>
-        <button
-          onClick={() => handleTabClick('acls')}
-          className={`px-6 py-3 font-medium border-b-2 transition-colors ${
-            activeTab === 'acls'
-              ? 'border-[#169AB4] text-[#169AB4]'
-              : 'border-transparent text-gray-500 hover:text-gray-700'
-          }`}
-        >
-          ACLS Training
-          {!hasAgreedToTerms && <span className="ml-2 text-xs text-red-500">*</span>}
-        </button>
+      {/* Header */}
+      <div className="mb-8">
+        <h1 className="text-2xl font-bold text-[#04445E] mb-2">
+          BLS/ACLS Training
+        </h1>
+        <p className="text-gray-600">
+          Select a training month to view and book available sessions
+        </p>
       </div>
 
       {/* Content Area */}
@@ -110,7 +84,7 @@ const WorkshopsComponent = () => {
           {/* Month Selector */}
           <div className="mb-8">
             <h2 className="text-xl font-semibold text-[#04445E] mb-4">
-              Select Training Month for {activeTab.toUpperCase()}
+              Select Training Month
             </h2>
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
               {availableMonths.map((monthData, index) => (
@@ -132,21 +106,18 @@ const WorkshopsComponent = () => {
               ))}
             </div>
           </div>
+
+          {/* Selected Month Content */}
           {selectedMonth ? (
             <div className="bg-gray-50 rounded-lg p-8">
               <div className="text-center text-gray-600">
                 <Calendar className="h-16 w-16 mx-auto mb-4 text-gray-300" />
                 <h3 className="text-xl font-semibold text-[#04445E] mb-2">
-                  {activeTab.toUpperCase()} Training - {selectedMonth.month} {selectedMonth.year}
+                  BLS/ACLS Training - {selectedMonth.month} {selectedMonth.year}
                 </h3>
                 <p className="text-gray-500 mb-4">
                   Training session details will be available soon
                 </p>
-                {/* <div className="inline-block bg-blue-50 border border-blue-200 rounded-lg p-4 mt-4">
-                  <p className="text-sm text-blue-800">
-                    📅 Registration opens 2 months before the training date
-                  </p>
-                </div> */}
               </div>
             </div>
           ) : (
