@@ -1,9 +1,10 @@
 import axios from 'axios';
 import { toast } from 'react-toastify';
 
+
 const api = axios.create({
-    baseURL: 'https://cv.nextstepsusmle.com/api',
-    withCredentials: true
+  baseURL: import.meta.env.VITE_DEVELOPMENT_API_URL || 'https://cv.nextstepsusmle.com/api',
+  withCredentials: true,
 });
 
 let isRedirecting = false;
