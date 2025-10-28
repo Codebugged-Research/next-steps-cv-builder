@@ -3,7 +3,7 @@ import { toast } from 'react-toastify';
 
 
 const api = axios.create({
-  baseURL: import.meta.env.VITE_DEVELOPMENT_API_URL || 'https://cv.nextstepsusmle.com/api',
+  baseURL: 'https://cv.nextstepsusmle.com/api',
   withCredentials: true,
 });
 
