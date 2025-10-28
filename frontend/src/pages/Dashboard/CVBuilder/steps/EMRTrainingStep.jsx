@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useCallback, useMemo } from 'react';
 import FormField from '../forms/FormField';
 import FormGrid from '../forms/FormGrid';
 import { Plus, Trash2, Monitor, Heart, Briefcase } from 'lucide-react';
@@ -8,6 +8,7 @@ const EMRTrainingStep = ({ formData, onInputChange, onArrayAdd, onArrayRemove, o
 
   const tabs = [
     { id: 'emrRcm', label: 'EMR & RCM Training'},
+    { id: 'workExperience', label: 'Work Experience' },
   ];
 
   const emrSystems = ['Epic', 'Cerner', 'Allscripts', 'eClinicalWorks', 'NextGen', 'Other'];
@@ -22,9 +23,13 @@ const EMRTrainingStep = ({ formData, onInputChange, onArrayAdd, onArrayRemove, o
     description: ''
   };
 
-  const handleTabClick = (tabId) => {
+  const handleTabClick = useCallback((tabId) => {
     setActiveTab(tabId);
-  };
+  }, []);
+
+  const updateEmrRcmTraining = useCallback((field, value) => {
+    onInputChange('emrRcmTraining', field, value);
+  }, [onInputChange]);
 
   const TabButton = ({ tab, isActive }) => {
     return (
@@ -41,7 +46,7 @@ const EMRTrainingStep = ({ formData, onInputChange, onArrayAdd, onArrayRemove, o
     );
   };
 
-  const EMRRCMTab = () => (
+  const EMRRCMTab = useMemo(() => (
     <div className="space-y-6">
       <div>
         <label className="block text-sm font-medium text-gray-700 mb-3">EMR Systems Experience</label>
@@ -56,7 +61,7 @@ const EMRTrainingStep = ({ formData, onInputChange, onArrayAdd, onArrayRemove, o
                   const updated = e.target.checked
                     ? [...currentSystems, system]
                     : currentSystems.filter(s => s !== system);
-                  onInputChange('emrRcmTraining', 'emrSystems', updated);
+                  updateEmrRcmTraining('emrSystems', updated);
                 }}
                 className="text-[#169AB4] focus:ring-[#169AB4]"
               />
@@ -70,85 +75,21 @@ const EMRTrainingStep = ({ formData, onInputChange, onArrayAdd, onArrayRemove, o
         label="Revenue Cycle Management (RCM) Training"
         type="checkbox"
         value={formData.emrRcmTraining?.rcmTraining || false}
-        onChange={(value) => onInputChange('emrRcmTraining', 'rcmTraining', value)}
+        onChange={(value) => updateEmrRcmTraining('rcmTraining', value)}
       />
 
       {formData.emrRcmTraining?.rcmTraining && (
         <FormField
           label="Training Duration"
           value={formData.emrRcmTraining?.duration || ''}
-          onChange={(value) => onInputChange('emrRcmTraining', 'duration', value)}
+          onChange={(value) => updateEmrRcmTraining('duration', value)}
           placeholder="e.g., 3 months, 6 weeks"
         />
       )}
     </div>
-  );
+  ), [formData.emrRcmTraining, updateEmrRcmTraining, emrSystems]);
 
-  // const ACLSBLSTab = () => (
-  //   <div className="space-y-6">
-  //     <FormGrid>
-  //       <FormField
-  //         label="ACLS Certification"
-  //         type="checkbox"
-  //         value={formData.aclsBls?.aclsCertified || false}
-  //         onChange={(value) => onInputChange('aclsBls', 'aclsCertified', value)}
-  //       />
-
-  //       <FormField
-  //         label="BLS Certification"
-  //         type="checkbox"
-  //         value={formData.aclsBls?.blsCertified || false}
-  //         onChange={(value) => onInputChange('aclsBls', 'blsCertified', value)}
-  //       />
-  //     </FormGrid>
-
-  //     {formData.aclsBls?.aclsCertified && (
-  //       <FormGrid>
-  //         <FormField
-  //           label="ACLS Issue Date"
-  //           type="date"
-  //           value={formData.aclsBls?.aclsIssueDate || ''}
-  //           onChange={(value) => onInputChange('aclsBls', 'aclsIssueDate', value)}
-  //         />
-  //         <FormField
-  //           label="ACLS Expiry Date"
-  //           type="date"
-  //           value={formData.aclsBls?.aclsExpiryDate || ''}
-  //           onChange={(value) => onInputChange('aclsBls', 'aclsExpiryDate', value)}
-  //         />
-  //       </FormGrid>
-  //     )}
-
-  //     {formData.aclsBls?.blsCertified && (
-  //       <FormGrid>
-  //         <FormField
-  //           label="BLS Issue Date"
-  //           type="date"
-  //           value={formData.aclsBls?.blsIssueDate || ''}
-  //           onChange={(value) => onInputChange('aclsBls', 'blsIssueDate', value)}
-  //         />
-  //         <FormField
-  //           label="BLS Expiry Date"
-  //           type="date"
-  //           value={formData.aclsBls?.blsExpiryDate || ''}
-  //           onChange={(value) => onInputChange('aclsBls', 'blsExpiryDate', value)}
-  //         />
-  //       </FormGrid>
-  //     )}
-
-  //      <FormField
-  //     label="Certification Provider"
-  //     value={formData.aclsBls?.provider || ''}
-  //     onChange={(value) => {
-  //       console.log('FormField onChange called with:', value);
-  //       onInputChange('aclsBls', 'provider', value);
-  //     }}
-  //     placeholder="e.g., American Heart Association"
-  //   />
-  //   </div>
-  // );
-
-  const WorkExperienceTab = () => (
+  const WorkExperienceTab = useMemo(() => (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <h3 className="text-lg font-semibold text-[#04445E]">Work Experience</h3>
@@ -201,7 +142,7 @@ const EMRTrainingStep = ({ formData, onInputChange, onArrayAdd, onArrayRemove, o
                 id={`current-job-${index}`}
                 checked={experience.currentJob || false}
                 onChange={(e) => onArrayUpdate('workExperience', index, 'currentJob', e.target.checked)}
-                className="text-[#169AB4] focus:ring-[#169AB4]"
+                className="w-4 h-4 text-[#169AB4] focus:ring-[#169AB4] rounded"
               />
               <label htmlFor={`current-job-${index}`} className="text-sm font-medium text-gray-700">
                 Current Position
@@ -248,18 +189,16 @@ const EMRTrainingStep = ({ formData, onInputChange, onArrayAdd, onArrayRemove, o
         </div>
       ))}
     </div>
-  );
+  ), [formData.workExperience, onArrayAdd, onArrayRemove, onArrayUpdate, newWorkExperience]);
 
   const renderActiveTab = () => {
     switch (activeTab) {
       case 'emrRcm':
-        return <EMRRCMTab />;
-      case 'aclsBls':
-        return <ACLSBLSTab />;
+        return EMRRCMTab;
       case 'workExperience':
-        return <WorkExperienceTab />;
+        return WorkExperienceTab;
       default:
-        return <EMRRCMTab />;
+        return EMRRCMTab;
     }
   };
 

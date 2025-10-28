@@ -106,7 +106,7 @@ const CVBuilder = ({ onPreview, user, onStepChange, currentStep, onStepComplete 
   const [completedSteps, setCompletedSteps] = useState([]);
   const [showSaveModal, setShowSaveModal] = useState(false);
 
-  const totalSteps = 11;
+  const totalSteps = 10;
   const activeStep = currentStep || internalCurrentStep;
 
   const calculateCompletedSteps = useCallback((data) => {
