@@ -19,11 +19,14 @@ import userRoutes from './src/routes/user.routes.js';
 import cvRoutes from './src/routes/cv.routes.js';
 import conferenceRoutes from './src/routes/conference.routes.js';
 import FileRoutes from './src/routes/file.routes.js';
+import workshopRoutes from './src/routes/workshop.routes.js';
+    
 
 app.use('/api/files', FileRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/cv', cvRoutes);
 app.use('/api/conferences', conferenceRoutes);
+app.use('/api/workshops', workshopRoutes);
 app.use('/api/documents', FileRoutes);
 
 export { app };
