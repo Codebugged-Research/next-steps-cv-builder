@@ -1,0 +1,27 @@
+import { Router } from 'express';
+import { 
+  createWorkshop, 
+  getAllWorkshops, 
+  getWorkshopById, 
+  updateWorkshop, 
+  deleteWorkshop,
+  getUpcomingWorkshops,
+  registerForWorkshop,
+  getUserRegistrations,
+  cancelRegistration
+} from '../controllers/workshop.controller.js';
+import { verifyJWT } from '../middlewares/auth.middleware.js';
+
+const router = Router();
+
+router.route('/').get(getAllWorkshops);
+router.route('/upcoming').get(getUpcomingWorkshops);
+router.route('/registrations').get(verifyJWT, getUserRegistrations);
+router.route('/create').post(verifyJWT, createWorkshop);
+router.route('/:id').get(getWorkshopById);
+router.route('/:id').put(verifyJWT, updateWorkshop);
+router.route('/:id').delete(verifyJWT, deleteWorkshop);
+router.route('/:id/register').post(verifyJWT, registerForWorkshop);
+router.route('/registrations/:registrationId').delete(verifyJWT, cancelRegistration);
+
+export default router;

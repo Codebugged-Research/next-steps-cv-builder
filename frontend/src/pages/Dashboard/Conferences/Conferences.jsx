@@ -60,16 +60,39 @@ const Conferences = ({ onBack }) => {
     }, []);
 
     const getAvailableConferences = () => {
-        const registeredConferenceIds = registrations.map(reg => reg.conference?._id);
-        return conferences.filter(conf => !registeredConferenceIds.includes(conf._id));
+        // Get registered conference IDs - support both old and new format
+        const registeredConferenceIds = registrations.map(reg => {
+            // New format: reg.conference is the ObjectId
+            if (typeof reg.conference === 'string') {
+                return reg.conference;
+            }
+            // Old format: reg.conference is populated object
+            if (reg.conference?._id) {
+                return reg.conference._id;
+            }
+            return null;
+        }).filter(id => id !== null);
+
+        console.log('Registered IDs:', registeredConferenceIds);
+        console.log('All conferences:', conferences.map(c => c._id));
+
+        // Filter out registered conferences
+        const available = conferences.filter(conf => !registeredConferenceIds.includes(conf._id));
+        
+        console.log('Available conferences:', available.length);
+        
+        return available;
     };
 
+    const availableConferences = getAvailableConferences();
+
     const headerConfig = {
+        backgroundImage: '/conferences.jpg',  
         icon: BookOpen,
         title: 'Conferences & Events',
         subtitle: 'Find below the list of upcoming conferences and events',
         stats: [
-            { value: getAvailableConferences().length.toString(), label: 'Available Conferences' },
+            { value: availableConferences.length.toString(), label: 'Available Conferences' },
             { value: stats.registered.toString(), label: 'Your Registrations' },
         ]
     };
@@ -92,7 +115,7 @@ const Conferences = ({ onBack }) => {
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 <ProjectHeader {...headerConfig} />
                 <ConferenceTabs
-                    upcomingConferences={getAvailableConferences()}
+                    upcomingConferences={availableConferences}
                     registrations={registrations}
                     onRefreshRegistrations={fetchRegistrations}
                 />

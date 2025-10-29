@@ -11,6 +11,54 @@ const conferenceRegistrationSchema = new mongoose.Schema({
         ref: 'Conference',
         required: true
     },
+    userInfo: {
+        fullName: {
+            type: String,
+            required: true
+        },
+        email: {
+            type: String,
+            required: true
+        },
+        phone: {
+            type: String,
+            default: ''
+        },
+        medicalSchool: {
+            type: String,
+            default: ''
+        },
+        graduationYear: {
+            type: String,
+            default: ''
+        }
+    },
+    conferenceInfo: {
+        name: {
+            type: String,
+            required: true
+        },
+        location: {
+            type: String,
+            default: ''
+        },
+        dates: {
+            type: String,
+            default: ''
+        },
+        month: {
+            type: String,
+            default: ''
+        },
+        modality: {
+            type: String,
+            default: ''
+        },
+        brochureLink: {
+            type: String,
+            default: ''
+        },
+    },
     registeredAt: {
         type: Date,
         default: Date.now

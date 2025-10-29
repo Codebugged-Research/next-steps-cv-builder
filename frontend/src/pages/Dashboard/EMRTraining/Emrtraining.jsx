@@ -1,6 +1,7 @@
-import React, { useState,useEffect } from 'react';
-import { Calendar, Play, Clock, Users, ExternalLink, CheckCircle, X } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { Calendar, Play, Clock, Users, ExternalLink, CheckCircle, X, FileText } from 'lucide-react';
 import HipaaAgreementComponent from './HipaaAgreeement';
+import HipaaContent from './HipaaContent';
 import api from '../../../services/api.js';
 
 const EmrTrainingComponent = () => {
@@ -9,6 +10,8 @@ const EmrTrainingComponent = () => {
   const [registrations, setRegistrations] = useState([]);
   const [hasAgreedToTerms, setHasAgreedToTerms] = useState(false);
   const [showAgreement, setShowAgreement] = useState(false);
+  const [showHipaaContent, setShowHipaaContent] = useState(false);
+  const [isLoadingStatus, setIsLoadingStatus] = useState(true);
 
   const recordings = [
     {
@@ -41,6 +44,7 @@ const EmrTrainingComponent = () => {
   ];
 
   const months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+
   useEffect(() => {
     const checkHipaaStatus = async () => {
       try {
@@ -54,9 +58,9 @@ const EmrTrainingComponent = () => {
         setIsLoadingStatus(false);
       }
     };
-
     checkHipaaStatus();
   }, []);
+
   const handleCancelRegistration = (sessionId) => {
     setRegistrations(registrations.filter(r => r.id !== sessionId));
   };
@@ -77,15 +81,19 @@ const EmrTrainingComponent = () => {
 
   const handleAgreementDecline = () => {
     setShowAgreement(false);
-    setActiveTab('recordings'); 
+    setActiveTab('recordings');
   };
 
   const getLevelColor = (level) => {
     switch (level) {
-      case 'Beginner': return 'bg-green-100 text-green-800';
-      case 'Intermediate': return 'bg-yellow-100 text-yellow-800';
-      case 'Advanced': return 'bg-red-100 text-red-800';
-      default: return 'bg-gray-100 text-gray-800';
+      case 'Beginner':
+        return 'bg-green-100 text-green-800';
+      case 'Intermediate':
+        return 'bg-yellow-100 text-yellow-800';
+      case 'Advanced':
+        return 'bg-red-100 text-red-800';
+      default:
+        return 'bg-gray-100 text-gray-800';
     }
   };
 
@@ -99,7 +107,6 @@ const EmrTrainingComponent = () => {
           </span>
         </div>
       </div>
-
       <div className="space-y-3 mb-6 flex-grow">
         <div className="flex items-center gap-2 text-sm text-gray-600">
           <Clock className="h-4 w-4 text-[#169AB4]" />
@@ -110,7 +117,6 @@ const EmrTrainingComponent = () => {
           <span>{recording.instructor} • {recording.views} views</span>
         </div>
       </div>
-
       <div className="flex justify-end items-center mt-auto">
         <button className="flex items-center gap-2 px-6 py-2 bg-[#169AB4] text-white rounded-lg hover:bg-[#147a8f] transition-colors font-medium">
           <Play className="h-4 w-4" />
@@ -135,11 +141,9 @@ const EmrTrainingComponent = () => {
           </div>
         </div>
       </div>
-
       <p className="text-gray-600 text-sm mb-4 leading-relaxed flex-grow">
         {registration.description}
       </p>
-
       <div className="space-y-3 mb-6">
         <div className="flex items-center gap-2 text-sm text-gray-600">
           <Calendar className="h-4 w-4 text-[#169AB4]" />
@@ -150,7 +154,6 @@ const EmrTrainingComponent = () => {
           <span>Registered on {registration.registeredDate}</span>
         </div>
       </div>
-
       <div className="flex justify-end items-center mt-auto">
         <button
           onClick={() => handleCancelRegistration(registration.id)}
@@ -166,67 +169,63 @@ const EmrTrainingComponent = () => {
   return (
     <div className="max-w-7xl mx-auto p-6">
       {showAgreement && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-lg p-6 max-w-md w-full text-center">
-            <h3 className="text-lg font-semibold mb-4">Import Your HIPAA Agreement Component Here</h3>
-            <p className="text-gray-600 mb-6">Replace this placeholder with your separate HIPAA agreement JSX component.</p>
-            <HipaaAgreementComponent
-              onAccept={handleAgreementAccept}
-              onDecline={handleAgreementDecline}
-              onClose={() => setShowAgreement(false)}
-            />
-            <div className="flex gap-4 justify-center">
-              <button
-                onClick={handleAgreementDecline}
-                className="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50"
-              >
-                Decline
-              </button>
-              <button
-                onClick={handleAgreementAccept}
-                className="px-4 py-2 bg-[#169AB4] text-white rounded-lg hover:bg-[#147a8f]"
-              >
-                Accept
-              </button>
-            </div>
-          </div>
-        </div>
+        <HipaaAgreementComponent
+          onAccept={handleAgreementAccept}
+          onDecline={handleAgreementDecline}
+          onClose={() => setShowAgreement(false)}
+        />
       )}
 
-      <div className="flex border-b border-gray-200 mb-8">
-        <button
-          onClick={handleShowBookingTab}
-          className={`px-6 py-3 font-medium border-b-2 transition-colors ${activeTab === 'book'
-              ? 'border-[#169AB4] text-[#169AB4]'
-              : 'border-transparent text-gray-500 hover:text-gray-700'
+      {showHipaaContent && (
+        <HipaaContent onClose={() => setShowHipaaContent(false)} />
+      )}
+
+      <div className="flex justify-between items-center border-b border-gray-200 mb-8">
+        <div className="flex">
+          <button
+            onClick={handleShowBookingTab}
+            className={`px-6 py-3 font-medium border-b-2 transition-colors ${
+              activeTab === 'book'
+                ? 'border-[#169AB4] text-[#169AB4]'
+                : 'border-transparent text-gray-500 hover:text-gray-700'
             }`}
-        >
-          Book Training
-          {!hasAgreedToTerms && <span className="ml-2 text-xs text-red-500">*</span>}
-        </button>
-        <button
-          onClick={() => setActiveTab('recordings')}
-          className={`px-6 py-3 font-medium border-b-2 transition-colors ${activeTab === 'recordings'
-              ? 'border-[#169AB4] text-[#169AB4]'
-              : 'border-transparent text-gray-500 hover:text-gray-700'
+          >
+            Book Training
+            {!hasAgreedToTerms && <span className="ml-2 text-xs text-red-500">*</span>}
+          </button>
+          <button
+            onClick={() => setActiveTab('recordings')}
+            className={`px-6 py-3 font-medium border-b-2 transition-colors ${
+              activeTab === 'recordings'
+                ? 'border-[#169AB4] text-[#169AB4]'
+                : 'border-transparent text-gray-500 hover:text-gray-700'
             }`}
-        >
-          Virtual Training
-        </button>
-        <button
-          onClick={() => setActiveTab('registrations')}
-          className={`px-6 py-3 font-medium border-b-2 transition-colors ${activeTab === 'registrations'
-              ? 'border-[#169AB4] text-[#169AB4]'
-              : 'border-transparent text-gray-500 hover:text-gray-700'
+          >
+            Virtual Training
+          </button>
+          <button
+            onClick={() => setActiveTab('registrations')}
+            className={`px-6 py-3 font-medium border-b-2 transition-colors ${
+              activeTab === 'registrations'
+                ? 'border-[#169AB4] text-[#169AB4]'
+                : 'border-transparent text-gray-500 hover:text-gray-700'
             }`}
+          >
+            Your Registrations ({registrations.length})
+          </button>
+        </div>
+
+        <button
+          onClick={() => setShowHipaaContent(true)}
+          className="flex items-center gap-2 px-4 py-2 bg-[#04445E] text-white rounded-lg hover:bg-[#06617f] transition-colors font-medium"
         >
-          Your Registrations ({registrations.length})
+          <FileText className="h-4 w-4" />
+          HIPAA Agreement
         </button>
       </div>
 
       {activeTab === 'book' && hasAgreedToTerms && (
         <div>
-          {/* Month Selector Only */}
           <div className="mb-8">
             <h2 className="text-xl font-semibold text-[#04445E] mb-4">Select Month</h2>
             <div className="flex flex-wrap gap-2">
@@ -234,10 +233,11 @@ const EmrTrainingComponent = () => {
                 <button
                   key={month}
                   onClick={() => setSelectedMonth(month)}
-                  className={`px-4 py-2 rounded-lg font-medium transition-colors ${selectedMonth === month
+                  className={`px-4 py-2 rounded-lg font-medium transition-colors ${
+                    selectedMonth === month
                       ? 'bg-[#169AB4] text-white'
                       : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                    }`}
+                  }`}
                 >
                   {month}
                 </button>
@@ -245,7 +245,6 @@ const EmrTrainingComponent = () => {
             </div>
           </div>
 
-          {/* Placeholder for training sessions - you can fetch/display data here */}
           <div className="text-center py-12 text-gray-500">
             <Calendar className="h-12 w-12 mx-auto mb-4 text-gray-300" />
             <h3 className="text-lg font-semibold mb-2">Training Sessions for {selectedMonth}</h3>
@@ -258,8 +257,8 @@ const EmrTrainingComponent = () => {
       {activeTab === 'book' && !hasAgreedToTerms && (
         <div className="text-center py-12 text-gray-500">
           <CheckCircle className="h-12 w-12 mx-auto mb-4 text-gray-300" />
-          <p className="mb-2">HIPAA Compliance Agreement Required</p>
-          <p className="text-sm">Please accept the terms and conditions to access training booking</p>
+          <p className="mb-2 font-semibold text-lg">HIPAA Compliance Agreement Required</p>
+          <p className="text-sm mb-4">Please accept the terms and conditions to access training booking</p>
           <button
             onClick={() => setShowAgreement(true)}
             className="mt-4 px-6 py-2 bg-[#169AB4] text-white rounded-lg hover:bg-[#147a8f] transition-colors font-medium"
@@ -278,17 +277,17 @@ const EmrTrainingComponent = () => {
             href="https://app.nextstepscareer.com/"
             target="_blank"
             rel="noopener noreferrer"
-            className="bg-[#04445E] text-white px-4 py-2 rounded-lg shadow hover:bg-[#06617f] transition"
+            className="inline-flex items-center gap-2 bg-[#04445E] text-white px-6 py-3 rounded-lg shadow hover:bg-[#06617f] transition font-medium"
           >
+            <ExternalLink className="h-5 w-5" />
             Click here to access NextSteps App
           </a>
         </div>
       )}
 
-
       {activeTab === 'registrations' && (
         <div>
-          <h2 className="text-xl font-semibold text-[[#04445E] mb-6">Your Registrations</h2>
+          <h2 className="text-xl font-semibold text-[#04445E] mb-6">Your Registrations</h2>
           {registrations.length > 0 ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {registrations.map((registration) => (
@@ -298,7 +297,7 @@ const EmrTrainingComponent = () => {
           ) : (
             <div className="text-center py-12 text-gray-500">
               <CheckCircle className="h-12 w-12 mx-auto mb-4 text-gray-300" />
-              <p>No active registrations</p>
+              <p className="font-semibold text-lg mb-2">No active registrations</p>
               <p className="text-sm">Register for training sessions to see them here</p>
             </div>
           )}

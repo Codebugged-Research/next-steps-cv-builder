@@ -323,12 +323,19 @@ const PublicationTimeline = () => {
               {timelineStages.find(s => s.id === activeStage)?.title}
             </h3>
           </div>
-
+       <div className="flex flex-col md:flex-row gap-4">
           <div className="flex gap-2">
             <button className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors">
               <Download className="w-4 h-4" />
-              Download PDF
+              Project 1
             </button>
+          </div>
+          <div className="flex gap-2">
+            <button className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors">
+              <Download className="w-4 h-4" />
+              Project 2
+            </button>
+          </div>
           </div>
         </div>
 
@@ -363,12 +370,13 @@ const NextStepsProjects = () => {
 
 const SystematicReviews = ({ onBack }) => {
   const headerConfig = {
-    icon: BookOpen,
+    backgroundImage: '/publications.jpg',  
     title: 'Publications',
     subtitle: 'Collaborate with peers and Next Steps team for publication-ready research',
     stats: [
       { value: '8', label: 'Project Stages' },
       { value: '5', label: 'Team Size' },
+      { value: '1', label: 'Project' }
     ]
   };
 
@@ -381,5 +389,4 @@ const SystematicReviews = ({ onBack }) => {
     </div>
   );
 };
-
 export default SystematicReviews;

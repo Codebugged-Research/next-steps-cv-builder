@@ -143,8 +143,14 @@ export const registerForConference = async (req, res) => {
         const { id } = req.params;
         const userId = req.user._id;
 
+        const user = await User.findById(userId);
+        if (!user) {
+            return res.status(404).json({
+                success: false,
+                message: 'User not found'
+            });
+        }
         const conference = await Conference.findById(id);
-        
         if (!conference) {
             return res.status(404).json({
                 success: false,
@@ -172,9 +178,34 @@ export const registerForConference = async (req, res) => {
             });
         }
 
+        const cancelledRegistration = await ConferenceRegistration.findOne({
+            user: userId,
+            conference: id,
+            status: 'cancelled'
+        });
+
+        if (cancelledRegistration) {
+            await ConferenceRegistration.deleteOne({ _id: cancelledRegistration._id });
+        }
+
         const registration = await ConferenceRegistration.create({
             user: userId,
             conference: id,
+            userInfo: {
+                fullName: user.fullName,
+                email: user.email,
+                phone: user.phone,
+                medicalSchool: user.medicalSchool,
+                graduationYear: user.graduationYear
+            },
+            conferenceInfo: {
+                name: conference.name,
+                location: conference.location,
+                dates: conference.dates,
+                month: conference.month,
+                modality: conference.modality,
+                brochureLink: conference.brochureLink
+            },
             registeredAt: new Date(),
             status: 'registered'
         });
@@ -184,13 +215,10 @@ export const registerForConference = async (req, res) => {
             { $push: { conferenceRegistrations: registration._id } }
         );
 
-        const populatedRegistration = await ConferenceRegistration.findById(registration._id)
-            .populate('conference');
-
         return res.status(201).json({
             success: true,
             message: 'Successfully registered for the conference',
-            data: populatedRegistration
+            data: registration
         });
     } catch (error) {
         console.error('Error registering for conference:', error);
@@ -210,12 +238,12 @@ export const getUserRegistrations = async (req, res) => {
             user: userId,
             status: 'registered'
         })
-            .populate('conference')
             .sort({ registeredAt: -1 });
 
         return res.status(200).json({
             success: true,
-            data: registrations
+            data: registrations,
+            count: registrations.length
         });
     } catch (error) {
         console.error('Error fetching user registrations:', error);
@@ -244,9 +272,7 @@ export const cancelRegistration = async (req, res) => {
                 message: 'Registration not found'
             });
         }
-
-        registration.status = 'cancelled';
-        await registration.save();
+        await ConferenceRegistration.deleteOne({ _id: registrationId });
 
         await User.findByIdAndUpdate(
             userId,

@@ -49,6 +49,21 @@ const userSchema = new mongoose.Schema({
             default: '1.0'
         }
     },
+    workshopRegistrations: [{
+        workshop: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'Workshop'
+        },
+        registeredAt: {
+            type: Date,
+            default: Date.now
+        },
+        status: {
+            type: String,
+            enum: ['registered', 'attended', 'cancelled'],
+            default: 'registered'
+        }
+    }],
     conferenceRegistrations: [{
         type: mongoose.Schema.Types.ObjectId,
         ref: 'ConferenceRegistration'

@@ -1,12 +1,17 @@
 import React, { useState, useEffect } from 'react';
-import { Calendar, CheckCircle } from 'lucide-react';
+import { Calendar, Users, Clock, MapPin, CheckCircle, Loader, BookOpen, X, RefreshCw } from 'lucide-react';
 import api from '../../../services/api.js';
+import { toast } from 'react-toastify';
+import ProjectHeader from '../../../components/Common/ProjectHeader';
 
 const WorkshopsComponent = () => {
   const [selectedMonth, setSelectedMonth] = useState(null);
-  const [hasAgreedToTerms, setHasAgreedToTerms] = useState(false);
-  const [showAgreement, setShowAgreement] = useState(false);
-  const [isLoadingStatus, setIsLoadingStatus] = useState(true);
+  const [workshops, setWorkshops] = useState([]);
+  const [userRegistrations, setUserRegistrations] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [refreshing, setRefreshing] = useState(false);
+  const [activeTab, setActiveTab] = useState('available');
+  const [cancellingId, setCancellingId] = useState(null);
 
   const availableMonths = [
     { month: 'December', year: 2025 },
@@ -17,118 +22,403 @@ const WorkshopsComponent = () => {
   ];
 
   useEffect(() => {
-    const checkHipaaStatus = async () => {
-      try {
-        const response = await api.get('/users/hipaa-status');
-        if (response.data.success) {
-          setHasAgreedToTerms(response.data.data.isSigned);
-        }
-      } catch (error) {
-        console.error('Error checking HIPAA status:', error);
-      } finally {
-        setIsLoadingStatus(false);
-      }
-    };
-    checkHipaaStatus();
+    fetchUserRegistrations();
   }, []);
 
-  const handleAgreementAccept = () => {
-    setHasAgreedToTerms(true);
-    setShowAgreement(false);
+  useEffect(() => {
+    if (selectedMonth) {
+      fetchWorkshops();
+    }
+  }, [selectedMonth]);
+
+  const fetchUserRegistrations = async () => {
+    try {
+      const response = await api.get('/workshops/registrations');
+      if (response.data.success) {
+        setUserRegistrations(response.data.data);
+      }
+    } catch (error) {
+      console.error('Error fetching registrations:', error);
+      setUserRegistrations([]);
+    }
   };
 
-  const handleAgreementDecline = () => {
-    setShowAgreement(false);
+  const fetchWorkshops = async () => {
+    setLoading(true);
+    try {
+      const response = await api.get(`/workshops?month=${selectedMonth.month}&year=${selectedMonth.year}`);
+      if (response.data.success) {
+        setWorkshops(response.data.data);
+      }
+    } catch (error) {
+      console.error('Error fetching workshops:', error);
+      toast.error('Failed to load workshops');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleRefresh = async () => {
+    setRefreshing(true);
+    try {
+      await fetchUserRegistrations();
+      if (selectedMonth) {
+        await fetchWorkshops();
+      }
+      toast.success('Data refreshed successfully');
+    } catch (error) {
+      toast.error('Failed to refresh data');
+    } finally {
+      setRefreshing(false);
+    }
   };
 
   const handleMonthSelect = (monthData) => {
     setSelectedMonth(monthData);
+    setActiveTab('available');
+  };
+
+  const handleRegister = async (workshopId) => {
+    if (userRegistrations.length > 0) {
+      toast.error('You can only register for one workshop. Please cancel your existing registration first.');
+      return;
+    }
+
+    try {
+      const response = await api.post(`/workshops/${workshopId}/register`);
+      if (response.data.success) {
+        toast.success('Successfully registered for workshop');
+        fetchWorkshops();
+        fetchUserRegistrations();
+        setActiveTab('registrations');
+      }
+    } catch (error) {
+      toast.error(error.response?.data?.message || 'Registration failed');
+    }
+  };
+
+  const handleCancelRegistration = async (registrationId) => {
+    if (!window.confirm('Are you sure you want to cancel this registration?')) {
+      return;
+    }
+
+    try {
+      setCancellingId(registrationId);
+      const response = await api.delete(`/workshops/registrations/${registrationId}`);
+      
+      if (response.data.success) {
+        toast.success('Registration cancelled successfully');
+        fetchUserRegistrations();
+        if (selectedMonth) {
+          fetchWorkshops();
+        }
+      }
+    } catch (error) {
+      console.error('Error cancelling registration:', error);
+      toast.error(error.response?.data?.message || 'Failed to cancel registration');
+    } finally {
+      setCancellingId(null);
+    }
+  };
+
+  const isRegistered = (workshopId) => {
+    return userRegistrations.some(reg => reg.workshop?._id === workshopId);
+  };
+
+  const getAvailableSeats = (workshop) => {
+    return workshop.capacity - workshop.registeredUsers.length;
+  };
+
+  const formatDate = (dateString) => {
+    const date = new Date(dateString);
+    return date.toLocaleDateString('en-US', {
+      weekday: 'long',
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric'
+    });
+  };
+
+  const hasExistingRegistration = userRegistrations.length > 0;
+
+  const headerConfig = {
+    backgroundImage: '/training.jpg',
+    icon: BookOpen,
+    title: 'BLS/ACLS Training',
+    subtitle: 'Select a training month to view and book available sessions',
+    stats: [
+      { value: workshops.length.toString(), label: 'Available Workshops' },
+      { value: userRegistrations.length.toString(), label: 'Your Registration' }
+    ]
   };
 
   return (
-    <div className="max-w-7xl mx-auto p-6">
-      {/* HIPAA Agreement Modal */}
-      {showAgreement && (
-        <HipaaAgreementComponent
-          onAccept={handleAgreementAccept}
-          onDecline={handleAgreementDecline}
-          onClose={() => setShowAgreement(false)}
-        />
-      )}
+    <div className="min-h-screen bg-gray-50">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+ 
+        <div className="relative">
+          <ProjectHeader {...headerConfig} />
 
-      {/* Header */}
-      <div className="mb-8">
-        <h1 className="text-2xl font-bold text-[#04445E] mb-2">
-          BLS/ACLS Training
-        </h1>
-        <p className="text-gray-600">
-          Select a training month to view and book available sessions
-        </p>
-      </div>
+          <div className="absolute top-0 right-0">
+            <button
+              onClick={handleRefresh}
+              disabled={refreshing}
+              className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-all ${
+                refreshing
+                  ? 'bg-gray-300 cursor-not-allowed text-gray-500'
+                  : 'bg-[#169AB4] hover:bg-[#147a8f] text-white shadow-md hover:shadow-lg'
+              }`}
+            >
+              <RefreshCw className={`h-4 w-4 ${refreshing ? 'animate-spin' : ''}`} />
+              <span className="font-medium">{refreshing ? 'Refreshing...' : 'Refresh'}</span>
+            </button>
+          </div>
+        </div>
 
-      {/* Content Area */}
-      {!hasAgreedToTerms ? (
-        <div className="text-center py-12 text-gray-500">
-          <CheckCircle className="h-12 w-12 mx-auto mb-4 text-gray-300" />
-          <p className="mb-2 font-semibold text-lg">HIPAA Compliance Agreement Required</p>
-          <p className="text-sm mb-4">Please accept the terms and conditions to access training booking</p>
+        <div className="flex border-b border-gray-200 mb-8 mt-4">
           <button
-            onClick={() => setShowAgreement(true)}
-            className="mt-4 px-6 py-2 bg-[#169AB4] text-white rounded-lg hover:bg-[#147a8f] transition-colors font-medium"
+            onClick={() => setActiveTab('available')}
+            className={`px-6 py-3 font-medium border-b-2 transition-colors ${
+              activeTab === 'available'
+                ? 'border-[#169AB4] text-[#169AB4]'
+                : 'border-transparent text-gray-500 hover:text-gray-700'
+            }`}
           >
-            Review Agreement
+            Available Workshops
+          </button>
+          <button
+            onClick={() => setActiveTab('registrations')}
+            className={`px-6 py-3 font-medium border-b-2 transition-colors ${
+              activeTab === 'registrations'
+                ? 'border-[#169AB4] text-[#169AB4]'
+                : 'border-transparent text-gray-500 hover:text-gray-700'
+            }`}
+          >
+            My Registration ({userRegistrations.length})
           </button>
         </div>
-      ) : (
-        <div>
-          {/* Month Selector */}
-          <div className="mb-8">
-            <h2 className="text-xl font-semibold text-[#04445E] mb-4">
-              Select Training Month
-            </h2>
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
-              {availableMonths.map((monthData, index) => (
-                <button
-                  key={index}
-                  onClick={() => handleMonthSelect(monthData)}
-                  className={`p-4 rounded-lg border-2 transition-all ${
-                    selectedMonth?.month === monthData.month && selectedMonth?.year === monthData.year
-                      ? 'border-[#169AB4] bg-[#169AB4] text-white shadow-lg'
-                      : 'border-gray-200 bg-white text-gray-700 hover:border-[#169AB4] hover:bg-gray-50'
-                  }`}
-                >
-                  <div className="text-center">
-                    <Calendar className="h-6 w-6 mx-auto mb-2" />
-                    <p className="font-semibold">{monthData.month}</p>
-                    <p className="text-sm">{monthData.year}</p>
-                  </div>
-                </button>
-              ))}
-            </div>
-          </div>
 
-          {/* Selected Month Content */}
-          {selectedMonth ? (
-            <div className="bg-gray-50 rounded-lg p-8">
-              <div className="text-center text-gray-600">
-                <Calendar className="h-16 w-16 mx-auto mb-4 text-gray-300" />
-                <h3 className="text-xl font-semibold text-[#04445E] mb-2">
-                  BLS/ACLS Training - {selectedMonth.month} {selectedMonth.year}
-                </h3>
-                <p className="text-gray-500 mb-4">
-                  Training session details will be available soon
+        {activeTab === 'available' && (
+          <>
+            {hasExistingRegistration && (
+              <div className="mb-6 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
+                <p className="text-yellow-800 text-sm">
+                  <strong>Note:</strong> You already have an active workshop registration.
                 </p>
               </div>
+            )}
+
+            <div className="mb-8">
+              <h2 className="text-xl font-semibold text-[#04445E] mb-4">Select Training Month</h2>
+              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
+                {availableMonths.map((monthData, index) => (
+                  <button
+                    key={index}
+                    onClick={() => handleMonthSelect(monthData)}
+                    className={`p-4 rounded-lg border-2 transition-all ${
+                      selectedMonth?.month === monthData.month && selectedMonth?.year === monthData.year
+                        ? 'border-[#169AB4] bg-[#169AB4] text-white shadow-lg'
+                        : 'border-gray-200 bg-white text-gray-700 hover:border-[#169AB4] hover:bg-gray-50'
+                    }`}
+                  >
+                    <div className="text-center">
+                      <Calendar className="h-6 w-6 mx-auto mb-2" />
+                      <p className="font-semibold">{monthData.month}</p>
+                      <p className="text-sm">{monthData.year}</p>
+                    </div>
+                  </button>
+                ))}
+              </div>
             </div>
-          ) : (
-            <div className="text-center py-12 text-gray-500 bg-gray-50 rounded-lg">
-              <Calendar className="h-12 w-12 mx-auto mb-4 text-gray-300" />
-              <h3 className="text-lg font-semibold mb-2">Select a Month</h3>
-              <p>Choose a training month from the options above to see available sessions</p>
-            </div>
-          )}
-        </div>
-      )}
+
+            {selectedMonth ? (
+              <div>
+                {loading ? (
+                  <div className="flex justify-center items-center py-12">
+                    <Loader className="h-8 w-8 animate-spin text-[#169AB4]" />
+                  </div>
+                ) : workshops.length > 0 ? (
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    {workshops.map((workshop) => (
+                      <div key={workshop._id} className="bg-white border border-gray-200 rounded-lg p-6 hover:shadow-lg transition-shadow">
+                        <div className="mb-4">
+                          <h3 className="text-xl font-bold text-[#04445E] mb-2">
+                            {workshop.title}
+                          </h3>
+                          <span className={`inline-block px-3 py-1 rounded-full text-xs font-medium ${
+                            workshop.type === 'BLS' ? 'bg-blue-100 text-blue-800' : 'bg-purple-100 text-purple-800'
+                          }`}>
+                            {workshop.type}
+                          </span>
+                        </div>
+
+                        <p className="text-gray-600 text-sm mb-4 line-clamp-2">
+                          {workshop.description}
+                        </p>
+
+                        <div className="space-y-2 mb-4">
+                          <div className="flex items-center gap-2 text-sm text-gray-600">
+                            <Calendar className="h-4 w-4 text-[#169AB4]" />
+                            <span>{formatDate(workshop.date)}</span>
+                          </div>
+                          <div className="flex items-center gap-2 text-sm text-gray-600">
+                            <Clock className="h-4 w-4 text-[#169AB4]" />
+                            <span>{workshop.startTime} - {workshop.endTime}</span>
+                          </div>
+                          <div className="flex items-center gap-2 text-sm text-gray-600">
+                            <MapPin className="h-4 w-4 text-[#169AB4]" />
+                            <span>{workshop.location}</span>
+                          </div>
+                          <div className="flex items-center gap-2 text-sm text-gray-600">
+                            <Users className="h-4 w-4 text-[#169AB4]" />
+                            <span>{getAvailableSeats(workshop)} seats available</span>
+                          </div>
+                        </div>
+
+                        {isRegistered(workshop._id) ? (
+                          <button
+                            disabled
+                            className="w-full flex items-center justify-center gap-2 px-4 py-2 bg-green-500 text-white rounded-lg cursor-not-allowed"
+                          >
+                            <CheckCircle className="h-4 w-4" />
+                            Registered
+                          </button>
+                        ) : hasExistingRegistration ? (
+                          <button
+                            disabled
+                            className="w-full px-4 py-2 bg-gray-300 text-gray-500 rounded-lg cursor-not-allowed font-medium"
+                          >
+                            Already Registered
+                          </button>
+                        ) : getAvailableSeats(workshop) > 0 ? (
+                          <button
+                            onClick={() => handleRegister(workshop._id)}
+                            className="w-full px-4 py-2 bg-[#169AB4] text-white rounded-lg hover:bg-[#147a8f] transition-colors font-medium"
+                          >
+                            Register Now
+                          </button>
+                        ) : (
+                          <button
+                            disabled
+                            className="w-full px-4 py-2 bg-gray-300 text-gray-500 rounded-lg cursor-not-allowed font-medium"
+                          >
+                            Fully Booked
+                          </button>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="bg-gray-50 rounded-lg p-8">
+                    <div className="text-center text-gray-600">
+                      <Calendar className="h-16 w-16 mx-auto mb-4 text-gray-300" />
+                      <h3 className="text-xl font-semibold text-[#04445E] mb-2">
+                        No Workshops Available
+                      </h3>
+                      <p className="text-gray-500 mb-4">
+                        There are no training sessions scheduled for {selectedMonth.month} {selectedMonth.year}
+                      </p>
+                    </div>
+                  </div>
+                )}
+              </div>
+            ) : (
+              <div className="text-center py-12 text-gray-500 bg-gray-50 rounded-lg">
+                <Calendar className="h-12 w-12 mx-auto mb-4 text-gray-300" />
+                <h3 className="text-lg font-semibold mb-2">Select a Month</h3>
+                <p>Choose a training month from the options above to see available sessions</p>
+              </div>
+            )}
+          </>
+        )}
+
+        {activeTab === 'registrations' && (
+          <div className="space-y-4">
+            {userRegistrations.length === 0 ? (
+              <div className="text-center py-12 text-gray-500">
+                <Calendar className="h-12 w-12 mx-auto mb-4 text-gray-300" />
+                <p className="font-semibold text-lg mb-2">No workshop registration yet</p>
+                <p className="text-sm">Register for a workshop to track it here</p>
+              </div>
+            ) : (
+              userRegistrations.map((registration) => {
+                const workshop = registration.workshop;
+                if (!workshop) return null;
+
+                return (
+                  <div key={registration._id} className="border border-gray-200 rounded-lg p-6 bg-white hover:shadow-md transition-shadow">
+                    <div className="flex justify-between items-start mb-4">
+                      <div className="flex-1">
+                        <h4 className="text-xl font-bold text-[#04445E] mb-2">
+                          {workshop.title}
+                        </h4>
+                        <div className="flex gap-2">
+                          <span className={`inline-block px-3 py-1 rounded-full text-xs font-medium ${
+                            workshop.type === 'BLS' ? 'bg-blue-100 text-blue-800' : 'bg-purple-100 text-purple-800'
+                          }`}>
+                            {workshop.type}
+                          </span>
+                          <span className="inline-block px-3 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                            <CheckCircle className="h-3 w-3 inline mr-1" />
+                            Registered
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+
+                    <p className="text-gray-600 text-sm mb-4">
+                      {workshop.description}
+                    </p>
+
+                    <div className="space-y-3 mb-4">
+                      <div className="flex items-center gap-2 text-sm text-gray-600">
+                        <Calendar className="h-4 w-4 text-[#169AB4]" />
+                        <span>{formatDate(workshop.date)}</span>
+                      </div>
+                      <div className="flex items-center gap-2 text-sm text-gray-600">
+                        <Clock className="h-4 w-4 text-[#169AB4]" />
+                        <span>{workshop.startTime} - {workshop.endTime}</span>
+                      </div>
+                      <div className="flex items-center gap-2 text-sm text-gray-600">
+                        <MapPin className="h-4 w-4 text-[#169AB4]" />
+                        <span>{workshop.location}</span>
+                      </div>
+                      <div className="flex items-center gap-2 text-sm text-gray-500">
+                        <CheckCircle className="h-4 w-4 text-green-500" />
+                        <span>Registered on {formatDate(registration.registeredAt)}</span>
+                      </div>
+                    </div>
+
+                    <div className="flex justify-end">
+                      <button
+                        onClick={() => handleCancelRegistration(registration._id)}
+                        disabled={cancellingId === registration._id}
+                        className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-colors text-sm ${
+                          cancellingId === registration._id
+                            ? 'bg-gray-400 cursor-not-allowed text-white'
+                            : 'bg-red-500 text-white hover:bg-red-600'
+                        }`}
+                      >
+                        {cancellingId === registration._id ? (
+                          <>
+                            <Loader className="h-4 w-4 animate-spin" />
+                            Cancelling...
+                          </>
+                        ) : (
+                          <>
+                            <X className="h-4 w-4" />
+                            Cancel Registration
+                          </>
+                        )}
+                      </button>
+                    </div>
+                  </div>
+                );
+              })
+            )}
+          </div>
+        )}
+      </div>
     </div>
   );
 };

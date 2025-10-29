@@ -19,14 +19,16 @@ import {
 
 const BasicDetailsStep = ({ formData, onInputChange }) => {
   const [photoPreview, setPhotoPreview] = useState(null);
-  const [passportPreview, setPassportPreview] = useState(null);
+  const [passportFrontPreview, setPassportFrontPreview] = useState(null);
+  const [passportBackPreview, setPassportBackPreview] = useState(null);
   const [aadharFrontPreview, setAadharFrontPreview] = useState(null);
   const [aadharBackPreview, setAadharBackPreview] = useState(null);
   const [errors, setErrors] = useState({});
   const [touched, setTouched] = useState({});
   const [uploading, setUploading] = useState({
     photo: false,
-    passport: false,
+    passportFront: false,
+    passportBack: false,
     aadharFront: false,
     aadharBack: false
   }); 
@@ -546,11 +548,18 @@ const BasicDetailsStep = ({ formData, onInputChange }) => {
           />
           
           <DocumentUploadCard
-            title="Passport"
-            documentType="passport"
-            preview={passportPreview}
-            isUploading={uploading.passport}
-            error={errors.passport}
+            title="Passport Front"
+            documentType="passportFront"
+            preview={passportFrontPreview}
+            isUploading={uploading.passportFront}
+            error={errors.passportFront}
+          />
+          <DocumentUploadCard
+            title="Passport Back"
+            documentType="passportBack"
+            preview={passportBackPreview}
+            isUploading={uploading.passportBack}
+            error={errors.passportBack}
           />
           
           <DocumentUploadCard
