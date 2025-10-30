@@ -1,4 +1,5 @@
 import { Workshop } from '../models/workshop.model.js';
+import { WorkshopRegistration } from '../models/workshopRegistration.model.js';
 import { User } from '../models/users.model.js';
 import { ApiError } from '../utils/ApiError.js';
 import { ApiResponse } from '../utils/ApiResponse.js';
@@ -30,7 +31,6 @@ const createWorkshop = asyncHandler(async (req, res) => {
 
 const getAllWorkshops = asyncHandler(async (req, res) => {
   const { month, year } = req.query;
-
   let query = {};
 
   if (month && year) {
@@ -44,27 +44,41 @@ const getAllWorkshops = asyncHandler(async (req, res) => {
     };
   }
 
-  const workshops = await Workshop.find(query)
-    .populate('registeredUsers', 'firstName lastName email')
-    .sort({ date: 1 });
+  const workshops = await Workshop.find(query).sort({ date: 1 }).lean();
+
+  const workshopsWithRegistrations = await Promise.all(
+    workshops.map(async (workshop) => {
+      const registrations = await WorkshopRegistration.find({ workshop: workshop._id })
+        .populate('user', 'firstName lastName email fullName')
+        .lean();
+      
+      return {
+        ...workshop,
+        registeredUsers: registrations
+      };
+    })
+  );
 
   return res.status(200).json(
-    new ApiResponse(200, workshops, 'Workshops fetched successfully')
+    new ApiResponse(200, workshopsWithRegistrations, 'Workshops fetched successfully')
   );
 });
 
 const getWorkshopById = asyncHandler(async (req, res) => {
   const { id } = req.params;
 
-  const workshop = await Workshop.findById(id)
-    .populate('registeredUsers', 'firstName lastName email');
+  const workshop = await Workshop.findById(id).lean();
 
   if (!workshop) {
     throw new ApiError(404, 'Workshop not found');
   }
 
+  const registrations = await WorkshopRegistration.find({ workshop: id })
+    .populate('user', 'firstName lastName email fullName')
+    .lean();
+
   return res.status(200).json(
-    new ApiResponse(200, workshop, 'Workshop fetched successfully')
+    new ApiResponse(200, { ...workshop, registeredUsers: registrations }, 'Workshop fetched successfully')
   );
 });
 
@@ -95,6 +109,8 @@ const deleteWorkshop = asyncHandler(async (req, res) => {
     throw new ApiError(404, 'Workshop not found');
   }
 
+  await WorkshopRegistration.deleteMany({ workshop: id });
+
   await User.updateMany(
     { 'workshopRegistrations.workshop': id },
     { $pull: { workshopRegistrations: { workshop: id } } }
@@ -112,12 +128,25 @@ const getUpcomingWorkshops = asyncHandler(async (req, res) => {
     date: { $gte: currentDate },
     status: 'scheduled'
   })
-    .populate('registeredUsers', 'firstName lastName email')
     .sort({ date: 1 })
-    .limit(10);
+    .limit(10)
+    .lean();
+
+  const workshopsWithRegistrations = await Promise.all(
+    workshops.map(async (workshop) => {
+      const registrations = await WorkshopRegistration.find({ workshop: workshop._id })
+        .populate('user', 'firstName lastName email fullName')
+        .lean();
+      
+      return {
+        ...workshop,
+        registeredUsers: registrations
+      };
+    })
+  );
 
   return res.status(200).json(
-    new ApiResponse(200, workshops, 'Upcoming workshops fetched successfully')
+    new ApiResponse(200, workshopsWithRegistrations, 'Upcoming workshops fetched successfully')
   );
 });
 
@@ -131,7 +160,12 @@ const registerForWorkshop = asyncHandler(async (req, res) => {
     throw new ApiError(404, 'User not found');
   }
 
-  if (user.workshopRegistrations && user.workshopRegistrations.length > 0) {
+  const existingRegistrations = await WorkshopRegistration.find({ 
+    user: userId,
+    status: { $in: ['pending', 'confirmed'] }
+  });
+
+  if (existingRegistrations.length > 0) {
     throw new ApiError(400, 'You can only register for one workshop at a time. Please cancel your existing registration first.');
   }
 
@@ -141,11 +175,21 @@ const registerForWorkshop = asyncHandler(async (req, res) => {
     throw new ApiError(404, 'Workshop not found');
   }
 
-  if (workshop.registeredUsers.includes(userId)) {
+  const alreadyRegistered = await WorkshopRegistration.findOne({
+    workshop: id,
+    user: userId
+  });
+
+  if (alreadyRegistered) {
     throw new ApiError(400, 'You are already registered for this workshop');
   }
 
-  if (workshop.registeredUsers.length >= workshop.capacity) {
+  const confirmedCount = await WorkshopRegistration.countDocuments({
+    workshop: id,
+    status: 'confirmed'
+  });
+
+  if (confirmedCount >= workshop.capacity) {
     throw new ApiError(400, 'Workshop is fully booked');
   }
 
@@ -153,8 +197,11 @@ const registerForWorkshop = asyncHandler(async (req, res) => {
     throw new ApiError(400, 'Cannot register for past workshops');
   }
 
-  workshop.registeredUsers.push(userId);
-  await workshop.save();
+  const registration = await WorkshopRegistration.create({
+    workshop: id,
+    user: userId,
+    status: 'pending'
+  });
 
   await User.findByIdAndUpdate(
     userId,
@@ -163,32 +210,27 @@ const registerForWorkshop = asyncHandler(async (req, res) => {
         workshopRegistrations: {
           workshop: id,
           registeredAt: new Date(),
-          status: 'registered'
+          status: 'pending'
         }
       }
     }
   );
 
   return res.status(200).json(
-    new ApiResponse(200, workshop, 'Successfully registered for workshop')
+    new ApiResponse(200, registration, 'Successfully registered for workshop. Waiting for admin confirmation.')
   );
 });
 
 const getUserRegistrations = asyncHandler(async (req, res) => {
   const userId = req.user._id;
 
-  const user = await User.findById(userId)
-    .populate({
-      path: 'workshopRegistrations.workshop',
-      select: 'title description type date startTime endTime location capacity instructor status'
-    });
-
-  if (!user) {
-    throw new ApiError(404, 'User not found');
-  }
+  const registrations = await WorkshopRegistration.find({ user: userId })
+    .populate('workshop', 'title description type date startTime endTime location capacity instructor status')
+    .sort({ registeredAt: -1 })
+    .lean();
 
   return res.status(200).json(
-    new ApiResponse(200, user.workshopRegistrations, 'Registrations fetched successfully')
+    new ApiResponse(200, registrations, 'Registrations fetched successfully')
   );
 });
 
@@ -196,30 +238,115 @@ const cancelRegistration = asyncHandler(async (req, res) => {
   const { registrationId } = req.params;
   const userId = req.user._id;
 
-  const user = await User.findById(userId);
-
-  if (!user) {
-    throw new ApiError(404, 'User not found');
-  }
-
-  const registration = user.workshopRegistrations.id(registrationId);
+  const registration = await WorkshopRegistration.findOne({
+    _id: registrationId,
+    user: userId
+  });
 
   if (!registration) {
     throw new ApiError(404, 'Registration not found');
   }
 
-  const workshopId = registration.workshop;
+  await WorkshopRegistration.findByIdAndDelete(registrationId);
 
-  await Workshop.findByIdAndUpdate(
-    workshopId,
-    { $pull: { registeredUsers: userId } }
+  await User.findByIdAndUpdate(
+    userId,
+    { $pull: { workshopRegistrations: { workshop: registration.workshop } } }
   );
-
-  user.workshopRegistrations.pull(registrationId);
-  await user.save();
 
   return res.status(200).json(
     new ApiResponse(200, null, 'Registration cancelled successfully')
+  );
+});
+
+const confirmRegistration = asyncHandler(async (req, res) => {
+  const { registrationId } = req.params;
+  const adminId = req.user._id;
+
+  const registration = await WorkshopRegistration.findById(registrationId);
+
+  if (!registration) {
+    throw new ApiError(404, 'Registration not found');
+  }
+
+  if (registration.status === 'confirmed') {
+    throw new ApiError(400, 'Registration already confirmed');
+  }
+
+  const workshop = await Workshop.findById(registration.workshop);
+
+  if (!workshop) {
+    throw new ApiError(404, 'Workshop not found');
+  }
+
+  const confirmedCount = await WorkshopRegistration.countDocuments({
+    workshop: registration.workshop,
+    status: 'confirmed'
+  });
+
+  if (confirmedCount >= workshop.capacity) {
+    throw new ApiError(400, 'Workshop capacity reached');
+  }
+
+  registration.status = 'confirmed';
+  registration.confirmedAt = new Date();
+  registration.confirmedBy = adminId;
+  await registration.save();
+
+  await User.updateOne(
+    { _id: registration.user, 'workshopRegistrations.workshop': registration.workshop },
+    { 
+      $set: { 
+        'workshopRegistrations.$.status': 'confirmed',
+        'workshopRegistrations.$.confirmedAt': new Date()
+      } 
+    }
+  );
+
+  return res.status(200).json(
+    new ApiResponse(200, registration, 'Registration confirmed successfully')
+  );
+});
+
+const rejectRegistration = asyncHandler(async (req, res) => {
+  const { registrationId } = req.params;
+  const adminId = req.user._id;
+
+  const registration = await WorkshopRegistration.findById(registrationId);
+
+  if (!registration) {
+    throw new ApiError(404, 'Registration not found');
+  }
+
+  registration.status = 'rejected';
+  registration.rejectedAt = new Date();
+  registration.rejectedBy = adminId;
+  await registration.save();
+
+  await User.updateOne(
+    { _id: registration.user, 'workshopRegistrations.workshop': registration.workshop },
+    { 
+      $set: { 
+        'workshopRegistrations.$.status': 'rejected',
+        'workshopRegistrations.$.rejectedAt': new Date()
+      } 
+    }
+  );
+
+  return res.status(200).json(
+    new ApiResponse(200, registration, 'Registration rejected successfully')
+  );
+});
+
+const getPendingRegistrations = asyncHandler(async (req, res) => {
+  const registrations = await WorkshopRegistration.find({ status: 'pending' })
+    .populate('workshop', 'title type date location capacity')
+    .populate('user', 'firstName lastName email fullName')
+    .sort({ registeredAt: -1 })
+    .lean();
+
+  return res.status(200).json(
+    new ApiResponse(200, registrations, 'Pending registrations fetched successfully')
   );
 });
 
@@ -232,5 +359,8 @@ export {
   getUpcomingWorkshops,
   registerForWorkshop,
   getUserRegistrations,
-  cancelRegistration
+  cancelRegistration,
+  confirmRegistration,
+  rejectRegistration,
+  getPendingRegistrations
 };

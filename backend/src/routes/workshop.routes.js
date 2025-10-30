@@ -8,7 +8,10 @@ import {
   getUpcomingWorkshops,
   registerForWorkshop,
   getUserRegistrations,
-  cancelRegistration
+  cancelRegistration,
+  confirmRegistration,
+  rejectRegistration,
+  getPendingRegistrations
 } from '../controllers/workshop.controller.js';
 import { verifyJWT } from '../middlewares/auth.middleware.js';
 
@@ -17,11 +20,14 @@ const router = Router();
 router.route('/').get(getAllWorkshops);
 router.route('/upcoming').get(getUpcomingWorkshops);
 router.route('/registrations').get(verifyJWT, getUserRegistrations);
+router.route('/pending-registrations').get(verifyJWT, getPendingRegistrations);
 router.route('/create').post(verifyJWT, createWorkshop);
 router.route('/:id').get(getWorkshopById);
 router.route('/:id').put(verifyJWT, updateWorkshop);
 router.route('/:id').delete(verifyJWT, deleteWorkshop);
 router.route('/:id/register').post(verifyJWT, registerForWorkshop);
 router.route('/registrations/:registrationId').delete(verifyJWT, cancelRegistration);
+router.route('/registrations/:registrationId/confirm').put(verifyJWT, confirmRegistration);
+router.route('/registrations/:registrationId/reject').put(verifyJWT, rejectRegistration);
 
 export default router;

@@ -36,10 +36,6 @@ const workshopSchema = new mongoose.Schema({
     required: true,
     min: 1
   },
-  registeredUsers: [{
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'User'
-  }],
   instructor: {
     type: String,
     required: true
@@ -54,5 +50,11 @@ const workshopSchema = new mongoose.Schema({
 });
 
 workshopSchema.index({ date: 1, type: 1 });
+
+workshopSchema.virtual('registrations', {
+  ref: 'WorkshopRegistration',
+  localField: '_id',
+  foreignField: 'workshop'
+});
 
 export const Workshop = mongoose.model('Workshop', workshopSchema);

@@ -60,9 +60,11 @@ const userSchema = new mongoose.Schema({
         },
         status: {
             type: String,
-            enum: ['registered', 'attended', 'cancelled'],
-            default: 'registered'
-        }
+            enum: ['pending', 'confirmed', 'rejected'],
+            default: 'pending'
+        },
+        confirmedAt: Date,
+        rejectedAt: Date
     }],
     conferenceRegistrations: [{
         type: mongoose.Schema.Types.ObjectId,

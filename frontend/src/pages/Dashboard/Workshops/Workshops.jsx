@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Calendar, Users, Clock, MapPin, CheckCircle, Loader, BookOpen, X, RefreshCw } from 'lucide-react';
+import { Calendar, Users, Clock, MapPin, CheckCircle, Loader, BookOpen, X, RefreshCw, AlertCircle } from 'lucide-react';
 import api from '../../../services/api.js';
 import { toast } from 'react-toastify';
 import ProjectHeader from '../../../components/Common/ProjectHeader';
@@ -87,7 +87,7 @@ const WorkshopsComponent = () => {
     try {
       const response = await api.post(`/workshops/${workshopId}/register`);
       if (response.data.success) {
-        toast.success('Successfully registered for workshop');
+        toast.success('Successfully registered for workshop. Waiting for admin confirmation.');
         fetchWorkshops();
         fetchUserRegistrations();
         setActiveTab('registrations');
@@ -125,8 +125,14 @@ const WorkshopsComponent = () => {
     return userRegistrations.some(reg => reg.workshop?._id === workshopId);
   };
 
+  const getRegistrationStatus = (workshopId) => {
+    const registration = userRegistrations.find(reg => reg.workshop?._id === workshopId);
+    return registration?.status || null;
+  };
+
   const getAvailableSeats = (workshop) => {
-    return workshop.capacity - workshop.registeredUsers.length;
+    const confirmedUsers = workshop.registeredUsers.filter(reg => reg.status === 'confirmed').length;
+    return workshop.capacity - confirmedUsers;
   };
 
   const formatDate = (dateString) => {
@@ -140,6 +146,24 @@ const WorkshopsComponent = () => {
   };
 
   const hasExistingRegistration = userRegistrations.length > 0;
+
+  const getStatusBadge = (status) => {
+    const badges = {
+      pending: { bg: 'bg-yellow-100', text: 'text-yellow-800', label: 'Pending', icon: AlertCircle },
+      confirmed: { bg: 'bg-green-100', text: 'text-green-800', label: 'Confirmed', icon: CheckCircle },
+      rejected: { bg: 'bg-red-100', text: 'text-red-800', label: 'Rejected', icon: X }
+    };
+    
+    const badge = badges[status] || badges.pending;
+    const Icon = badge.icon;
+    
+    return (
+      <span className={`inline-block px-3 py-1 rounded-full text-xs font-medium ${badge.bg} ${badge.text}`}>
+        <Icon className="h-3 w-3 inline mr-1" />
+        {badge.label}
+      </span>
+    );
+  };
 
   const headerConfig = {
     backgroundImage: '/training.jpg',
@@ -155,10 +179,8 @@ const WorkshopsComponent = () => {
   return (
     <div className="min-h-screen bg-gray-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
- 
         <div className="relative">
           <ProjectHeader {...headerConfig} />
-
           <div className="absolute top-0 right-0">
             <button
               onClick={handleRefresh}
@@ -239,74 +261,96 @@ const WorkshopsComponent = () => {
                   </div>
                 ) : workshops.length > 0 ? (
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    {workshops.map((workshop) => (
-                      <div key={workshop._id} className="bg-white border border-gray-200 rounded-lg p-6 hover:shadow-lg transition-shadow">
-                        <div className="mb-4">
-                          <h3 className="text-xl font-bold text-[#04445E] mb-2">
-                            {workshop.title}
-                          </h3>
-                          <span className={`inline-block px-3 py-1 rounded-full text-xs font-medium ${
-                            workshop.type === 'BLS' ? 'bg-blue-100 text-blue-800' : 'bg-purple-100 text-purple-800'
-                          }`}>
-                            {workshop.type}
-                          </span>
+                    {workshops.map((workshop) => {
+                      const registrationStatus = getRegistrationStatus(workshop._id);
+                      const isUserRegistered = isRegistered(workshop._id);
+                      
+                      return (
+                        <div key={workshop._id} className="bg-white border border-gray-200 rounded-lg p-6 hover:shadow-lg transition-shadow">
+                          <div className="mb-4">
+                            <h3 className="text-xl font-bold text-[#04445E] mb-2">
+                              {workshop.title}
+                            </h3>
+                            <div className="flex gap-2 flex-wrap">
+                              <span className={`inline-block px-3 py-1 rounded-full text-xs font-medium ${
+                                workshop.type === 'BLS' ? 'bg-blue-100 text-blue-800' : 'bg-purple-100 text-purple-800'
+                              }`}>
+                                {workshop.type}
+                              </span>
+                              {isUserRegistered && getStatusBadge(registrationStatus)}
+                            </div>
+                          </div>
+
+                          <p className="text-gray-600 text-sm mb-4 line-clamp-2">
+                            {workshop.description}
+                          </p>
+
+                          <div className="space-y-2 mb-4">
+                            <div className="flex items-center gap-2 text-sm text-gray-600">
+                              <Calendar className="h-4 w-4 text-[#169AB4]" />
+                              <span>{formatDate(workshop.date)}</span>
+                            </div>
+                            <div className="flex items-center gap-2 text-sm text-gray-600">
+                              <Clock className="h-4 w-4 text-[#169AB4]" />
+                              <span>{workshop.startTime} - {workshop.endTime}</span>
+                            </div>
+                            <div className="flex items-center gap-2 text-sm text-gray-600">
+                              <MapPin className="h-4 w-4 text-[#169AB4]" />
+                              <span>{workshop.location}</span>
+                            </div>
+                            <div className="flex items-center gap-2 text-sm text-gray-600">
+                              <Users className="h-4 w-4 text-[#169AB4]" />
+                              <span>{getAvailableSeats(workshop)} seats available</span>
+                            </div>
+                          </div>
+
+                          {isUserRegistered ? (
+                            <button
+                              disabled
+                              className="w-full flex items-center justify-center gap-2 px-4 py-2 bg-gray-300 text-gray-600 rounded-lg cursor-not-allowed"
+                            >
+                              {registrationStatus === 'confirmed' ? (
+                                <>
+                                  <CheckCircle className="h-4 w-4" />
+                                  Confirmed
+                                </>
+                              ) : registrationStatus === 'rejected' ? (
+                                <>
+                                  <X className="h-4 w-4" />
+                                  Rejected
+                                </>
+                              ) : (
+                                <>
+                                  <AlertCircle className="h-4 w-4" />
+                                  Pending Approval
+                                </>
+                              )}
+                            </button>
+                          ) : hasExistingRegistration ? (
+                            <button
+                              disabled
+                              className="w-full px-4 py-2 bg-gray-300 text-gray-500 rounded-lg cursor-not-allowed font-medium"
+                            >
+                              Already Registered
+                            </button>
+                          ) : getAvailableSeats(workshop) > 0 ? (
+                            <button
+                              onClick={() => handleRegister(workshop._id)}
+                              className="w-full px-4 py-2 bg-[#169AB4] text-white rounded-lg hover:bg-[#147a8f] transition-colors font-medium"
+                            >
+                              Register Now
+                            </button>
+                          ) : (
+                            <button
+                              disabled
+                              className="w-full px-4 py-2 bg-gray-300 text-gray-500 rounded-lg cursor-not-allowed font-medium"
+                            >
+                              Fully Booked
+                            </button>
+                          )}
                         </div>
-
-                        <p className="text-gray-600 text-sm mb-4 line-clamp-2">
-                          {workshop.description}
-                        </p>
-
-                        <div className="space-y-2 mb-4">
-                          <div className="flex items-center gap-2 text-sm text-gray-600">
-                            <Calendar className="h-4 w-4 text-[#169AB4]" />
-                            <span>{formatDate(workshop.date)}</span>
-                          </div>
-                          <div className="flex items-center gap-2 text-sm text-gray-600">
-                            <Clock className="h-4 w-4 text-[#169AB4]" />
-                            <span>{workshop.startTime} - {workshop.endTime}</span>
-                          </div>
-                          <div className="flex items-center gap-2 text-sm text-gray-600">
-                            <MapPin className="h-4 w-4 text-[#169AB4]" />
-                            <span>{workshop.location}</span>
-                          </div>
-                          <div className="flex items-center gap-2 text-sm text-gray-600">
-                            <Users className="h-4 w-4 text-[#169AB4]" />
-                            <span>{getAvailableSeats(workshop)} seats available</span>
-                          </div>
-                        </div>
-
-                        {isRegistered(workshop._id) ? (
-                          <button
-                            disabled
-                            className="w-full flex items-center justify-center gap-2 px-4 py-2 bg-green-500 text-white rounded-lg cursor-not-allowed"
-                          >
-                            <CheckCircle className="h-4 w-4" />
-                            Registered
-                          </button>
-                        ) : hasExistingRegistration ? (
-                          <button
-                            disabled
-                            className="w-full px-4 py-2 bg-gray-300 text-gray-500 rounded-lg cursor-not-allowed font-medium"
-                          >
-                            Already Registered
-                          </button>
-                        ) : getAvailableSeats(workshop) > 0 ? (
-                          <button
-                            onClick={() => handleRegister(workshop._id)}
-                            className="w-full px-4 py-2 bg-[#169AB4] text-white rounded-lg hover:bg-[#147a8f] transition-colors font-medium"
-                          >
-                            Register Now
-                          </button>
-                        ) : (
-                          <button
-                            disabled
-                            className="w-full px-4 py-2 bg-gray-300 text-gray-500 rounded-lg cursor-not-allowed font-medium"
-                          >
-                            Fully Booked
-                          </button>
-                        )}
-                      </div>
-                    ))}
+                      );
+                    })}
                   </div>
                 ) : (
                   <div className="bg-gray-50 rounded-lg p-8">
@@ -352,19 +396,34 @@ const WorkshopsComponent = () => {
                         <h4 className="text-xl font-bold text-[#04445E] mb-2">
                           {workshop.title}
                         </h4>
-                        <div className="flex gap-2">
+                        <div className="flex gap-2 flex-wrap">
                           <span className={`inline-block px-3 py-1 rounded-full text-xs font-medium ${
                             workshop.type === 'BLS' ? 'bg-blue-100 text-blue-800' : 'bg-purple-100 text-purple-800'
                           }`}>
                             {workshop.type}
                           </span>
-                          <span className="inline-block px-3 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                            <CheckCircle className="h-3 w-3 inline mr-1" />
-                            Registered
-                          </span>
+                          {getStatusBadge(registration.status)}
                         </div>
                       </div>
                     </div>
+
+                    {registration.status === 'pending' && (
+                      <div className="mb-4 p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
+                        <p className="text-yellow-800 text-sm">
+                          <AlertCircle className="h-4 w-4 inline mr-2" />
+                          Your registration is pending admin approval.
+                        </p>
+                      </div>
+                    )}
+
+                    {registration.status === 'rejected' && (
+                      <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg">
+                        <p className="text-red-800 text-sm">
+                          <X className="h-4 w-4 inline mr-2" />
+                          Your registration was rejected. Please register for another workshop.
+                        </p>
+                      </div>
+                    )}
 
                     <p className="text-gray-600 text-sm mb-4">
                       {workshop.description}
@@ -387,6 +446,12 @@ const WorkshopsComponent = () => {
                         <CheckCircle className="h-4 w-4 text-green-500" />
                         <span>Registered on {formatDate(registration.registeredAt)}</span>
                       </div>
+                      {registration.confirmedAt && (
+                        <div className="flex items-center gap-2 text-sm text-gray-500">
+                          <CheckCircle className="h-4 w-4 text-green-500" />
+                          <span>Confirmed on {formatDate(registration.confirmedAt)}</span>
+                        </div>
+                      )}
                     </div>
 
                     <div className="flex justify-end">
