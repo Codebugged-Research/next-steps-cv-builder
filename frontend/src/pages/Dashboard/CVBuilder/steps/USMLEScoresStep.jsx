@@ -10,9 +10,11 @@ import { validateFile } from '../../../../utils/validationRules';
 const USMLEScoresStep = ({ formData, onInputChange }) => {
   const [step1CertPreview, setStep1CertPreview] = useState(null);
   const [step2CertPreview, setStep2CertPreview] = useState(null);
+  const [oetCertPreview, setOetCertPreview] = useState(null);
   const [uploading, setUploading] = useState({
     step1Cert: false,
-    step2Cert: false
+    step2Cert: false,
+    oetCert: false
   });
   const [errors, setErrors] = useState({});
 
@@ -28,7 +30,6 @@ const USMLEScoresStep = ({ formData, onInputChange }) => {
 
     try {
       setUploading(prev => ({ ...prev, [certificateType]: true }));
-
       const formDataObj = new FormData();
       formDataObj.append('certificate', file);
 
@@ -51,8 +52,13 @@ const USMLEScoresStep = ({ formData, onInputChange }) => {
             name: file.name,
             url: response.data.data.url
           });
-        } else {
+        } else if (certificateType === 'step2Cert') {
           setStep2CertPreview({
+            name: file.name,
+            url: response.data.data.url
+          });
+        } else if (certificateType === 'oetCert') {
+          setOetCertPreview({
             name: file.name,
             url: response.data.data.url
           });
@@ -60,11 +66,25 @@ const USMLEScoresStep = ({ formData, onInputChange }) => {
 
         onInputChange('usmleScores', certificateType, certificateData);
         setErrors(prev => ({ ...prev, [certificateType]: '' }));
-        toast.success(`${certificateType === 'step1Cert' ? 'Step 1' : 'Step 2 CK'} certificate uploaded successfully!`);
+        
+        const certNames = {
+          step1Cert: 'Step 1',
+          step2Cert: 'Step 2 CK',
+          oetCert: 'OET'
+        };
+        
+        toast.success(`${certNames[certificateType]} certificate uploaded successfully!`);
       }
     } catch (error) {
       console.error(`${certificateType} upload error:`, error);
-      toast.error(error.response?.data?.message || `Failed to upload ${certificateType === 'step1Cert' ? 'Step 1' : 'Step 2 CK'} certificate`);
+      
+      const certNames = {
+        step1Cert: 'Step 1',
+        step2Cert: 'Step 2 CK',
+        oetCert: 'OET'
+      };
+      
+      toast.error(error.response?.data?.message || `Failed to upload ${certNames[certificateType]} certificate`);
     } finally {
       setUploading(prev => ({ ...prev, [certificateType]: false }));
     }
@@ -73,8 +93,10 @@ const USMLEScoresStep = ({ formData, onInputChange }) => {
   const removeCertificate = (certificateType) => {
     if (certificateType === 'step1Cert') {
       setStep1CertPreview(null);
-    } else {
+    } else if (certificateType === 'step2Cert') {
       setStep2CertPreview(null);
+    } else if (certificateType === 'oetCert') {
+      setOetCertPreview(null);
     }
     onInputChange('usmleScores', certificateType, null);
   };
@@ -159,10 +181,11 @@ const USMLEScoresStep = ({ formData, onInputChange }) => {
 
   const showStep1Upload = formData.usmleScores?.step1Status === 'pass';
   const showStep2Upload = formData.usmleScores?.step2ckScore && formData.usmleScores.step2ckScore.trim() !== '';
+  const showOetUpload = formData.usmleScores?.oetScore && formData.usmleScores.oetScore.trim() !== '';
 
   return (
     <div className="space-y-6">
-      <h2 className="text-2xl font-bold text-[#04445E] mb-6">USMLE Scores</h2>
+      <h2 className="text-2xl font-bold text-[#04445E] mb-6">USMLE Scores & Language Proficiency</h2>
       
       <FormGrid>
         <div className="space-y-3">
@@ -227,6 +250,30 @@ const USMLEScoresStep = ({ formData, onInputChange }) => {
             { value: 'waived', label: 'Waived (Pathway)' }
           ]}
         />
+      </div>
+
+      {/* OET Score Section */}
+      <div className="pt-4">
+        <div className="space-y-3">
+          <FormField
+            label="OET Score"
+            type="text"
+            value={formData.usmleScores?.oetScore || ''}
+            onChange={(value) => onInputChange('usmleScores', 'oetScore', value)}
+            placeholder="Enter your overall OET score (e.g., B, 350)"
+          />
+          
+          {showOetUpload && (
+            <CertificateUploadCard
+              title="OET Score Certificate"
+              certificateType="oetCert"
+              preview={oetCertPreview}
+              isUploading={uploading.oetCert}
+              error={errors.oetCert}
+              showUpload={true}
+            />
+          )}
+        </div>
       </div>
 
       <div className="bg-gray-50 rounded-lg p-4">

@@ -3,6 +3,7 @@ import { Calendar, Users, Clock, MapPin, CheckCircle, Loader, BookOpen, X, Refre
 import api from '../../../services/api.js';
 import { toast } from 'react-toastify';
 import ProjectHeader from '../../../components/Common/ProjectHeader';
+import ConfirmationModal from '../../../components/Common/ConfirmationModal';
 
 const WorkshopsComponent = () => {
   const [selectedMonth, setSelectedMonth] = useState(null);
@@ -12,6 +13,10 @@ const WorkshopsComponent = () => {
   const [refreshing, setRefreshing] = useState(false);
   const [activeTab, setActiveTab] = useState('available');
   const [cancellingId, setCancellingId] = useState(null);
+  const [showRegistrationModal, setShowRegistrationModal] = useState(false);
+  const [selectedWorkshopId, setSelectedWorkshopId] = useState(null);
+  const [showCancelModal, setShowCancelModal] = useState(false);
+  const [selectedRegistrationId, setSelectedRegistrationId] = useState(null);
 
   const availableMonths = [
     { month: 'December', year: 2025 },
@@ -78,14 +83,18 @@ const WorkshopsComponent = () => {
     setActiveTab('available');
   };
 
-  const handleRegister = async (workshopId) => {
+  const handleRegisterClick = (workshopId) => {
     if (userRegistrations.length > 0) {
       toast.error('You can only register for one workshop. Please cancel your existing registration first.');
       return;
     }
+    setSelectedWorkshopId(workshopId);
+    setShowRegistrationModal(true);
+  };
 
+  const confirmRegistration = async () => {
     try {
-      const response = await api.post(`/workshops/${workshopId}/register`);
+      const response = await api.post(`/workshops/${selectedWorkshopId}/register`);
       if (response.data.success) {
         toast.success('Successfully registered for workshop. Waiting for admin confirmation.');
         fetchWorkshops();
@@ -94,18 +103,22 @@ const WorkshopsComponent = () => {
       }
     } catch (error) {
       toast.error(error.response?.data?.message || 'Registration failed');
+    } finally {
+      setShowRegistrationModal(false);
+      setSelectedWorkshopId(null);
     }
   };
 
-  const handleCancelRegistration = async (registrationId) => {
-    if (!window.confirm('Are you sure you want to cancel this registration?')) {
-      return;
-    }
+  const handleCancelClick = (registrationId) => {
+    setSelectedRegistrationId(registrationId);
+    setShowCancelModal(true);
+  };
 
+  const confirmCancellation = async () => {
     try {
-      setCancellingId(registrationId);
-      const response = await api.delete(`/workshops/registrations/${registrationId}`);
-      
+      setCancellingId(selectedRegistrationId);
+      const response = await api.delete(`/workshops/registrations/${selectedRegistrationId}`);
+
       if (response.data.success) {
         toast.success('Registration cancelled successfully');
         fetchUserRegistrations();
@@ -118,6 +131,8 @@ const WorkshopsComponent = () => {
       toast.error(error.response?.data?.message || 'Failed to cancel registration');
     } finally {
       setCancellingId(null);
+      setShowCancelModal(false);
+      setSelectedRegistrationId(null);
     }
   };
 
@@ -153,10 +168,10 @@ const WorkshopsComponent = () => {
       confirmed: { bg: 'bg-green-100', text: 'text-green-800', label: 'Confirmed', icon: CheckCircle },
       rejected: { bg: 'bg-red-100', text: 'text-red-800', label: 'Rejected', icon: X }
     };
-    
+
     const badge = badges[status] || badges.pending;
     const Icon = badge.icon;
-    
+
     return (
       <span className={`inline-block px-3 py-1 rounded-full text-xs font-medium ${badge.bg} ${badge.text}`}>
         <Icon className="h-3 w-3 inline mr-1" />
@@ -185,11 +200,10 @@ const WorkshopsComponent = () => {
             <button
               onClick={handleRefresh}
               disabled={refreshing}
-              className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-all ${
-                refreshing
+              className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-all ${refreshing
                   ? 'bg-gray-300 cursor-not-allowed text-gray-500'
                   : 'bg-[#169AB4] hover:bg-[#147a8f] text-white shadow-md hover:shadow-lg'
-              }`}
+                }`}
             >
               <RefreshCw className={`h-4 w-4 ${refreshing ? 'animate-spin' : ''}`} />
               <span className="font-medium">{refreshing ? 'Refreshing...' : 'Refresh'}</span>
@@ -200,21 +214,19 @@ const WorkshopsComponent = () => {
         <div className="flex border-b border-gray-200 mb-8 mt-4">
           <button
             onClick={() => setActiveTab('available')}
-            className={`px-6 py-3 font-medium border-b-2 transition-colors ${
-              activeTab === 'available'
+            className={`px-6 py-3 font-medium border-b-2 transition-colors ${activeTab === 'available'
                 ? 'border-[#169AB4] text-[#169AB4]'
                 : 'border-transparent text-gray-500 hover:text-gray-700'
-            }`}
+              }`}
           >
             Available Workshops
           </button>
           <button
             onClick={() => setActiveTab('registrations')}
-            className={`px-6 py-3 font-medium border-b-2 transition-colors ${
-              activeTab === 'registrations'
+            className={`px-6 py-3 font-medium border-b-2 transition-colors ${activeTab === 'registrations'
                 ? 'border-[#169AB4] text-[#169AB4]'
                 : 'border-transparent text-gray-500 hover:text-gray-700'
-            }`}
+              }`}
           >
             My Registration ({userRegistrations.length})
           </button>
@@ -237,11 +249,10 @@ const WorkshopsComponent = () => {
                   <button
                     key={index}
                     onClick={() => handleMonthSelect(monthData)}
-                    className={`p-4 rounded-lg border-2 transition-all ${
-                      selectedMonth?.month === monthData.month && selectedMonth?.year === monthData.year
+                    className={`p-4 rounded-lg border-2 transition-all ${selectedMonth?.month === monthData.month && selectedMonth?.year === monthData.year
                         ? 'border-[#169AB4] bg-[#169AB4] text-white shadow-lg'
                         : 'border-gray-200 bg-white text-gray-700 hover:border-[#169AB4] hover:bg-gray-50'
-                    }`}
+                      }`}
                   >
                     <div className="text-center">
                       <Calendar className="h-6 w-6 mx-auto mb-2" />
@@ -264,7 +275,7 @@ const WorkshopsComponent = () => {
                     {workshops.map((workshop) => {
                       const registrationStatus = getRegistrationStatus(workshop._id);
                       const isUserRegistered = isRegistered(workshop._id);
-                      
+
                       return (
                         <div key={workshop._id} className="bg-white border border-gray-200 rounded-lg p-6 hover:shadow-lg transition-shadow">
                           <div className="mb-4">
@@ -272,9 +283,8 @@ const WorkshopsComponent = () => {
                               {workshop.title}
                             </h3>
                             <div className="flex gap-2 flex-wrap">
-                              <span className={`inline-block px-3 py-1 rounded-full text-xs font-medium ${
-                                workshop.type === 'BLS' ? 'bg-blue-100 text-blue-800' : 'bg-purple-100 text-purple-800'
-                              }`}>
+                              <span className={`inline-block px-3 py-1 rounded-full text-xs font-medium ${workshop.type === 'BLS' ? 'bg-blue-100 text-blue-800' : 'bg-purple-100 text-purple-800'
+                                }`}>
                                 {workshop.type}
                               </span>
                               {isUserRegistered && getStatusBadge(registrationStatus)}
@@ -335,7 +345,7 @@ const WorkshopsComponent = () => {
                             </button>
                           ) : getAvailableSeats(workshop) > 0 ? (
                             <button
-                              onClick={() => handleRegister(workshop._id)}
+                              onClick={() => handleRegisterClick(workshop._id)}
                               className="w-full px-4 py-2 bg-[#169AB4] text-white rounded-lg hover:bg-[#147a8f] transition-colors font-medium"
                             >
                               Register Now
@@ -397,9 +407,8 @@ const WorkshopsComponent = () => {
                           {workshop.title}
                         </h4>
                         <div className="flex gap-2 flex-wrap">
-                          <span className={`inline-block px-3 py-1 rounded-full text-xs font-medium ${
-                            workshop.type === 'BLS' ? 'bg-blue-100 text-blue-800' : 'bg-purple-100 text-purple-800'
-                          }`}>
+                          <span className={`inline-block px-3 py-1 rounded-full text-xs font-medium ${workshop.type === 'BLS' ? 'bg-blue-100 text-blue-800' : 'bg-purple-100 text-purple-800'
+                            }`}>
                             {workshop.type}
                           </span>
                           {getStatusBadge(registration.status)}
@@ -422,6 +431,32 @@ const WorkshopsComponent = () => {
                           <X className="h-4 w-4 inline mr-2" />
                           Your registration was rejected. Please register for another workshop.
                         </p>
+                      </div>
+                    )}
+
+                    {/* Certificate Download Section */}
+                    {registration.certificate && (
+                      <div className="mb-4 p-4 bg-green-50 border border-green-200 rounded-lg">
+                        <div className="flex items-start gap-3">
+                          <CheckCircle className="h-5 w-5 text-green-600 mt-0.5 flex-shrink-0" />
+                          <div className="flex-1">
+                            <p className="text-green-800 font-semibold mb-2">
+                              🎉 Your Certificate is Ready!
+                            </p>
+                            <p className="text-green-700 text-sm mb-3">
+                              Congratulations on completing the workshop. Download your certificate below.
+                            </p>
+                            <a href={registration.certificate}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              download
+                              className="inline-flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors text-sm font-medium"
+                            >
+                              <BookOpen className="h-4 w-4" />
+                              Download Certificate
+                            </a>
+                          </div>
+                        </div>
                       </div>
                     )}
 
@@ -456,13 +491,12 @@ const WorkshopsComponent = () => {
 
                     <div className="flex justify-end">
                       <button
-                        onClick={() => handleCancelRegistration(registration._id)}
+                        onClick={() => handleCancelClick(registration._id)}
                         disabled={cancellingId === registration._id}
-                        className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-colors text-sm ${
-                          cancellingId === registration._id
+                        className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-colors text-sm ${cancellingId === registration._id
                             ? 'bg-gray-400 cursor-not-allowed text-white'
                             : 'bg-red-500 text-white hover:bg-red-600'
-                        }`}
+                          }`}
                       >
                         {cancellingId === registration._id ? (
                           <>
@@ -484,6 +518,56 @@ const WorkshopsComponent = () => {
           </div>
         )}
       </div>
+
+      <ConfirmationModal
+        isOpen={showRegistrationModal}
+        onClose={() => {
+          setShowRegistrationModal(false);
+          setSelectedWorkshopId(null);
+        }}
+        onConfirm={confirmRegistration}
+        title="Confirm Workshop Registration"
+        type="warning"
+        confirmText="Yes, Register Me"
+        cancelText="Cancel"
+      >
+        <div className="space-y-3">
+          <p className="text-gray-700 font-medium">
+            Are you sure you want to proceed with this registration?
+          </p>
+          <ul className="space-y-2 text-sm text-gray-600">
+            <li className="flex items-start gap-2">
+              <span className="text-yellow-600 mt-0.5">•</span>
+              <span>Registration <strong>cannot be cancelled after a</strong> certain period</span>
+            </li>
+          </ul>
+        </div>
+      </ConfirmationModal>
+
+      {/* Cancellation Confirmation Modal */}
+      <ConfirmationModal
+        isOpen={showCancelModal}
+        onClose={() => {
+          setShowCancelModal(false);
+          setSelectedRegistrationId(null);
+        }}
+        onConfirm={confirmCancellation}
+        title="Cancel Workshop Registration"
+        type="danger"
+        confirmText="Yes, Cancel Registration"
+        cancelText="Keep Registration"
+      >
+        <div className="space-y-3">
+          <p className="text-gray-700 font-medium">
+            Are you sure you want to cancel this workshop registration?
+          </p>
+          <div className="bg-red-50 border border-red-200 rounded-lg p-3">
+            <p className="text-sm text-red-800">
+              <strong>Warning:</strong> This action cannot be undone. You will lose your spot in this workshop and may need to wait for the next available session.
+            </p>
+          </div>
+        </div>
+      </ConfirmationModal>
     </div>
   );
 };

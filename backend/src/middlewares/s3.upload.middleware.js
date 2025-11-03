@@ -3,6 +3,7 @@ import multer from 'multer';
 import multerS3 from 'multer-s3';
 import { v4 as uuidv4 } from 'uuid';
 import dotenv from 'dotenv';
+
 dotenv.config();
 
 AWS.config.update({
@@ -66,8 +67,8 @@ const uploadDocument = multer({
       'image/png',
       'image/jpg',
       'application/pdf',
-      'application/msword', // .doc
-      'application/vnd.openxmlformats-officedocument.wordprocessingml.document', // .docx
+      'application/msword',
+      'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
     ];
 
     if (allowedTypes.includes(file.mimetype)) cb(null, true);
@@ -75,8 +76,37 @@ const uploadDocument = multer({
   },
 });
 
-export { uploadPhoto, uploadDocument, s3 };
+const uploadCertificate = multer({
+  storage: multerS3({
+    s3,
+    bucket: process.env.S3_BUCKET_NAME,
+    key: (req, file, cb) => {
+      const fileName = `workshop-certificates/${uuidv4()}-${file.originalname}`;
+      cb(null, fileName);
+    },
+    contentType: multerS3.AUTO_CONTENT_TYPE,
+    acl: 'public-read',
+    metadata: (req, file, cb) => {
+      cb(null, {
+        fieldName: file.fieldname,
+        uploadedBy: req.user._id.toString(),
+        uploadDate: new Date().toISOString(),
+        registrationId: req.params.registrationId
+      });
+    },
+  }),
+  limits: { fileSize: 10 * 1024 * 1024 },
+  fileFilter: (req, file, cb) => {
+    const allowedTypes = [
+      'image/jpeg',
+      'image/png',
+      'image/jpg',
+      'application/pdf'
+    ];
 
+    if (allowedTypes.includes(file.mimetype)) cb(null, true);
+    else cb(new Error('Only PDF, JPG, and PNG files are allowed'), false);
+  },
+});
 
-
-
+export { uploadPhoto, uploadDocument, uploadCertificate, s3 };

@@ -1,3 +1,4 @@
+import { s3 } from '../middlewares/s3.upload.middleware.js';
 import { Workshop } from '../models/workshop.model.js';
 import { WorkshopRegistration } from '../models/workshopRegistration.model.js';
 import { User } from '../models/users.model.js';
@@ -350,6 +351,93 @@ const getPendingRegistrations = asyncHandler(async (req, res) => {
   );
 });
 
+const uploadCertificate = asyncHandler(async (req, res) => {
+  const { registrationId } = req.params;
+  const adminId = req.user._id;
+
+  if (!req.file) {
+    throw new ApiError(400, 'Certificate file is required');
+  }
+
+  const registration = await WorkshopRegistration.findById(registrationId);
+
+  if (!registration) {
+    throw new ApiError(404, 'Registration not found');
+  }
+
+  if (registration.certificate && registration.certificate.key) {
+    try {
+      await s3.deleteObject({
+        Bucket: process.env.S3_BUCKET_NAME,
+        Key: registration.certificate.key
+      }).promise();
+    } catch (error) {
+      console.error('Error deleting old certificate from S3:', error);
+    }
+  }
+
+  registration.certificate = {
+    url: req.file.location,
+    key: req.file.key,
+    uploadedAt: new Date(),
+    uploadedBy: adminId
+  };
+
+  await registration.save();
+
+  await User.updateOne(
+    { _id: registration.user, 'workshopRegistrations.workshop': registration.workshop },
+    { 
+      $set: { 
+        'workshopRegistrations.$.certificate': req.file.location
+      } 
+    }
+  );
+
+  return res.status(200).json(
+    new ApiResponse(200, registration, 'Certificate uploaded successfully to AWS S3')
+  );
+});
+
+const deleteCertificate = asyncHandler(async (req, res) => {
+  const { registrationId } = req.params;
+
+  const registration = await WorkshopRegistration.findById(registrationId);
+
+  if (!registration) {
+    throw new ApiError(404, 'Registration not found');
+  }
+
+  if (registration.certificate && registration.certificate.key) {
+    try {
+      await s3.deleteObject({
+        Bucket: process.env.S3_BUCKET_NAME,
+        Key: registration.certificate.key
+      }).promise();
+    } catch (error) {
+      console.error('Error deleting certificate from S3:', error);
+      throw new ApiError(500, 'Failed to delete certificate from AWS S3');
+    }
+  }
+
+  registration.certificate = undefined;
+  await registration.save();
+
+  await User.updateOne(
+    { _id: registration.user, 'workshopRegistrations.workshop': registration.workshop },
+    { 
+      $set: { 
+        'workshopRegistrations.$.certificate': null
+      } 
+    }
+  );
+
+  return res.status(200).json(
+    new ApiResponse(200, registration, 'Certificate deleted successfully from AWS S3')
+  );
+});
+
+
 export {
   createWorkshop,
   getAllWorkshops,
@@ -362,5 +450,7 @@ export {
   cancelRegistration,
   confirmRegistration,
   rejectRegistration,
-  getPendingRegistrations
+  getPendingRegistrations,
+  uploadCertificate,
+  deleteCertificate
 };

@@ -64,7 +64,8 @@ const userSchema = new mongoose.Schema({
             default: 'pending'
         },
         confirmedAt: Date,
-        rejectedAt: Date
+        rejectedAt: Date,
+        certificate: String
     }],
     conferenceRegistrations: [{
         type: mongoose.Schema.Types.ObjectId,

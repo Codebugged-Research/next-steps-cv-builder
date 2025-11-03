@@ -1,11 +1,32 @@
 import React, { useState } from 'react';
-import { ArrowLeft, BookOpen, Search, FileText, Edit, CheckCircle, Eye, Download, Users, Calendar, Target, ChevronLeft, ChevronRight } from 'lucide-react';
+import { ArrowLeft, BookOpen, Search, FileText, Edit, CheckCircle, Eye, Download, Users, Calendar, Target, ChevronLeft, ChevronRight, List } from 'lucide-react';
 import ProjectHeader from '../../../components/Common/ProjectHeader';
 
 const PublicationTimeline = () => {
   const [activeStage, setActiveStage] = useState(0);
   const [currentPage, setCurrentPage] = useState(0);
+  const [selectedProject, setSelectedProject] = useState('project1');
+  const [showProjectSelector, setShowProjectSelector] = useState(false);
   const stagesPerPage = 5;
+
+  const projects = [
+    {
+      id: 'project1',
+      name: 'Project 1 - Systematic Review on AI in Healthcare',
+      status: 'in-progress',
+      startDate: '2024-01-15',
+      teamMembers: 5,
+      currentStage: 2
+    },
+    {
+      id: 'project2',
+      name: 'Project 2 - Case Report on Rare Disease',
+      status: 'in-progress',
+      startDate: '2024-02-01',
+      teamMembers: 3,
+      currentStage: 1
+    }
+  ];
 
   const timelineStages = [
     {
@@ -180,7 +201,7 @@ const PublicationTimeline = () => {
       content: {
         overview: "Publication follow-up and final processing",
         topics: [
-          "Publication status follow up",
+          "Publication status follow-up",
           "Minor/Major revisions",
           "PDF Generation"
         ],
@@ -227,8 +248,88 @@ const PublicationTimeline = () => {
     }
   };
 
+  const handleProjectSelect = (projectId) => {
+    setSelectedProject(projectId);
+    setShowProjectSelector(false);
+    // Update timeline based on selected project
+    const project = projects.find(p => p.id === projectId);
+    if (project) {
+      setActiveStage(project.currentStage);
+      setCurrentPage(Math.floor(project.currentStage / stagesPerPage));
+    }
+  };
+
+  const currentProjectData = projects.find(p => p.id === selectedProject);
+
   return (
     <div className="w-full bg-white rounded-lg shadow-lg p-6 mb-8">
+      {/* Project Selector Section */}
+      <div className="mb-6 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg p-4 border border-blue-200">
+        <div className="flex items-center justify-between">
+          <div className="flex-1">
+            <h3 className="text-sm font-medium text-gray-600 mb-1">Currently Viewing</h3>
+            <p className="text-lg font-semibold text-gray-900">{currentProjectData?.name}</p>
+            <div className="flex items-center gap-4 mt-2">
+              <span className={`text-xs px-2 py-1 rounded-full ${
+                currentProjectData?.status === 'in-progress' ? 'bg-yellow-100 text-yellow-700' : 'bg-gray-100 text-gray-700'
+              }`}>
+                {currentProjectData?.status === 'in-progress' ? 'In Progress' : currentProjectData?.status}
+              </span>
+            </div>
+          </div>
+          <button
+            onClick={() => setShowProjectSelector(!showProjectSelector)}
+            className="flex items-center gap-2 px-4 py-2 bg-[#04445E] text-white rounded-lg hover:bg-[#033852] transition-colors"
+          >
+            <List className="w-4 h-4" />
+            Select Project
+          </button>
+        </div>
+
+        {/* Project Selector Dropdown */}
+        {showProjectSelector && (
+          <div className="mt-4 bg-white rounded-lg border border-gray-200 shadow-lg overflow-hidden">
+            <div className="p-3 bg-gray-50 border-b border-gray-200">
+              <h4 className="font-semibold text-gray-900">Your Projects</h4>
+            </div>
+            <div className="divide-y divide-gray-200">
+              {projects.map((project) => (
+                <button
+                  key={project.id}
+                  onClick={() => handleProjectSelect(project.id)}
+                  className={`w-full text-left p-4 hover:bg-gray-50 transition-colors ${
+                    selectedProject === project.id ? 'bg-blue-50 border-l-4 border-[#04445E]' : ''
+                  }`}
+                >
+                  <div className="flex items-start justify-between">
+                    <div className="flex-1">
+                      <h5 className="font-medium text-gray-900 mb-1">{project.name}</h5>
+                      <div className="flex items-center gap-3 text-sm text-gray-600">
+                        <span className="flex items-center gap-1">
+                          <Calendar className="w-3 h-3" />
+                          {new Date(project.startDate).toLocaleDateString()}
+                        </span>
+                        <span className="flex items-center gap-1">
+                          <Users className="w-3 h-3" />
+                          {project.teamMembers} members
+                        </span>
+                        <span className="flex items-center gap-1">
+                          <Target className="w-3 h-3" />
+                          Stage {project.currentStage + 1}
+                        </span>
+                      </div>
+                    </div>
+                    {selectedProject === project.id && (
+                      <CheckCircle className="w-5 h-5 text-[#04445E]" />
+                    )}
+                  </div>
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
+      </div>
+
       <div className="flex items-center justify-between mb-6">
         <h2 className="text-xl font-bold text-gray-900">Publication Timeline</h2>
         <div className="flex items-center gap-4">
@@ -323,19 +424,19 @@ const PublicationTimeline = () => {
               {timelineStages.find(s => s.id === activeStage)?.title}
             </h3>
           </div>
-       <div className="flex flex-col md:flex-row gap-4">
-          <div className="flex gap-2">
-            <button className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors">
-              <Download className="w-4 h-4" />
-              Project 1
-            </button>
-          </div>
-          <div className="flex gap-2">
-            <button className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors">
-              <Download className="w-4 h-4" />
-              Project 2
-            </button>
-          </div>
+          <div className="flex flex-col md:flex-row gap-4">
+            <div className="flex gap-2">
+              <button className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors">
+                <Download className="w-4 h-4" />
+                Project 1
+              </button>
+            </div>
+            <div className="flex gap-2">
+              <button className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors">
+                <Download className="w-4 h-4" />
+                Project 2
+              </button>
+            </div>
           </div>
         </div>
 
@@ -389,4 +490,5 @@ const SystematicReviews = ({ onBack }) => {
     </div>
   );
 };
+
 export default SystematicReviews;

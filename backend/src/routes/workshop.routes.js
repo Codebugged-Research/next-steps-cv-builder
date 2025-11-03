@@ -11,9 +11,12 @@ import {
   cancelRegistration,
   confirmRegistration,
   rejectRegistration,
-  getPendingRegistrations
+  getPendingRegistrations,
+  uploadCertificate,
+  deleteCertificate
 } from '../controllers/workshop.controller.js';
 import { verifyJWT } from '../middlewares/auth.middleware.js';
+import { uploadCertificate as uploadCertificateMiddleware } from '../middlewares/s3.upload.middleware.js';
 
 const router = Router();
 
@@ -29,5 +32,7 @@ router.route('/:id/register').post(verifyJWT, registerForWorkshop);
 router.route('/registrations/:registrationId').delete(verifyJWT, cancelRegistration);
 router.route('/registrations/:registrationId/confirm').put(verifyJWT, confirmRegistration);
 router.route('/registrations/:registrationId/reject').put(verifyJWT, rejectRegistration);
+router.route('/registrations/:registrationId/certificate').post(verifyJWT, uploadCertificateMiddleware.single('certificate'), uploadCertificate);
+router.route('/registrations/:registrationId/certificate').delete(verifyJWT, deleteCertificate);
 
 export default router;
