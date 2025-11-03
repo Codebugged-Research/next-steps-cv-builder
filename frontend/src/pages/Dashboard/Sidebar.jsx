@@ -27,18 +27,19 @@ const Sidebar = ({
     { id: 1, label: 'Basic Details', shortLabel: 'Basic Details' },
     { id: 2, label: 'Education', shortLabel: 'Education' },
     { id: 3, label: 'USMLE Scores', shortLabel: 'USMLE Scores' },
-    { id: 4, label: 'Skills', shortLabel: 'Skills' },
-    { id: 5, label: 'Achievements', shortLabel: 'Achievements' },
-    { id: 6, label: 'Publications', shortLabel: 'Publications' },
-    { id: 7, label: 'Conferences', shortLabel: 'Conferences' },
-    { id: 8, label: 'EMR & RCM', shortLabel: 'EMR & RCM' },
-    { id: 9, label: 'Workshops', shortLabel: 'Workshops' },
-    { id: 10, label: 'Review', shortLabel: 'Review' }
+    { id: 4, label: 'US Clinical Experience', shortLabel: 'US CE' },
+    { id: 5, label: 'Skills', shortLabel: 'Skills' },
+    { id: 6, label: 'Achievements', shortLabel: 'Achievements' },
+    { id: 7, label: 'Publications', shortLabel: 'Publications' },
+    { id: 8, label: 'Conferences', shortLabel: 'Conferences' },
+    { id: 9, label: 'EMR & RCM', shortLabel: 'EMR & RCM' },
+    { id: 10, label: 'Workshops', shortLabel: 'Workshops' },
+    { id: 11, label: 'Review', shortLabel: 'Review' }
   ];
 
   const handleCVBuilderClick = () => {
     onSectionChange('cv-builder');
-    setShowCVSteps(!showCVSteps);
+    setShowCVSteps(!showCVSteps); 
     setShowPrograms(false);
   };
 

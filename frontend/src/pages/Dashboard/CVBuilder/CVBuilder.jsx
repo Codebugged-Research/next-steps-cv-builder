@@ -70,6 +70,9 @@ const initialCVData = {
     step2ckScore: '',
     ecfmgCertified: false
   },
+    usClinicalExperience: {  
+    list: []
+  },
   clinicalExperiences: [],
   skills: {
     skillsList: '',
@@ -106,26 +109,26 @@ const CVBuilder = ({ onPreview, user, onStepChange, currentStep, onStepComplete 
   const [completedSteps, setCompletedSteps] = useState([]);
   const [showSaveModal, setShowSaveModal] = useState(false);
 
-  const totalSteps = 10;
-  const activeStep = currentStep || internalCurrentStep;
+ const totalSteps = 11;
+const activeStep = currentStep || internalCurrentStep;
 
-  const calculateCompletedSteps = useCallback((data) => {
-    const checks = [
-      { condition: data.basicDetails?.fullName && data.basicDetails?.email, step: 1 },
-      { condition: data.education?.graduation?.universityName && data.education?.graduation?.country, step: 2 },
-      { condition: data.usmleScores?.step1Status, step: 3 },
-      { condition: data.clinicalExperiences?.length > 0, step: 4 },
-      { condition: data.skills?.skillsList?.trim(), step: 5 },
-      { condition: data.professionalExperiences?.length > 0, step: 6 },
-      { condition: data.volunteerExperiences?.length > 0, step: 7 },
-      { condition: data.significantAchievements?.trim(), step: 8 },
-      { condition: data.workshops?.length > 0, step: 9 },
-      { condition: data.publications?.length > 0 || data.conferences?.length > 0, step: 10 },
-      { condition: data.emrRcmTraining?.emrSystems?.length > 0 || data.emrRcmTraining?.rcmTraining, step: 11 }
-    ];
-
-    return checks.filter(({ condition }) => condition).map(({ step }) => step);
-  }, []);
+const calculateCompletedSteps = useCallback((data) => {
+  const checks = [
+    { condition: data.basicDetails?.fullName && data.basicDetails?.email, step: 1 },
+    { condition: data.education?.graduation?.universityName && data.education?.graduation?.country, step: 2 },
+    { condition: data.usmleScores?.step1Status, step: 3 },
+    { condition: data.usClinicalExperience?.list?.length > 0, step: 4 },
+    { condition: data.skills?.skillsList?.trim(), step: 5 },
+    { condition: data.significantAchievements?.trim(), step: 6 },
+    { condition: data.publications?.length > 0, step: 7 },
+    { condition: data.conferences?.length > 0, step: 8 },
+    { condition: data.emrRcmTraining?.emrSystems?.length > 0 || data.emrRcmTraining?.rcmTraining, step: 9 },
+    { condition: data.workshops?.length > 0, step: 10 },
+    { condition: true, step: 11 }
+  ];
+  
+  return checks.filter(({ condition }) => condition).map(({ step }) => step);
+}, []);
 
   const checkExistingCV = useCallback(async () => {
     if (!user?._id) {

@@ -1,6 +1,7 @@
 import BasicDetailsStep from './steps/BasicDetailsStep';
 import EducationStep from './steps/EducationStep';
 import USMLEScoresStep from './steps/USMLEScoresStep';
+import USClinicalExperienceStep from './steps/USClinicalExperienceStep';
 import SkillsStep from './steps/SkillsStep';
 import AchievementsStep from './steps/AchievementsStep';
 import PublicationsStep from './steps/PublicationsStep';
@@ -13,13 +14,14 @@ const stepComponents = {
   1: BasicDetailsStep,
   2: EducationStep,
   3: USMLEScoresStep,
-  4: SkillsStep,
-  5: AchievementsStep,
-  6: PublicationsStep,
-  7: ConferencesStep,
-  8: EMRTrainingStep,
-  9: WorkshopsStep,
-  10: ReviewStep
+  4: USClinicalExperienceStep,
+  5: SkillsStep,
+  6: AchievementsStep,
+  7: PublicationsStep,
+  8: ConferencesStep,
+  9: EMRTrainingStep,
+  10: WorkshopsStep,
+  11: ReviewStep
 };
 
 const StepContent = ({ currentStep, formData, onInputChange, onArrayAdd, onArrayRemove, onArrayUpdate }) => {
