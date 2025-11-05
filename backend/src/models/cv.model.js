@@ -310,6 +310,43 @@ const cvSchema = new mongoose.Schema({
             default: false
         }
     },
+    // ADDED: US Clinical Experience
+    usClinicalExperience: {
+        list: [{
+            title: {
+                type: String,
+                default: ""
+            },
+            hospital: {
+                type: String,
+                default: ""
+            },
+            location: {
+                type: String,
+                default: ""
+            },
+            duration: {
+                type: String,
+                default: ""
+            },
+            startDate: {
+                type: String,
+                default: ""
+            },
+            endDate: {
+                type: String,
+                default: ""
+            },
+            description: {
+                type: String,
+                default: ""
+            },
+            supervisor: {
+                type: String,
+                default: ""
+            }
+        }]
+    },
     clinicalExperiences: [{
         title: String,
         hospital: String,
@@ -355,118 +392,118 @@ const cvSchema = new mongoose.Schema({
         description: String
     }],
     significantAchievements: {
-    type: String,
-    default: ""
-},
-achievements: [{
-    id: Number,
-    title: {
-        type: String,
-        required: true
-    },
-    description: {
         type: String,
         default: ""
     },
-    date: {
-        type: String,
-        default: ""
-    },
-    attachmentType: {
-        type: String,
-        enum: ['none', 'url'],
-        default: 'none'
-    },
-    url: {
-        type: String,
-        default: ""
-    }
-}],
+    achievements: [{
+        id: Number,
+        title: {
+            type: String,
+            required: true
+        },
+        description: {
+            type: String,
+            default: ""
+        },
+        date: {
+            type: String,
+            default: ""
+        },
+        attachmentType: {
+            type: String,
+            enum: ['none', 'url'],
+            default: 'none'
+        },
+        url: {
+            type: String,
+            default: ""
+        }
+    }],
     publications: [{
-    title: {
-        type: String,
-        required: true
-    },
-    journal: {
-        type: String,
-        required: true
-    },
-    year: {
-        type: String,
-        required: true
-    },
-    type: {
-        type: String,
-        enum: ['research-article', 'case-report', 'review-article', 'conference-paper'],
-        default: 'research-article'
-    },
-    supportingDocument: {
-        url: {
+        title: {
             type: String,
-            default: null
+            required: true
         },
-        key: {
+        journal: {
             type: String,
-            default: null
+            required: true
         },
-        fileName: {
+        year: {
             type: String,
-            default: null
+            required: true
         },
-        fileSize: {
-            type: Number,
-            default: null
+        type: {
+            type: String,
+            enum: ['research-article', 'case-report', 'review-article', 'conference-paper'],
+            default: 'research-article'
+        },
+        supportingDocument: {
+            url: {
+                type: String,
+                default: null
+            },
+            key: {
+                type: String,
+                default: null
+            },
+            fileName: {
+                type: String,
+                default: null
+            },
+            fileSize: {
+                type: Number,
+                default: null
+            }
         }
-    }
-}],
-   conferences: [{
-    name: {
-        type: String,
-        required: true
-    },
-    year: {
-        type: String,
-        required: true
-    },
-    location: {
-        type: String,
-        default: ""
-    },
-    country: {
-        type: String,
-        default: ""
-    },
-    role: {
-        type: String,
-        required: true
-    },
-    description: {
-        type: String,
-        default: ""
-    },
-    certificateAwarded: {
-        type: Boolean,
-        default: false
-    },
-    supportingDocument: {
-        url: {
+    }],
+    conferences: [{
+        name: {
             type: String,
-            default: null
+            required: true
         },
-        key: {
+        year: {
             type: String,
-            default: null
+            required: true
         },
-        fileName: {
+        location: {
             type: String,
-            default: null
+            default: ""
         },
-        fileSize: {
-            type: Number,
-            default: null
+        country: {
+            type: String,
+            default: ""
+        },
+        role: {
+            type: String,
+            required: true
+        },
+        description: {
+            type: String,
+            default: ""
+        },
+        certificateAwarded: {
+            type: Boolean,
+            default: false
+        },
+        supportingDocument: {
+            url: {
+                type: String,
+                default: null
+            },
+            key: {
+                type: String,
+                default: null
+            },
+            fileName: {
+                type: String,
+                default: null
+            },
+            fileSize: {
+                type: Number,
+                default: null
+            }
         }
-    }
-}],
+    }],
     workshops: [{
         name: {
             type: String,
@@ -506,7 +543,68 @@ achievements: [{
             default: ""
         }
     },
-    // Government CV upload section
+    // ADDED: ACLS/BLS Certification
+    aclsBls: {
+        aclsCertified: {
+            type: Boolean,
+            default: false
+        },
+        blsCertified: {
+            type: Boolean,
+            default: false
+        },
+        aclsIssueDate: {
+            type: String,
+            default: ""
+        },
+        aclsExpiryDate: {
+            type: String,
+            default: ""
+        },
+        blsIssueDate: {
+            type: String,
+            default: ""
+        },
+        blsExpiryDate: {
+            type: String,
+            default: ""
+        },
+        provider: {
+            type: String,
+            default: ""
+        }
+    },
+    // ADDED: Work Experience
+    workExperience: [{
+        position: {
+            type: String,
+            default: ""
+        },
+        organization: {
+            type: String,
+            default: ""
+        },
+        location: {
+            type: String,
+            default: ""
+        },
+        startDate: {
+            type: String,
+            default: ""
+        },
+        endDate: {
+            type: String,
+            default: ""
+        },
+        current: {
+            type: Boolean,
+            default: false
+        },
+        description: {
+            type: String,
+            default: ""
+        }
+    }],
     govCV: {
         userId: {
             type: mongoose.Schema.Types.ObjectId,
@@ -519,7 +617,7 @@ achievements: [{
             type: String
         },
         fileId: {
-            type: String // GridFS file ID
+            type: String
         },
         size: {
             type: Number

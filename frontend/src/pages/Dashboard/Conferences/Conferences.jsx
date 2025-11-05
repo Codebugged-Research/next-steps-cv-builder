@@ -60,26 +60,19 @@ const Conferences = ({ onBack }) => {
     }, []);
 
     const getAvailableConferences = () => {
-        // Get registered conference IDs - support both old and new format
         const registeredConferenceIds = registrations.map(reg => {
-            // New format: reg.conference is the ObjectId
             if (typeof reg.conference === 'string') {
                 return reg.conference;
             }
-            // Old format: reg.conference is populated object
             if (reg.conference?._id) {
                 return reg.conference._id;
             }
             return null;
         }).filter(id => id !== null);
 
-        console.log('Registered IDs:', registeredConferenceIds);
-        console.log('All conferences:', conferences.map(c => c._id));
 
-        // Filter out registered conferences
         const available = conferences.filter(conf => !registeredConferenceIds.includes(conf._id));
         
-        console.log('Available conferences:', available.length);
         
         return available;
     };

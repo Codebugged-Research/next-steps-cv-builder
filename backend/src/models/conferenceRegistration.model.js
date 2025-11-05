@@ -66,7 +66,7 @@ const conferenceRegistrationSchema = new mongoose.Schema({
     status: {
         type: String,
         enum: ['registered', 'cancelled', 'attended'],
-        default: 'registered'
+        default: 'pending'
     }
 }, {
     timestamps: true

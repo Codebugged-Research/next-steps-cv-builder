@@ -8,27 +8,28 @@ const UpcomingConferencesTab = ({ conferences, onRefreshRegistrations, loading, 
   const [bookingLoading, setBookingLoading] = useState(null);
 
   const handleRegister = async (conferenceId) => {
-    try {
-      setBookingLoading(conferenceId);
-      
-      const response = await api.post(`/conferences/${conferenceId}/register`);
-      
-      if (response.data.success) {
-        toast.success('Successfully registered for the conference!');
-        if (onRefreshRegistrations) {
-          onRefreshRegistrations();
-        }
-      } else {
-        toast.error(response.data.message || 'Registration failed');
+  try {
+    setBookingLoading(conferenceId);
+    
+    const response = await api.post(`/conferences/${conferenceId}/register`);
+    
+    if (response.data.success) {
+      toast.success('Successfully registered for the conference!');
+      if (onRefreshRegistrations) {
+        onRefreshRegistrations();
       }
-    } catch (error) {
-      console.error('Error registering for conference:', error);
-      const errorMessage = error.response?.data?.message || 'Failed to register. Please try again.';
-      toast.error(errorMessage);
-    } finally {
-      setBookingLoading(null);
+    } else {
+      toast.error(response.data.message || 'Registration failed');
     }
-  };
+  } catch (error) {
+    console.error('Error registering for conference:', error);
+    const errorMessage =
+                        'Max registration limit reached ';
+    toast.error(errorMessage);
+  } finally {
+    setBookingLoading(null);
+  }
+};
 
   if (loading) {
     return (

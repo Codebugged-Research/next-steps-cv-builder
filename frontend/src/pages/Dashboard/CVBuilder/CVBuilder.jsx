@@ -70,7 +70,7 @@ const initialCVData = {
     step2ckScore: '',
     ecfmgCertified: false
   },
-    usClinicalExperience: {  
+  usClinicalExperience: {  
     list: []
   },
   clinicalExperiences: [],
@@ -108,27 +108,27 @@ const CVBuilder = ({ onPreview, user, onStepChange, currentStep, onStepComplete 
   const [loading, setLoading] = useState(true);
   const [completedSteps, setCompletedSteps] = useState([]);
   const [showSaveModal, setShowSaveModal] = useState(false);
-
- const totalSteps = 11;
-const activeStep = currentStep || internalCurrentStep;
-
-const calculateCompletedSteps = useCallback((data) => {
-  const checks = [
-    { condition: data.basicDetails?.fullName && data.basicDetails?.email, step: 1 },
-    { condition: data.education?.graduation?.universityName && data.education?.graduation?.country, step: 2 },
-    { condition: data.usmleScores?.step1Status, step: 3 },
-    { condition: data.usClinicalExperience?.list?.length > 0, step: 4 },
-    { condition: data.skills?.skillsList?.trim(), step: 5 },
-    { condition: data.significantAchievements?.trim(), step: 6 },
-    { condition: data.publications?.length > 0, step: 7 },
-    { condition: data.conferences?.length > 0, step: 8 },
-    { condition: data.emrRcmTraining?.emrSystems?.length > 0 || data.emrRcmTraining?.rcmTraining, step: 9 },
-    { condition: data.workshops?.length > 0, step: 10 },
-    { condition: true, step: 11 }
-  ];
   
-  return checks.filter(({ condition }) => condition).map(({ step }) => step);
-}, []);
+  const totalSteps = 11;
+  const activeStep = currentStep || internalCurrentStep;
+
+  const calculateCompletedSteps = useCallback((data) => {
+    const checks = [
+      { condition: data.basicDetails?.fullName && data.basicDetails?.email, step: 1 },
+      { condition: data.education?.graduation?.universityName && data.education?.graduation?.country, step: 2 },
+      { condition: data.usmleScores?.step1Status, step: 3 },
+      { condition: data.usClinicalExperience?.list?.length > 0, step: 4 },
+      { condition: data.skills?.skillsList?.trim(), step: 5 },
+      { condition: data.significantAchievements?.trim(), step: 6 },
+      { condition: data.publications?.length > 0, step: 7 },
+      { condition: data.conferences?.length > 0, step: 8 },
+      { condition: data.emrRcmTraining?.emrSystems?.length > 0 || data.emrRcmTraining?.rcmTraining, step: 9 },
+      { condition: data.workshops?.length > 0, step: 10 },
+      { condition: true, step: 11 }
+    ];
+    
+    return checks.filter(({ condition }) => condition).map(({ step }) => step);
+  }, []);
 
   const checkExistingCV = useCallback(async () => {
     if (!user?._id) {
@@ -140,17 +140,16 @@ const calculateCompletedSteps = useCallback((data) => {
       const response = await api.get(`/cv/${user._id}`);
       if (response.data.success) {
         const cvData = response.data.data;
-
         if (typeof cvData.skills === 'string') {
           cvData.skills = { skillsList: cvData.skills, supportingDocuments: [] };
         } else if (!cvData.skills) {
           cvData.skills = { skillsList: '', supportingDocuments: [] };
         }
-
         setFormData(cvData);
         setCompletedSteps(calculateCompletedSteps(cvData));
       }
     } catch (error) {
+      // Silently handle error
     } finally {
       setLoading(false);
     }
@@ -159,7 +158,6 @@ const calculateCompletedSteps = useCallback((data) => {
   const updateCompletedSteps = useCallback((newData) => {
     const newCompleted = calculateCompletedSteps(newData);
     setCompletedSteps(newCompleted);
-
     if (onStepComplete && newCompleted.includes(activeStep) && !completedSteps.includes(activeStep)) {
       onStepComplete(activeStep);
     }
@@ -190,7 +188,6 @@ const calculateCompletedSteps = useCallback((data) => {
   const handleInputChange = useCallback((section, field, value) => {
     setFormData(prevData => {
       const newData = JSON.parse(JSON.stringify(prevData));
-
       if (section === 'skills') {
         if (!newData.skills) newData.skills = {};
         newData.skills[field] = value;
@@ -203,7 +200,6 @@ const calculateCompletedSteps = useCallback((data) => {
         if (!newData[section]) newData[section] = {};
         newData[section][field] = value;
       }
-
       return newData;
     });
   }, []);
@@ -264,18 +260,18 @@ const calculateCompletedSteps = useCallback((data) => {
     }
   }, [user?._id, formData]);
 
-
   const handlePreview = useCallback(() => setShowPreview(true), []);
   const handleBackFromPreview = useCallback(() => setShowPreview(false), []);
+
   const handleDownload = useCallback(() => {
     toast.info('PDF download functionality will be implemented soon');
   }, []);
 
   if (loading) {
     return (
-      <div className="bg-white rounded-xl shadow-lg p-8">
-        <div className="text-center py-12">
-          <div className="text-xl text-[#04445E]">Loading your CV...</div>
+      <div className="bg-white rounded-xl shadow-lg p-4 sm:p-6 md:p-8 mx-auto max-w-full">
+        <div className="text-center py-8 sm:py-12">
+          <div className="text-lg sm:text-xl text-[#04445E]">Loading your CV...</div>
         </div>
       </div>
     );
@@ -293,7 +289,7 @@ const calculateCompletedSteps = useCallback((data) => {
   }
 
   return (
-    <div className="bg-white rounded-xl shadow-lg p-8">
+    <div className="bg-white rounded-xl shadow-lg p-4 sm:p-6 md:p-8 mx-auto max-w-full lg:max-w-6xl">
       <ProgressBar currentStep={activeStep} totalSteps={totalSteps} />
       <StepContent
         currentStep={activeStep}
