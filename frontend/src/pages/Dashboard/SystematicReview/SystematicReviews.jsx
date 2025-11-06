@@ -1,32 +1,19 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { ArrowLeft, BookOpen, Search, FileText, Edit, CheckCircle, Eye, Download, Users, Calendar, Target, ChevronLeft, ChevronRight, List } from 'lucide-react';
 import ProjectHeader from '../../../components/Common/ProjectHeader';
+import api from '../../../services/api';
 
 const PublicationTimeline = () => {
   const [activeStage, setActiveStage] = useState(0);
   const [currentPage, setCurrentPage] = useState(0);
-  const [selectedProject, setSelectedProject] = useState('project1');
+  const [selectedProject, setSelectedProject] = useState(null);
+  const [selectedProjectId, setSelectedProjectId] = useState(null);
   const [showProjectSelector, setShowProjectSelector] = useState(false);
-  const stagesPerPage = 5;
+  const [publications, setPublications] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
-  const projects = [
-    {
-      id: 'project1',
-      name: 'Project 1 - Systematic Review on AI in Healthcare',
-      status: 'in-progress',
-      startDate: '2024-01-15',
-      teamMembers: 5,
-      currentStage: 2
-    },
-    {
-      id: 'project2',
-      name: 'Project 2 - Case Report on Rare Disease',
-      status: 'in-progress',
-      startDate: '2024-02-01',
-      teamMembers: 3,
-      currentStage: 1
-    }
-  ];
+  const stagesPerPage = 5;
 
   const timelineStages = [
     {
@@ -34,7 +21,6 @@ const PublicationTimeline = () => {
       title: "Stage 1",
       duration: "Month 1",
       icon: BookOpen,
-      status: "completed",
       content: {
         overview: "Foundation of research methodology and article types",
         topics: [
@@ -43,8 +29,7 @@ const PublicationTimeline = () => {
           "Purpose of Review Article",
           "Introduction to PICO Chart",
           "Purpose of PICO Chart"
-        ],
-        progress: 100
+        ]
       }
     },
     {
@@ -52,7 +37,6 @@ const PublicationTimeline = () => {
       title: "Stage 2",
       duration: "Month 1",
       icon: Target,
-      status: "completed",
       content: {
         overview: "Developing PICO framework and understanding publication process",
         topics: [
@@ -60,8 +44,7 @@ const PublicationTimeline = () => {
           "Information about Publication Process",
           "Initiation for Review Article topics",
           "Information regarding Next Class"
-        ],
-        progress: 100
+        ]
       }
     },
     {
@@ -69,7 +52,6 @@ const PublicationTimeline = () => {
       title: "Stage 3",
       duration: "Month 1",
       icon: Search,
-      status: "in-progress",
       content: {
         overview: "Search strategy development and database navigation",
         topics: [
@@ -77,8 +59,7 @@ const PublicationTimeline = () => {
           "Purpose of Search Strategy",
           "Introduction to Pubmed Database",
           "Search rules related to Pubmed Database"
-        ],
-        progress: 75
+        ]
       }
     },
     {
@@ -86,7 +67,6 @@ const PublicationTimeline = () => {
       title: "Stage 4",
       duration: "Month 1",
       icon: FileText,
-      status: "pending",
       content: {
         overview: "Case reports introduction and practical demonstrations",
         topics: [
@@ -96,8 +76,7 @@ const PublicationTimeline = () => {
           "Few Examples",
           "Initiation for Case Report topics",
           "Examples through Demonstration"
-        ],
-        progress: 0
+        ]
       }
     },
     {
@@ -105,7 +84,6 @@ const PublicationTimeline = () => {
       title: "Stage 5",
       duration: "Month 1",
       icon: Users,
-      status: "pending",
       content: {
         overview: "Resource access and citation management tools",
         topics: [
@@ -114,8 +92,7 @@ const PublicationTimeline = () => {
           "Introduction to Reference Citation Manager",
           "Demonstration of Mendeley Citation Manager",
           "Guidelines for Systematic Review Article"
-        ],
-        progress: 0
+        ]
       }
     },
     {
@@ -123,15 +100,13 @@ const PublicationTimeline = () => {
       title: "Stage 6",
       duration: "Month 2",
       icon: CheckCircle,
-      status: "pending",
       content: {
         overview: "Topic finalization and task distribution",
         topics: [
           "Finalize Review Article Topic",
           "Distribution of Tasks between Students",
           "Discussion on Case Report Topics"
-        ],
-        progress: 0
+        ]
       }
     },
     {
@@ -139,76 +114,60 @@ const PublicationTimeline = () => {
       title: "Stage 7",
       duration: "Month 2",
       icon: Edit,
-      status: "pending",
       content: {
         overview: "Case report finalization and comprehensive discussion",
         topics: [
           "Finalize Case Report Topic",
           "Distribution of Tasks between Students",
           "Discussion on both Review Article and Case Report"
-        ],
-        progress: 0
-      }
-    },
-    {
-      id: 7,
-      title: "Stage 8",
-      duration: "Month 2",
-      icon: Eye,
-      status: "pending",
-      content: {
-        overview: "Progress monitoring and quality assurance",
-        topics: [
-          "RA & CR progress monitoring"
-        ],
-        progress: 0
-      }
-    },
-    {
-      id: 8,
-      title: "Stage 9-12",
-      duration: "Month 3",
-      icon: FileText,
-      status: "pending",
-      content: {
-        overview: "Final draft preparation and submission",
-        topics: [
-          "Preparation & Submissions of final draft (Both RA & CR)"
-        ],
-        progress: 0
-      }
-    },
-    {
-      id: 9,
-      title: "Stage 13-16",
-      duration: "Month 4",
-      icon: CheckCircle,
-      status: "pending",
-      content: {
-        overview: "Quality review and journal selection",
-        topics: [
-          "Proof reading plagiarism check grammar corrections selection of suitable journals"
-        ],
-        progress: 0
-      }
-    },
-    {
-      id: 10,
-      title: "Stage 17-20",
-      duration: "Month 5",
-      icon: Download,
-      status: "pending",
-      content: {
-        overview: "Publication follow-up and final processing",
-        topics: [
-          "Publication status follow-up",
-          "Minor/Major revisions",
-          "PDF Generation"
-        ],
-        progress: 0
+        ]
       }
     }
   ];
+
+  useEffect(() => {
+    fetchUserPublications();
+  }, []);
+
+  const fetchUserPublications = async () => {
+    try {
+      setLoading(true);
+      const response = await api.get('/publications/user/publications');
+      
+      if (response.data.success) {
+        setPublications(response.data.data);
+        if (response.data.data.length > 0) {
+          setSelectedProject(response.data.data[0]._id);
+          const firstProject = response.data.data[0].projects[0];
+          if (firstProject) {
+            setSelectedProjectId(firstProject._id);
+            setActiveStage(firstProject.stage - 1);
+            setCurrentPage(Math.floor((firstProject.stage - 1) / stagesPerPage));
+          }
+        }
+      }
+      setLoading(false);
+    } catch (err) {
+      setError(err.response?.data?.message || 'Failed to fetch publications');
+      setLoading(false);
+    }
+  };
+
+  const getStatusForStage = (stageNumber) => {
+    if (!selectedProject || !selectedProjectId) return 'pending';
+    
+    const publication = publications.find(p => p._id === selectedProject);
+    if (!publication) return 'pending';
+
+    const project = publication.projects.find(p => p._id === selectedProjectId);
+    if (!project) return 'pending';
+
+    const currentStage = project.stage;
+    
+    if (stageNumber < currentStage) return 'completed';
+    if (stageNumber === currentStage) return 'in-progress';
+    return 'pending';
+  };
 
   const getStatusColor = (status) => {
     switch(status) {
@@ -248,33 +207,83 @@ const PublicationTimeline = () => {
     }
   };
 
-  const handleProjectSelect = (projectId) => {
-    setSelectedProject(projectId);
+  const handleProjectSelect = (publicationId, projectId) => {
+    setSelectedProject(publicationId);
+    setSelectedProjectId(projectId);
     setShowProjectSelector(false);
-    // Update timeline based on selected project
-    const project = projects.find(p => p.id === projectId);
-    if (project) {
-      setActiveStage(project.currentStage);
-      setCurrentPage(Math.floor(project.currentStage / stagesPerPage));
+    
+    const publication = publications.find(p => p._id === publicationId);
+    if (publication) {
+      const project = publication.projects.find(proj => proj._id === projectId);
+      if (project) {
+        setActiveStage(project.stage - 1);
+        setCurrentPage(Math.floor((project.stage - 1) / stagesPerPage));
+      }
     }
   };
 
-  const currentProjectData = projects.find(p => p.id === selectedProject);
+  const currentPublication = publications.find(p => p._id === selectedProject);
+  const currentProjectData = currentPublication?.projects.find(p => p._id === selectedProjectId);
+
+  const downloadCertificate = (certificateUrl) => {
+    if (certificateUrl) {
+      window.open(certificateUrl, '_blank');
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className="w-full bg-white rounded-lg shadow-lg p-6 mb-8">
+        <div className="flex items-center justify-center py-12">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#04445E]"></div>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="w-full bg-white rounded-lg shadow-lg p-6 mb-8">
+        <div className="text-center py-12">
+          <p className="text-red-600">{error}</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (publications.length === 0) {
+    return (
+      <div className="w-full bg-white rounded-lg shadow-lg p-6 mb-8">
+        <div className="text-center py-12">
+          <p className="text-gray-600">No publications found. Please contact your administrator.</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="w-full bg-white rounded-lg shadow-lg p-6 mb-8">
-      {/* Project Selector Section */}
       <div className="mb-6 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg p-4 border border-blue-200">
         <div className="flex items-center justify-between">
           <div className="flex-1">
             <h3 className="text-sm font-medium text-gray-600 mb-1">Currently Viewing</h3>
-            <p className="text-lg font-semibold text-gray-900">{currentProjectData?.name}</p>
+            <p className="text-lg font-semibold text-gray-900">{currentProjectData?.name || 'Select a project'}</p>
             <div className="flex items-center gap-4 mt-2">
               <span className={`text-xs px-2 py-1 rounded-full ${
-                currentProjectData?.status === 'in-progress' ? 'bg-yellow-100 text-yellow-700' : 'bg-gray-100 text-gray-700'
+                currentPublication?.status === 'active' ? 'bg-yellow-100 text-yellow-700' : 
+                currentPublication?.status === 'completed' ? 'bg-green-100 text-green-700' :
+                'bg-gray-100 text-gray-700'
               }`}>
-                {currentProjectData?.status === 'in-progress' ? 'In Progress' : currentProjectData?.status}
+                {currentPublication?.status}
               </span>
+              <span className="text-xs text-gray-600">
+                Team Size: {currentPublication?.teamSize}
+              </span>
+              {currentProjectData && (
+                <span className="text-xs text-gray-600">
+                  Current Stage: {currentProjectData.stage}
+                </span>
+              )}
             </div>
           </div>
           <button
@@ -286,44 +295,47 @@ const PublicationTimeline = () => {
           </button>
         </div>
 
-        {/* Project Selector Dropdown */}
         {showProjectSelector && (
           <div className="mt-4 bg-white rounded-lg border border-gray-200 shadow-lg overflow-hidden">
             <div className="p-3 bg-gray-50 border-b border-gray-200">
               <h4 className="font-semibold text-gray-900">Your Projects</h4>
             </div>
-            <div className="divide-y divide-gray-200">
-              {projects.map((project) => (
-                <button
-                  key={project.id}
-                  onClick={() => handleProjectSelect(project.id)}
-                  className={`w-full text-left p-4 hover:bg-gray-50 transition-colors ${
-                    selectedProject === project.id ? 'bg-blue-50 border-l-4 border-[#04445E]' : ''
-                  }`}
-                >
-                  <div className="flex items-start justify-between">
-                    <div className="flex-1">
-                      <h5 className="font-medium text-gray-900 mb-1">{project.name}</h5>
-                      <div className="flex items-center gap-3 text-sm text-gray-600">
-                        <span className="flex items-center gap-1">
-                          <Calendar className="w-3 h-3" />
-                          {new Date(project.startDate).toLocaleDateString()}
-                        </span>
-                        <span className="flex items-center gap-1">
-                          <Users className="w-3 h-3" />
-                          {project.teamMembers} members
-                        </span>
-                        <span className="flex items-center gap-1">
-                          <Target className="w-3 h-3" />
-                          Stage {project.currentStage + 1}
-                        </span>
+            <div className="divide-y divide-gray-200 max-h-96 overflow-y-auto">
+              {publications.map((publication) => (
+                <div key={publication._id}>
+                  {publication.projects.map((project) => (
+                    <button
+                      key={project._id}
+                      onClick={() => handleProjectSelect(publication._id, project._id)}
+                      className={`w-full text-left p-4 hover:bg-gray-50 transition-colors ${
+                        selectedProjectId === project._id ? 'bg-blue-50 border-l-4 border-[#04445E]' : ''
+                      }`}
+                    >
+                      <div className="flex items-start justify-between">
+                        <div className="flex-1">
+                          <h5 className="font-medium text-gray-900 mb-1">{project.name}</h5>
+                          <div className="flex items-center gap-3 text-sm text-gray-600">
+                            <span className="flex items-center gap-1">
+                              <Calendar className="w-3 h-3" />
+                              {new Date(publication.createdAt).toLocaleDateString()}
+                            </span>
+                            <span className="flex items-center gap-1">
+                              <Users className="w-3 h-3" />
+                              {publication.teamSize} members
+                            </span>
+                            <span className="flex items-center gap-1">
+                              <Target className="w-3 h-3" />
+                              Stage {project.stage}
+                            </span>
+                          </div>
+                        </div>
+                        {selectedProjectId === project._id && (
+                          <CheckCircle className="w-5 h-5 text-[#04445E]" />
+                        )}
                       </div>
-                    </div>
-                    {selectedProject === project.id && (
-                      <CheckCircle className="w-5 h-5 text-[#04445E]" />
-                    )}
-                  </div>
-                </button>
+                    </button>
+                  ))}
+                </div>
               ))}
             </div>
           </div>
@@ -377,6 +389,8 @@ const PublicationTimeline = () => {
             {currentStages.map((stage, index) => {
               const Icon = stage.icon;
               const isActive = stage.id === activeStage;
+              const stageNumber = stage.id + 1;
+              const status = getStatusForStage(stageNumber);
               const stageIndex = timelineStages.findIndex(s => s.id === stage.id);
               const isPast = stageIndex < timelineStages.findIndex(s => s.id === activeStage);
               
@@ -388,7 +402,7 @@ const PublicationTimeline = () => {
                       isActive 
                         ? 'border-[#04445E] bg-[#04445E] text-white shadow-lg scale-110' 
                         : isPast 
-                        ? `border-green-500 ${getStatusColor(stage.status)} text-white`
+                        ? `border-green-500 ${getStatusColor(status)} text-white`
                         : 'border-gray-300 bg-white text-gray-500 hover:border-[#04445E] hover:scale-105'
                     }`}
                   >
@@ -403,11 +417,11 @@ const PublicationTimeline = () => {
                       {stage.duration}
                     </div>
                     <div className={`text-xs px-2 py-1 rounded-full inline-block ${
-                      stage.status === 'completed' ? 'bg-green-100 text-green-700' :
-                      stage.status === 'in-progress' ? 'bg-blue-100 text-[#04445E]' :
+                      status === 'completed' ? 'bg-green-100 text-green-700' :
+                      status === 'in-progress' ? 'bg-blue-100 text-[#04445E]' :
                       'bg-gray-100 text-gray-600'
                     }`}>
-                      {getStatusIcon(stage.status)}
+                      {getStatusIcon(status)}
                     </div>
                   </div>
                 </div>
@@ -425,18 +439,15 @@ const PublicationTimeline = () => {
             </h3>
           </div>
           <div className="flex flex-col md:flex-row gap-4">
-            <div className="flex gap-2">
-              <button className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors">
+            {currentPublication?.certificate?.url && (
+              <button 
+                onClick={() => downloadCertificate(currentPublication?.certificate?.url)}
+                className="flex items-center gap-2 px-4 py-2 rounded-lg transition-colors bg-green-600 text-white hover:bg-green-700"
+              >
                 <Download className="w-4 h-4" />
-                Project 1
+                Download Certificate
               </button>
-            </div>
-            <div className="flex gap-2">
-              <button className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors">
-                <Download className="w-4 h-4" />
-                Project 2
-              </button>
-            </div>
+            )}
           </div>
         </div>
 
@@ -470,14 +481,37 @@ const NextStepsProjects = () => {
 };
 
 const SystematicReviews = ({ onBack }) => {
+  const [publications, setPublications] = useState([]);
+
+  useEffect(() => {
+    fetchStats();
+  }, []);
+
+  const fetchStats = async () => {
+    try {
+      const response = await api.get('/publications/user/publications');
+      
+      if (response.data.success) {
+        setPublications(response.data.data);
+      }
+    } catch (err) {
+      console.error('Failed to fetch stats');
+    }
+  };
+
+  const totalProjects = publications.reduce((acc, pub) => acc + pub.numberOfProjects, 0);
+  const avgTeamSize = publications.length > 0 
+    ? Math.round(publications.reduce((acc, pub) => acc + pub.teamSize, 0) / publications.length) 
+    : 0;
+
   const headerConfig = {
     backgroundImage: '/publications.jpg',  
     title: 'Publications',
     subtitle: 'Collaborate with peers and Next Steps team for publication-ready research',
     stats: [
-      { value: '8', label: 'Project Stages' },
-      { value: '5', label: 'Team Size' },
-      { value: '1', label: 'Project' }
+      { value: '7', label: 'Project Stages' },
+      { value: avgTeamSize.toString(), label: 'Avg Team Size' },
+      { value: totalProjects.toString(), label: 'Total Projects' }
     ]
   };
 
