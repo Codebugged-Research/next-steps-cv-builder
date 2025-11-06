@@ -115,11 +115,62 @@ const PublicationTimeline = () => {
       duration: "Month 2",
       icon: Edit,
       content: {
-        overview: "Case report finalization and comprehensive discussion",
+        overview: "Case report and systematic review finalization with comprehensive discussion",
         topics: [
           "Finalize Case Report Topic",
+          "Finalize Systematic Review Topic",
           "Distribution of Tasks between Students",
-          "Discussion on both Review Article and Case Report"
+          "Discussion on RA, CR & SC"
+        ]
+      }
+    },
+    {
+      id: 7,
+      title: "Stage 8",
+      duration: "Month 2",
+      icon: Eye,
+      content: {
+        overview: "Progress monitoring and quality assurance",
+        topics: [
+          "RA, CR & SC progress monitoring"
+        ]
+      }
+    },
+    {
+      id: 8,
+      title: "Stage 9-12",
+      duration: "Month 3",
+      icon: FileText,
+      content: {
+        overview: "Final draft preparation and submission",
+        topics: [
+          "Preparation & Submissions of final draft (RA, CR & SC)"
+        ]
+      }
+    },
+    {
+      id: 9,
+      title: "Stage 13-16",
+      duration: "Month 4",
+      icon: CheckCircle,
+      content: {
+        overview: "Quality review and journal selection",
+        topics: [
+          "Proof reading plagiarism check grammar corrections selection of suitable journals"
+        ]
+      }
+    },
+    {
+      id: 10,
+      title: "Stage 17-20",
+      duration: "Month 5",
+      icon: Download,
+      content: {
+        overview: "Publication follow-up and final processing",
+        topics: [
+          "Publication status follow-up",
+          "Minor/Major revisions",
+          "PDF Generation"
         ]
       }
     }
@@ -509,7 +560,7 @@ const SystematicReviews = ({ onBack }) => {
     title: 'Publications',
     subtitle: 'Collaborate with peers and Next Steps team for publication-ready research',
     stats: [
-      { value: '7', label: 'Project Stages' },
+      { value: '11', label: 'Project Stages' },
       { value: avgTeamSize.toString(), label: 'Avg Team Size' },
       { value: totalProjects.toString(), label: 'Total Projects' }
     ]
