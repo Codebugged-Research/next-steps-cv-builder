@@ -12,6 +12,7 @@ import {
   uploadCertificate,
   deleteCertificate
 } from '../controllers/emrTraining.controller.js';
+
 import { verifyJWT } from '../middlewares/auth.middleware.js';
 import { uploadCertificate as uploadCertificateMiddleware } from '../middlewares/s3.upload.middleware.js';
 import { checkEmrTrainingLimit } from '../middlewares/registrationLimits.middleware.js';
