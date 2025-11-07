@@ -99,7 +99,7 @@ const PublicationTimeline = () => {
       id: 5,
       title: "Stage 6",
       duration: "Month 2",
-      icon: CheckCircle,
+      icon: Users,
       content: {
         overview: "Topic finalization and task distribution",
         topics: [
@@ -314,6 +314,7 @@ const PublicationTimeline = () => {
 
   return (
     <div className="w-full bg-white rounded-lg shadow-lg p-6 mb-8">
+      {/* Project Selector */}
       <div className="mb-6 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg p-4 border border-blue-200">
         <div className="flex items-center justify-between">
           <div className="flex-1">
@@ -393,6 +394,7 @@ const PublicationTimeline = () => {
         )}
       </div>
 
+      {/* Timeline Header */}
       <div className="flex items-center justify-between mb-6">
         <h2 className="text-xl font-bold text-gray-900">Publication Timeline</h2>
         <div className="flex items-center gap-4">
@@ -426,13 +428,44 @@ const PublicationTimeline = () => {
         </div>
       </div>
 
+      {/* Timeline Visualization */}
       <div className="mb-8">
         <div className="relative px-8">
+          {/* Background line */}
           <div className="absolute top-8 left-16 right-16 h-1 bg-gray-200 rounded"></div>
+          
+          {/* Progress line */}
           <div 
-            className="absolute top-8 left-16 h-1 bg-[#04445E] rounded transition-all duration-500"
+            className="absolute top-8 h-1 bg-[#04445E] rounded transition-all duration-500"
             style={{ 
-              width: `${(currentStages.findIndex(s => s.id === activeStage) + 1) / currentStages.length * (100 - (32/currentStages.length))}%` 
+              left: '4rem',
+              width: `${(() => {
+                if (!currentProjectData) return '0%';
+                
+                const currentStageNumber = currentProjectData.stage;
+                const totalStages = currentStages.length;
+                const firstStageNumber = (currentPage * stagesPerPage) + 1;
+                const lastStageNumber = firstStageNumber + totalStages - 1;
+                
+                if (currentStageNumber < firstStageNumber) {
+                  return '0%';
+                }
+                
+                if (currentStageNumber > lastStageNumber) {
+                  return 'calc(100% - 8rem)';
+                }
+                
+                const relativeStageIndex = currentStageNumber - firstStageNumber;
+                
+                if (relativeStageIndex === 0) {
+                  return '0%';
+                }
+                
+                const segmentWidth = 100 / (totalStages - 1);
+                const progressPercent = segmentWidth * relativeStageIndex;
+                
+                return `calc(${progressPercent}% - ${4 * (1 - progressPercent/100)}rem)`;
+              })()}` 
             }}
           ></div>
 
@@ -442,8 +475,9 @@ const PublicationTimeline = () => {
               const isActive = stage.id === activeStage;
               const stageNumber = stage.id + 1;
               const status = getStatusForStage(stageNumber);
-              const stageIndex = timelineStages.findIndex(s => s.id === stage.id);
-              const isPast = stageIndex < timelineStages.findIndex(s => s.id === activeStage);
+              const currentStageNumber = currentProjectData?.stage || 0;
+              const isPast = stageNumber < currentStageNumber;
+              const isCurrent = stageNumber === currentStageNumber;
               
               return (
                 <div key={stage.id} className="flex flex-col items-center min-w-0 flex-1">
@@ -453,7 +487,9 @@ const PublicationTimeline = () => {
                       isActive 
                         ? 'border-[#04445E] bg-[#04445E] text-white shadow-lg scale-110' 
                         : isPast 
-                        ? `border-green-500 ${getStatusColor(status)} text-white`
+                        ? 'border-green-500 bg-green-500 text-white'
+                        : isCurrent
+                        ? 'border-blue-500 bg-blue-500 text-white'
                         : 'border-gray-300 bg-white text-gray-500 hover:border-[#04445E] hover:scale-105'
                     }`}
                   >
@@ -482,6 +518,7 @@ const PublicationTimeline = () => {
         </div>
       </div>
 
+      {/* Stage Content */}
       <div className="bg-gradient-to-br from-blue-50 to-slate-50 rounded-lg p-6 border border-blue-100">
         <div className="flex items-start justify-between mb-6">
           <div>

@@ -88,7 +88,7 @@ const EmrTrainingComponent = () => {
       month: month,
       time: '2:00 PM - 5:00 PM',
       duration: '3 hours',
-      location: 'Hyderabad Branch'
+      location: '3rd Floor, M Square Building, above Swiggy Onboarding Office, Patrika Nagar, Madhapur, Hyderabad, Telangana 500081'
     });
     setShowRegistrationModal(true);
   };
