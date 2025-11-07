@@ -11,12 +11,6 @@ const emrTrainingRegistrationSchema = new mongoose.Schema({
     required: true,
     enum: ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December']
   },
-  date: {
-    type: Number,
-    required: true,
-    min: 1,
-    max: 31
-  },
   year: {
     type: Number,
     required: true,
@@ -32,6 +26,7 @@ const emrTrainingRegistrationSchema = new mongoose.Schema({
     enum: ['pending', 'confirmed', 'rejected', 'completed', 'cancelled'],
     default: 'pending'
   },
+  
   registeredAt: {
     type: Date,
     default: Date.now

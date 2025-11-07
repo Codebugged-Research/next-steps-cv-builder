@@ -6,11 +6,11 @@ import { ApiResponse } from '../utils/ApiResponse.js';
 import { asyncHandler } from '../utils/asyncHandler.js';
 
 const registerForTraining = asyncHandler(async (req, res) => {
-  const { month, date, sessionTime } = req.body;
+  const { month, sessionTime } = req.body;
   const userId = req.user._id;
 
-  if (!month || !date) {
-    throw new ApiError(400, 'Month and date are required');
+  if (!month) {
+    throw new ApiError(400, 'Month is required');
   }
 
   const user = await User.findById(userId);
@@ -30,7 +30,6 @@ const registerForTraining = asyncHandler(async (req, res) => {
   const alreadyRegistered = await EmrTrainingRegistration.findOne({
     user: userId,
     month,
-    date,
     year: 2025,
     status: { $in: ['pending', 'confirmed'] }
   });
@@ -42,7 +41,6 @@ const registerForTraining = asyncHandler(async (req, res) => {
   const registration = await EmrTrainingRegistration.create({
     user: userId,
     month,
-    date,
     year: 2025,
     sessionTime: sessionTime || '2:00 PM - 5:00 PM',
     status: 'pending'
@@ -54,7 +52,6 @@ const registerForTraining = asyncHandler(async (req, res) => {
       $push: {
         emrTrainingRegistrations: {
           month,
-          date,
           year: 2025,
           registeredAt: new Date(),
           status: 'pending'

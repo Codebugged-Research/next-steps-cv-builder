@@ -88,7 +88,7 @@ const EmrTrainingComponent = () => {
       month: month,
       time: '2:00 PM - 5:00 PM',
       duration: '3 hours',
-      location: 'Virtual - Zoom'
+      location: 'Hyderabad'
     });
     setShowRegistrationModal(true);
   };
