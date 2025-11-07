@@ -35,7 +35,7 @@ const PublicationsStep = ({ formData, onArrayAdd, onArrayRemove, onArrayUpdate }
       const formDataObj = new FormData();
       formDataObj.append('document', file);
 
-      const response = await api.post('/publications/documents/upload', formDataObj, {
+      const response = await api.post('/documents/upload', formDataObj, {
         headers: {
           'Content-Type': 'multipart/form-data',
         },

@@ -31,7 +31,14 @@ const BasicDetailsStep = ({ formData, onInputChange }) => {
     passportBack: false,
     aadharFront: false,
     aadharBack: false
-  }); 
+  });
+  const [pendingFiles, setPendingFiles] = useState({
+    photo: null,
+    passportFront: null,
+    passportBack: null,
+    aadharFront: null,
+    aadharBack: null
+  });
   
   const languages = formData.basicDetails.languages || [];
 
@@ -49,7 +56,7 @@ const BasicDetailsStep = ({ formData, onInputChange }) => {
     setErrors(prev => ({ ...prev, [field]: error }));
   };
 
-  const handleDocumentUpload = async (e, documentType) => {
+  const handleDocumentSelect = (e, documentType) => {
     const file = e.target.files[0];
     if (!file) return;
 
@@ -59,28 +66,39 @@ const BasicDetailsStep = ({ formData, onInputChange }) => {
       return;
     }
 
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      switch(documentType) {
+        case 'photo':
+          setPhotoPreview(reader.result);
+          break;
+        case 'passportFront':
+          setPassportFrontPreview(reader.result);
+          break;
+        case 'passportBack':
+          setPassportBackPreview(reader.result);
+          break;
+        case 'aadharFront':
+          setAadharFrontPreview(reader.result);
+          break;
+        case 'aadharBack':
+          setAadharBackPreview(reader.result);
+          break;
+      }
+    };
+    reader.readAsDataURL(file);
+
+    setPendingFiles(prev => ({ ...prev, [documentType]: file }));
+    setErrors(prev => ({ ...prev, [documentType]: '' }));
+  };
+
+  const handleDocumentUpload = async (documentType) => {
+    const file = pendingFiles[documentType];
+    if (!file) return;
+
     try {
       setUploading(prev => ({ ...prev, [documentType]: true }));
       
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        switch(documentType) {
-          case 'photo':
-            setPhotoPreview(reader.result);
-            break;
-          case 'passport':
-            setPassportPreview(reader.result);
-            break;
-          case 'aadharFront':
-            setAadharFrontPreview(reader.result);
-            break;
-          case 'aadharBack':
-            setAadharBackPreview(reader.result);
-            break;
-        }
-      };
-      reader.readAsDataURL(file);
-
       const uploadFormData = new FormData();
       uploadFormData.append('document', file);
       
@@ -89,29 +107,25 @@ const BasicDetailsStep = ({ formData, onInputChange }) => {
       if (response.data.success) {
         onInputChange('basicDetails', documentType, response.data.data.url);
         onInputChange('basicDetails', `${documentType}Key`, response.data.data.key);
-        setErrors(prev => ({ ...prev, [documentType]: '' }));
-        toast.success(`${documentType === 'photo' ? 'Photo' : documentType === 'passport' ? 'Passport' : documentType === 'aadharFront' ? 'Aadhar Front' : 'Aadhar Back'} uploaded successfully!`);
+        setPendingFiles(prev => ({ ...prev, [documentType]: null }));
+        toast.success(`${getDocumentLabel(documentType)} uploaded successfully!`);
       }
     } catch (error) {
-      toast.error(error.response?.data?.message || `Failed to upload ${documentType}`);
-      
-      switch(documentType) {
-        case 'photo':
-          setPhotoPreview(null);
-          break;
-        case 'passport':
-          setPassportPreview(null);
-          break;
-        case 'aadharFront':
-          setAadharFrontPreview(null);
-          break;
-        case 'aadharBack':
-          setAadharBackPreview(null);
-          break;
-      }
+      toast.error(error.response?.data?.message || `Failed to upload ${getDocumentLabel(documentType)}`);
     } finally {
       setUploading(prev => ({ ...prev, [documentType]: false }));
     }
+  };
+
+  const getDocumentLabel = (documentType) => {
+    const labels = {
+      photo: 'Photo',
+      passportFront: 'Passport Front',
+      passportBack: 'Passport Back',
+      aadharFront: 'Aadhar Front',
+      aadharBack: 'Aadhar Back'
+    };
+    return labels[documentType] || documentType;
   };
 
   const removeDocument = (documentType) => {
@@ -119,8 +133,11 @@ const BasicDetailsStep = ({ formData, onInputChange }) => {
       case 'photo':
         setPhotoPreview(null);
         break;
-      case 'passport':
-        setPassportPreview(null);
+      case 'passportFront':
+        setPassportFrontPreview(null);
+        break;
+      case 'passportBack':
+        setPassportBackPreview(null);
         break;
       case 'aadharFront':
         setAadharFrontPreview(null);
@@ -130,6 +147,7 @@ const BasicDetailsStep = ({ formData, onInputChange }) => {
         break;
     }
     onInputChange('basicDetails', documentType, null);
+    setPendingFiles(prev => ({ ...prev, [documentType]: null }));
   };
 
   const addLanguage = () => {
@@ -181,7 +199,8 @@ const BasicDetailsStep = ({ formData, onInputChange }) => {
     preview, 
     isUploading, 
     error,
-    required = false 
+    required = false,
+    hasPendingFile 
   }) => (
     <div className="bg-gray-50 rounded-lg p-4">
       <h4 className="text-md font-semibold text-[#04445E] mb-3">
@@ -191,23 +210,13 @@ const BasicDetailsStep = ({ formData, onInputChange }) => {
       {!preview ? (
         <div>
           <label className="flex flex-col items-center justify-center w-32 h-32 border-2 border-dashed border-gray-300 rounded-lg cursor-pointer hover:bg-gray-100 transition-colors">
-            {isUploading ? (
-              <div className="text-center">
-                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#169AB4] mx-auto mb-2"></div>
-                <span className="text-sm text-gray-500">Uploading...</span>
-              </div>
-            ) : (
-              <>
-                <Upload className="h-8 w-8 text-gray-400 mb-2" />
-                <span className="text-sm text-gray-500 text-center">Upload {title}</span>
-              </>
-            )}
+            <Upload className="h-8 w-8 text-gray-400 mb-2" />
+            <span className="text-sm text-gray-500 text-center">Select {title}</span>
             <input
               type="file"
               className="hidden"
               accept={FILE_CONSTRAINTS.PHOTO.ACCEPTED_EXTENSIONS}
-              onChange={(e) => handleDocumentUpload(e, documentType)}
-              disabled={isUploading}
+              onChange={(e) => handleDocumentSelect(e, documentType)}
             />
           </label>
           {error && (
@@ -218,18 +227,48 @@ const BasicDetailsStep = ({ formData, onInputChange }) => {
           )}
         </div>
       ) : (
-        <div className="relative w-32 h-32">
-          <img
-            src={preview}
-            alt={`${title} Preview`}
-            className="w-32 h-32 rounded-lg object-cover"
-          />
-          <button
-            onClick={() => removeDocument(documentType)}
-            className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1 hover:bg-red-600 transition-colors"
-          >
-            <X className="h-4 w-4" />
-          </button>
+        <div className="space-y-3">
+          <div className="relative w-32 h-32">
+            <img
+              src={preview}
+              alt={`${title} Preview`}
+              className="w-32 h-32 rounded-lg object-cover"
+            />
+            <button
+              onClick={() => removeDocument(documentType)}
+              className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1 hover:bg-red-600 transition-colors"
+            >
+              <X className="h-4 w-4" />
+            </button>
+          </div>
+          
+          {hasPendingFile && !formData.basicDetails[documentType] && (
+            <button
+              onClick={() => handleDocumentUpload(documentType)}
+              disabled={isUploading}
+              className={`w-full px-4 py-2 rounded-lg text-white transition-colors ${
+                isUploading 
+                  ? 'bg-gray-400 cursor-not-allowed' 
+                  : 'bg-[#169AB4] hover:bg-[#147a8f]'
+              }`}
+            >
+              {isUploading ? (
+                <span className="flex items-center justify-center gap-2">
+                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                  Uploading...
+                </span>
+              ) : (
+                'Upload'
+              )}
+            </button>
+          )}
+          
+          {formData.basicDetails[documentType] && (
+            <div className="flex items-center gap-2 text-sm text-green-600">
+              <AlertCircle className="h-4 w-4" />
+              <span>Uploaded</span>
+            </div>
+          )}
         </div>
       )}
       
@@ -537,7 +576,7 @@ const BasicDetailsStep = ({ formData, onInputChange }) => {
       <div className="space-y-6">
         <h3 className="text-lg font-semibold text-[#04445E]">Document Uploads</h3>
         
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           <DocumentUploadCard
             title="Profile Photo"
             documentType="photo"
@@ -545,6 +584,7 @@ const BasicDetailsStep = ({ formData, onInputChange }) => {
             isUploading={uploading.photo}
             error={errors.photo}
             required={true}
+            hasPendingFile={!!pendingFiles.photo}
           />
           
           <DocumentUploadCard
@@ -553,13 +593,16 @@ const BasicDetailsStep = ({ formData, onInputChange }) => {
             preview={passportFrontPreview}
             isUploading={uploading.passportFront}
             error={errors.passportFront}
+            hasPendingFile={!!pendingFiles.passportFront}
           />
+
           <DocumentUploadCard
             title="Passport Back"
             documentType="passportBack"
             preview={passportBackPreview}
             isUploading={uploading.passportBack}
             error={errors.passportBack}
+            hasPendingFile={!!pendingFiles.passportBack}
           />
           
           <DocumentUploadCard
@@ -568,6 +611,7 @@ const BasicDetailsStep = ({ formData, onInputChange }) => {
             preview={aadharFrontPreview}
             isUploading={uploading.aadharFront}
             error={errors.aadharFront}
+            hasPendingFile={!!pendingFiles.aadharFront}
           />
           
           <DocumentUploadCard
@@ -576,6 +620,7 @@ const BasicDetailsStep = ({ formData, onInputChange }) => {
             preview={aadharBackPreview}
             isUploading={uploading.aadharBack}
             error={errors.aadharBack}
+            hasPendingFile={!!pendingFiles.aadharBack}
           />
         </div>
       </div>

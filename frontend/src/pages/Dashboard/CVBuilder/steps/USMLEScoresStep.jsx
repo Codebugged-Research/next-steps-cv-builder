@@ -11,6 +11,11 @@ const USMLEScoresStep = ({ formData, onInputChange }) => {
   const [step1CertPreview, setStep1CertPreview] = useState(null);
   const [step2CertPreview, setStep2CertPreview] = useState(null);
   const [oetCertPreview, setOetCertPreview] = useState(null);
+  const [pendingFiles, setPendingFiles] = useState({
+    step1Cert: null,
+    step2Cert: null,
+    oetCert: null
+  });
   const [uploading, setUploading] = useState({
     step1Cert: false,
     step2Cert: false,
@@ -18,7 +23,7 @@ const USMLEScoresStep = ({ formData, onInputChange }) => {
   });
   const [errors, setErrors] = useState({});
 
-  const handleCertificateUpload = async (e, certificateType) => {
+  const handleFileSelect = (e, certificateType) => {
     const file = e.target.files[0];
     if (!file) return;
 
@@ -28,12 +33,33 @@ const USMLEScoresStep = ({ formData, onInputChange }) => {
       return;
     }
 
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      if (certificateType === 'step1Cert') {
+        setStep1CertPreview({ name: file.name });
+      } else if (certificateType === 'step2Cert') {
+        setStep2CertPreview({ name: file.name });
+      } else if (certificateType === 'oetCert') {
+        setOetCertPreview({ name: file.name });
+      }
+    };
+    reader.readAsDataURL(file);
+
+    setPendingFiles(prev => ({ ...prev, [certificateType]: file }));
+    setErrors(prev => ({ ...prev, [certificateType]: '' }));
+  };
+
+  const handleCertificateUpload = async (certificateType) => {
+    const file = pendingFiles[certificateType];
+    if (!file) return;
+
     try {
       setUploading(prev => ({ ...prev, [certificateType]: true }));
+      
       const formDataObj = new FormData();
-      formDataObj.append('certificate', file);
+      formDataObj.append('document', file);
 
-      const response = await api.post('/usmle/certificates/upload', formDataObj, {
+      const response = await api.post('/documents/upload', formDataObj, {
         headers: {
           'Content-Type': 'multipart/form-data',
         },
@@ -65,6 +91,7 @@ const USMLEScoresStep = ({ formData, onInputChange }) => {
         }
 
         onInputChange('usmleScores', certificateType, certificateData);
+        setPendingFiles(prev => ({ ...prev, [certificateType]: null }));
         setErrors(prev => ({ ...prev, [certificateType]: '' }));
         
         const certNames = {
@@ -76,8 +103,6 @@ const USMLEScoresStep = ({ formData, onInputChange }) => {
         toast.success(`${certNames[certificateType]} certificate uploaded successfully!`);
       }
     } catch (error) {
-      console.error(`${certificateType} upload error:`, error);
-      
       const certNames = {
         step1Cert: 'Step 1',
         step2Cert: 'Step 2 CK',
@@ -99,6 +124,7 @@ const USMLEScoresStep = ({ formData, onInputChange }) => {
       setOetCertPreview(null);
     }
     onInputChange('usmleScores', certificateType, null);
+    setPendingFiles(prev => ({ ...prev, [certificateType]: null }));
   };
 
   const CertificateUploadCard = ({ 
@@ -107,7 +133,8 @@ const USMLEScoresStep = ({ formData, onInputChange }) => {
     preview, 
     isUploading, 
     error,
-    showUpload = true
+    showUpload = true,
+    hasPendingFile
   }) => (
     <div className="bg-gray-50 rounded-lg p-4">
       <h4 className="text-sm font-medium text-gray-700 mb-3">
@@ -117,23 +144,13 @@ const USMLEScoresStep = ({ formData, onInputChange }) => {
       {showUpload && !preview && (
         <div>
           <label className="flex flex-col items-center justify-center w-full h-24 border-2 border-dashed border-gray-300 rounded-lg cursor-pointer hover:bg-gray-100 transition-colors">
-            {isUploading ? (
-              <div className="text-center">
-                <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-[#169AB4] mx-auto mb-2"></div>
-                <span className="text-xs text-gray-500">Uploading...</span>
-              </div>
-            ) : (
-              <>
-                <Upload className="h-6 w-6 text-gray-400 mb-1" />
-                <span className="text-xs text-gray-500 text-center">Upload Certificate</span>
-              </>
-            )}
+            <Upload className="h-6 w-6 text-gray-400 mb-1" />
+            <span className="text-xs text-gray-500 text-center">Select Certificate</span>
             <input
               type="file"
               className="hidden"
               accept=".pdf,.jpg,.jpeg,.png"
-              onChange={(e) => handleCertificateUpload(e, certificateType)}
-              disabled={isUploading}
+              onChange={(e) => handleFileSelect(e, certificateType)}
             />
           </label>
           {error && (
@@ -146,30 +163,62 @@ const USMLEScoresStep = ({ formData, onInputChange }) => {
       )}
 
       {preview && (
-        <div className="bg-white border border-gray-200 rounded-lg p-3">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <FileText className="h-4 w-4 text-blue-500" />
-              <span className="text-sm text-gray-900 truncate">{preview.name}</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <a
-                href={preview.url}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-xs text-[#169AB4] hover:text-[#147a8f] underline"
-              >
-                View
-              </a>
-              <button
-                onClick={() => removeCertificate(certificateType)}
-                className="p-1 text-red-500 hover:bg-red-50 rounded"
-                title="Remove Certificate"
-              >
-                <X className="h-3 w-3" />
-              </button>
+        <div className="space-y-3">
+          <div className="bg-white border border-gray-200 rounded-lg p-3">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <FileText className="h-4 w-4 text-blue-500" />
+                <span className="text-sm text-gray-900 truncate">{preview.name}</span>
+              </div>
+              <div className="flex items-center gap-2">
+                {preview.url && (
+                  <a
+                    href={preview.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-xs text-[#169AB4] hover:text-[#147a8f] underline"
+                  >
+                    View
+                  </a>
+                )}
+                <button
+                  onClick={() => removeCertificate(certificateType)}
+                  className="p-1 text-red-500 hover:bg-red-50 rounded"
+                  title="Remove Certificate"
+                >
+                  <X className="h-3 w-3" />
+                </button>
+              </div>
             </div>
           </div>
+
+          {hasPendingFile && !formData.usmleScores?.[certificateType] && (
+            <button
+              onClick={() => handleCertificateUpload(certificateType)}
+              disabled={isUploading}
+              className={`w-full px-4 py-2 rounded-lg text-white transition-colors ${
+                isUploading 
+                  ? 'bg-gray-400 cursor-not-allowed' 
+                  : 'bg-[#169AB4] hover:bg-[#147a8f]'
+              }`}
+            >
+              {isUploading ? (
+                <span className="flex items-center justify-center gap-2">
+                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                  Uploading...
+                </span>
+              ) : (
+                'Upload'
+              )}
+            </button>
+          )}
+
+          {formData.usmleScores?.[certificateType] && (
+            <div className="flex items-center gap-2 text-sm text-green-600">
+              <AlertCircle className="h-4 w-4" />
+              <span>Uploaded</span>
+            </div>
+          )}
         </div>
       )}
 
@@ -195,7 +244,6 @@ const USMLEScoresStep = ({ formData, onInputChange }) => {
             value={formData.usmleScores?.step1Status || ''}
             onChange={(value) => onInputChange('usmleScores', 'step1Status', value)}
             options={[
-              { value: '', label: 'Select Status' },
               { value: 'not-taken', label: 'Not Taken' },
               { value: 'pass', label: 'Pass' },
               { value: 'fail', label: 'Fail' }
@@ -210,6 +258,7 @@ const USMLEScoresStep = ({ formData, onInputChange }) => {
               isUploading={uploading.step1Cert}
               error={errors.step1Cert}
               showUpload={true}
+              hasPendingFile={!!pendingFiles.step1Cert}
             />
           )}
         </div>
@@ -231,6 +280,7 @@ const USMLEScoresStep = ({ formData, onInputChange }) => {
               isUploading={uploading.step2Cert}
               error={errors.step2Cert}
               showUpload={true}
+              hasPendingFile={!!pendingFiles.step2Cert}
             />
           )}
         </div>
@@ -252,7 +302,6 @@ const USMLEScoresStep = ({ formData, onInputChange }) => {
         />
       </div>
 
-      {/* OET Score Section */}
       <div className="pt-4">
         <div className="space-y-3">
           <FormField
@@ -271,6 +320,7 @@ const USMLEScoresStep = ({ formData, onInputChange }) => {
               isUploading={uploading.oetCert}
               error={errors.oetCert}
               showUpload={true}
+              hasPendingFile={!!pendingFiles.oetCert}
             />
           )}
         </div>

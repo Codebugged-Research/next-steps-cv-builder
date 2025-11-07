@@ -33,11 +33,11 @@ const ConferencesStep = ({ formData, onArrayAdd, onArrayRemove, onArrayUpdate })
 
     try {
       setUploading(prev => ({ ...prev, [`conference_${conferenceIndex}`]: true }));
-
+      
       const formDataObj = new FormData();
       formDataObj.append('document', file);
 
-      const response = await api.post('/conferences/documents/upload', formDataObj, {
+      const response = await api.post('/documents/upload', formDataObj, {
         headers: {
           'Content-Type': 'multipart/form-data',
         },
@@ -50,6 +50,7 @@ const ConferencesStep = ({ formData, onArrayAdd, onArrayRemove, onArrayUpdate })
           fileName: file.name,
           fileSize: file.size
         };
+        
         onArrayUpdate('conferences', conferenceIndex, 'supportingDocument', documentData);
         setErrors(prev => ({ ...prev, [`conference_${conferenceIndex}`]: '' }));
         toast.success('Document uploaded successfully!');
@@ -138,7 +139,7 @@ const ConferencesStep = ({ formData, onArrayAdd, onArrayRemove, onArrayUpdate })
         <h4 className="text-sm font-medium text-gray-700 mb-3">
           Supporting Document <span className="text-xs text-gray-500">(Optional)</span>
         </h4>
-
+        
         {!conference.supportingDocument ? (
           <div>
             <label className="flex items-center justify-center w-full h-20 border-2 border-dashed border-gray-300 rounded-lg cursor-pointer hover:bg-gray-100 transition-colors">

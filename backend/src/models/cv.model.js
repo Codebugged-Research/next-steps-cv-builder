@@ -56,6 +56,22 @@ const cvSchema = new mongoose.Schema({
             type: String,
             default: null
         },
+        passportFront: {
+            type: String,
+            default: null
+        },
+        passportFrontKey: {
+            type: String,
+            default: null
+        },
+        passportBack: {
+            type: String,
+            default: null
+        },
+        passportBackKey: {
+            type: String,
+            default: null
+        },
         aadharFront: {
             type: String,
             default: null
@@ -305,12 +321,33 @@ const cvSchema = new mongoose.Schema({
             enum: ['not-taken', 'pass', 'fail', 'waived', ''],
             default: ''
         },
+        oetScore: {
+            type: String,
+            default: ""
+        },
+        oetCert: {
+            url: {
+                type: String,
+                default: null
+            },
+            key: {
+                type: String,
+                default: null
+            },
+            fileName: {
+                type: String,
+                default: null
+            },
+            uploadDate: {
+                type: String,
+                default: null
+            }
+        },
         ecfmgCertified: {
             type: Boolean,
             default: false
         }
     },
-    // ADDED: US Clinical Experience
     usClinicalExperience: {
         list: [{
             title: {
@@ -543,7 +580,6 @@ const cvSchema = new mongoose.Schema({
             default: ""
         }
     },
-    // ADDED: ACLS/BLS Certification
     aclsBls: {
         aclsCertified: {
             type: Boolean,
@@ -574,7 +610,6 @@ const cvSchema = new mongoose.Schema({
             default: ""
         }
     },
-    // ADDED: Work Experience
     workExperience: [{
         position: {
             type: String,
