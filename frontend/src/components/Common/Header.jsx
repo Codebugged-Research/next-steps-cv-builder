@@ -4,7 +4,6 @@ import { useState, useEffect } from "react";
 const Header = ({ onLogout }) => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
-  // Prevent body scroll when mobile menu is open
   useEffect(() => {
     if (isMobileMenuOpen) {
       document.body.style.overflow = 'hidden';
@@ -20,8 +19,7 @@ const Header = ({ onLogout }) => {
     <header className="bg-gray-200 shadow-sm border-b border-gray-200">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-14 sm:h-16">
-          {/* Logo and Title */}
-          <div className="flex items-center gap-2 sm:gap-3 min-w-0 flex-1">
+          <div className="flex items-center gap-2 sm:gap-3 min-w-0 flex-1 pl-3 sm:pl-0">
             <img
               src="/NEXT-STEPS-LOGO.png"
               alt="Next Steps Logo"
@@ -29,11 +27,10 @@ const Header = ({ onLogout }) => {
             />
             <h1 className="text-sm sm:text-lg md:text-xl font-semibold text-[#04445E] truncate">
               <span className="hidden sm:inline">Next Steps-USMLE CV Builder</span>
-              <span className="sm:hidden">Next Steps</span>
+              <span className="sm:hidden text-lg ">Next Steps CV Portal</span>
             </h1>
           </div>
 
-          {/* Desktop Navigation */}
           <div className="hidden md:flex items-center gap-4">
             <span className="text-sm text-gray-600">Welcome</span>
             <button

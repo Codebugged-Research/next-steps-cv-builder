@@ -259,37 +259,45 @@ const CVBuilder = ({ onPreview, user, onStepChange, currentStep, onStepComplete 
   }, [activeStep, handleStepChange]);
 
   const handleSave = useCallback(async () => {
-    const userId = getUserId();
+  const userId = getUserId();
+  
+  console.log('=== DEBUG INFO ===');
+  console.log('User ID:', userId);
+  console.log('User object:', user);
+  console.log('LocalStorage userId:', localStorage.getItem('userId'));
+  
+  if (!userId) {
+    toast.error('User not authenticated. Please login again.');
+    return;
+  }
+  
+  try {
+    const saveData = { 
+      ...formData, 
+      userId: userId 
+    };
     
-    if (!userId) {
-      toast.error('User not authenticated. Please login again.');
-      return;
+    console.log('Making request to /cv/save');
+    console.log('Request data:', { userId: saveData.userId });
+    
+    const response = await api.post('/cv/save', saveData);
+    
+    if (response.data.success) {
+      toast.success("CV Saved Successfully");
+    } else {
+      toast.error(response.data.message || 'Failed to save CV');
     }
-
-    try {
-      const saveData = { 
-        ...formData, 
-        userId: userId 
-      };
-      
-      const response = await api.post('/cv/save', saveData);
-      
-      
-      if (response.data.success) {
-        toast.success("CV Saved Successfully");
-      } else {
-        toast.error(response.data.message || 'Failed to save CV');
-      }
-    } catch (error) {
-      
-      if (error.response?.status === 401) {
-        toast.error('Session expired. Please login again.');
-
-      } else {
-        toast.error(error.response?.data?.message || 'Failed to save CV');
-      }
+  } catch (error) {
+    console.error('Save error:', error);
+    console.error('Error response:', error.response);
+    
+    if (error.response?.status === 401) {
+      toast.error('Session expired. Please login again.');
+    } else {
+      toast.error(error.response?.data?.message || 'Failed to save CV');
     }
-  }, [getUserId, user, formData]);
+  }
+}, [getUserId, user, formData]);
 
   const handlePreview = useCallback(() => setShowPreview(true), []);
   const handleBackFromPreview = useCallback(() => setShowPreview(false), []);
