@@ -23,7 +23,7 @@ const HipaaContent = ({ onClose }) => {
           <div className="space-y-6">
             <div className="bg-gray-50 p-4 rounded-lg">
               <p className="text-gray-700 leading-relaxed">
-                I, a student of <span className="font-semibold">(Medical College Name)</span>, hereby acknowledge and agree to the following terms and conditions while participating in the Electronic Medical Records (EMR) and Revenue Cycle Management (RCM) training conducted at <span className="font-semibold">Next Steps Career Corp</span>.
+                I, hereby acknowledge and agree to the following terms and conditions while participating in the Electronic Medical Records (EMR) and Revenue Cycle Management (RCM) training conducted at <span className="font-semibold">Next Steps Career Corp</span>.
               </p>
             </div>
 

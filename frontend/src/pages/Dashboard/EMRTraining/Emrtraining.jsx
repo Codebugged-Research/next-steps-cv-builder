@@ -88,7 +88,7 @@ const EmrTrainingComponent = () => {
       month: month,
       time: '2:00 PM - 5:00 PM',
       duration: '3 hours',
-      location: 'Hyderabad'
+      location: 'Hyderabad Branch'
     });
     setShowRegistrationModal(true);
   };
