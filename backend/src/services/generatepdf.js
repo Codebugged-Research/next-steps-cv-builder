@@ -1,7 +1,6 @@
 import PDFDocument from 'pdfkit';
 import axios from 'axios';
 import { PDF_CONSTANTS } from '../constants.js';
-
 const { COLORS, FONTS, SIZES, MARGINS, PAGE_LIMITS } = PDF_CONSTANTS;
 
 async function fetchImageBuffer(url) {
@@ -10,13 +9,18 @@ async function fetchImageBuffer(url) {
 }
 
 function addHeader(doc, data) {
-    const { fullName, email, phone, city, nationality } = data.basicDetails;
+    const { fullName, email, phone, city, nationality, address } = data.basicDetails;
     
     doc.fontSize(SIZES.heading).fillColor(COLORS.primary).font(FONTS.bold).text(fullName, MARGINS.left, MARGINS.top);
     
     const contactY = MARGINS.top + 30;
     doc.fontSize(SIZES.body).fillColor(COLORS.text).font(FONTS.regular);
-    doc.text(`${email} | ${phone} | ${city}${nationality ? ` | ${nationality}` : ''}`, MARGINS.left, contactY);
+    
+    let contactInfo = `${email} | ${phone} | ${city}`;
+    if (nationality) contactInfo += ` | ${nationality}`;
+    if (address) contactInfo += ` | ${address}`;
+    
+    doc.text(contactInfo, MARGINS.left, contactY);
     
     return MARGINS.top + 60;
 }
@@ -54,7 +58,6 @@ function addBasicInfo(doc, data, startY) {
     const info = [];
     if (data.basicDetails.gender) info.push(`Gender: ${data.basicDetails.gender}`);
     if (data.basicDetails.medicalSchool) info.push(`Medical School: ${data.basicDetails.medicalSchool}`);
-    if (data.basicDetails.graduationYear) info.push(`Graduation Year: ${data.basicDetails.graduationYear}`);
     if (data.basicDetails.mbbsRegNo) info.push(`MBBS Reg No: ${data.basicDetails.mbbsRegNo}`);
     if (data.basicDetails.usmleId) info.push(`USMLE ID: ${data.basicDetails.usmleId}`);
     
@@ -95,7 +98,23 @@ function addEducation(doc, data, startY) {
             y += 12;
         }
         if (grad.overallGrade) {
-            doc.fillColor(COLORS.text).text(`Grade: ${grad.overallGrade}${grad.classType ? ` (${grad.classType})` : ''}`, MARGINS.left, y + 12);
+            doc.fillColor(COLORS.text).text(`Overall Grade: ${grad.overallGrade}${grad.classType ? ` (${grad.classType})` : ''}`, MARGINS.left, y + 12);
+            y += 12;
+        }
+        if (grad.firstYearPercentage) {
+            doc.text(`First Year: ${grad.firstYearPercentage}`, MARGINS.indent, y + 5);
+            y += 12;
+        }
+        if (grad.secondYearPercentage) {
+            doc.text(`Second Year: ${grad.secondYearPercentage}`, MARGINS.indent, y);
+            y += 12;
+        }
+        if (grad.thirdYearPercentage) {
+            doc.text(`Third Year: ${grad.thirdYearPercentage}`, MARGINS.indent, y);
+            y += 12;
+        }
+        if (grad.finalYearPercentage) {
+            doc.text(`Final Year: ${grad.finalYearPercentage}`, MARGINS.indent, y);
             y += 12;
         }
         y += 20;
@@ -114,6 +133,10 @@ function addEducation(doc, data, startY) {
             doc.fillColor(COLORS.darkGray).text(`${pg.startDate || ''} - ${pg.endDate || ''}${pg.status ? ` (${pg.status})` : ''}`, MARGINS.left, y + 12);
             y += 12;
         }
+        if (pg.overallGrade) {
+            doc.fillColor(COLORS.text).text(`Grade: ${pg.overallGrade}`, MARGINS.left, y + 12);
+            y += 12;
+        }
         y += 20;
     }
     
@@ -126,6 +149,18 @@ function addEducation(doc, data, startY) {
             doc.text(`${col.city || ''}, ${col.state || ''}`, MARGINS.left, y + 12);
             y += 12;
         }
+        if (col.startYear || col.endYear) {
+            doc.fillColor(COLORS.darkGray).text(`${col.startYear || ''} - ${col.endYear || ''}`, MARGINS.left, y + 12);
+            y += 12;
+        }
+        if (col.eleventhGrade) {
+            doc.fillColor(COLORS.text).text(`11th Grade: ${col.eleventhGrade}`, MARGINS.indent, y + 5);
+            y += 12;
+        }
+        if (col.twelfthGrade) {
+            doc.text(`12th Grade: ${col.twelfthGrade}`, MARGINS.indent, y);
+            y += 12;
+        }
         y += 20;
     }
     
@@ -134,8 +169,20 @@ function addEducation(doc, data, startY) {
         doc.font(FONTS.bold).fillColor(COLORS.text).text('High School', MARGINS.left, y);
         y += SIZES.lineHeight;
         doc.font(FONTS.regular).text(sch.schoolName, MARGINS.left, y);
+        if (sch.board) {
+            doc.text(`Board: ${sch.board}`, MARGINS.left, y + 12);
+            y += 12;
+        }
         if (sch.city || sch.state) {
             doc.text(`${sch.city || ''}, ${sch.state || ''}`, MARGINS.left, y + 12);
+            y += 12;
+        }
+        if (sch.startYear || sch.endYear) {
+            doc.fillColor(COLORS.darkGray).text(`${sch.startYear || ''} - ${sch.endYear || ''}`, MARGINS.left, y + 12);
+            y += 12;
+        }
+        if (sch.grade) {
+            doc.fillColor(COLORS.text).text(`Grade: ${sch.grade}`, MARGINS.left, y + 12);
             y += 12;
         }
         y += 20;
@@ -145,16 +192,16 @@ function addEducation(doc, data, startY) {
 }
 
 function addUSMLEScores(doc, data, startY) {
-    if (!data.usmleScores?.step1Status && !data.usmleScores?.step2ckScore) return startY;
+    if (!data.usmleScores?.step1Status && !data.usmleScores?.step2ckScore && !data.usmleScores?.oetScore) return startY;
     
-    let y = addSection(doc, 'USMLE SCORES', startY);
+    let y = addSection(doc, 'USMLE & OTHER SCORES', startY);
     
     doc.fontSize(SIZES.body).fillColor(COLORS.text).font(FONTS.regular);
     
     if (data.usmleScores.step1Status && data.usmleScores.step1Status !== 'not-taken') {
         doc.text(`Step 1: ${data.usmleScores.step1Status.toUpperCase()}`, MARGINS.left, y);
         if (data.usmleScores.step1Cert?.url) {
-            doc.fillColor(COLORS.accent).text('Certificate', 200, y, { link: data.usmleScores.step1Cert.url, underline: true });
+            doc.fillColor(COLORS.accent).text(data.usmleScores.step1Cert.url, 200, y, { link: data.usmleScores.step1Cert.url, underline: true });
         }
         y += SIZES.lineHeight;
     }
@@ -162,7 +209,7 @@ function addUSMLEScores(doc, data, startY) {
     if (data.usmleScores.step2ckScore) {
         doc.fillColor(COLORS.text).text(`Step 2 CK: ${data.usmleScores.step2ckScore}`, MARGINS.left, y);
         if (data.usmleScores.step2Cert?.url) {
-            doc.fillColor(COLORS.accent).text('Certificate', 200, y, { link: data.usmleScores.step2Cert.url, underline: true });
+            doc.fillColor(COLORS.accent).text(data.usmleScores.step2Cert.url, 200, y, { link: data.usmleScores.step2Cert.url, underline: true });
         }
         y += SIZES.lineHeight;
     }
@@ -172,8 +219,59 @@ function addUSMLEScores(doc, data, startY) {
         y += SIZES.lineHeight;
     }
     
+    if (data.usmleScores.oetScore) {
+        doc.text(`OET Score: ${data.usmleScores.oetScore}`, MARGINS.left, y);
+        if (data.usmleScores.oetCert?.url) {
+            doc.fillColor(COLORS.accent).text(data.usmleScores.oetCert.url, 200, y, { link: data.usmleScores.oetCert.url, underline: true });
+        }
+        y += SIZES.lineHeight;
+    }
+    
     if (data.usmleScores.ecfmgCertified) {
-        doc.text('ECFMG Certified: Yes', MARGINS.left, y);
+        doc.fillColor(COLORS.text).text('ECFMG Certified: Yes', MARGINS.left, y);
+        y += SIZES.lineHeight;
+    }
+    
+    return y + 10;
+}
+
+function addACLSBLS(doc, data, startY) {
+    if (!data.aclsBls?.aclsCertified && !data.aclsBls?.blsCertified) return startY;
+    
+    let y = addSection(doc, 'ACLS/BLS CERTIFICATIONS', startY);
+    
+    doc.fontSize(SIZES.body).fillColor(COLORS.text).font(FONTS.regular);
+    
+    if (data.aclsBls.aclsCertified) {
+        doc.font(FONTS.bold).text('ACLS Certified: Yes', MARGINS.left, y);
+        y += SIZES.lineHeight;
+        if (data.aclsBls.aclsIssueDate) {
+            doc.font(FONTS.regular).text(`Issue Date: ${data.aclsBls.aclsIssueDate}`, MARGINS.indent, y);
+            y += 12;
+        }
+        if (data.aclsBls.aclsExpiryDate) {
+            doc.text(`Expiry Date: ${data.aclsBls.aclsExpiryDate}`, MARGINS.indent, y);
+            y += 12;
+        }
+        y += 10;
+    }
+    
+    if (data.aclsBls.blsCertified) {
+        doc.font(FONTS.bold).text('BLS Certified: Yes', MARGINS.left, y);
+        y += SIZES.lineHeight;
+        if (data.aclsBls.blsIssueDate) {
+            doc.font(FONTS.regular).text(`Issue Date: ${data.aclsBls.blsIssueDate}`, MARGINS.indent, y);
+            y += 12;
+        }
+        if (data.aclsBls.blsExpiryDate) {
+            doc.text(`Expiry Date: ${data.aclsBls.blsExpiryDate}`, MARGINS.indent, y);
+            y += 12;
+        }
+        y += 10;
+    }
+    
+    if (data.aclsBls.provider) {
+        doc.text(`Provider: ${data.aclsBls.provider}`, MARGINS.left, y);
         y += SIZES.lineHeight;
     }
     
@@ -202,8 +300,22 @@ function addExperienceSection(doc, experiences, title, startY) {
         }
         y += SIZES.lineHeight;
         
+        if (exp.location) {
+            doc.fillColor(COLORS.darkGray).font(FONTS.italic).text(exp.location, MARGINS.left, y);
+            y += 12;
+        }
+        
         if (exp.duration) {
             doc.fillColor(COLORS.darkGray).font(FONTS.italic).text(exp.duration, MARGINS.left, y);
+            y += 12;
+        } else if (exp.startDate || exp.endDate) {
+            const dateStr = `${exp.startDate || ''} - ${exp.current ? 'Present' : exp.endDate || ''}`;
+            doc.fillColor(COLORS.darkGray).font(FONTS.italic).text(dateStr, MARGINS.left, y);
+            y += 12;
+        }
+        
+        if (exp.supervisor) {
+            doc.fillColor(COLORS.text).font(FONTS.regular).text(`Supervisor: ${exp.supervisor}`, MARGINS.left, y);
             y += 12;
         }
         
@@ -241,7 +353,7 @@ function addPublications(doc, data, startY) {
         y += 12;
         
         if (pub.supportingDocument?.url) {
-            doc.fillColor(COLORS.accent).text('View Document', MARGINS.indent, y, { link: pub.supportingDocument.url, underline: true });
+            doc.fillColor(COLORS.accent).text(pub.supportingDocument.url, MARGINS.indent, y, { link: pub.supportingDocument.url, underline: true });
             y += 12;
         }
         
@@ -286,7 +398,7 @@ function addConferences(doc, data, startY) {
         }
         
         if (conf.supportingDocument?.url) {
-            doc.fillColor(COLORS.accent).text('View Document', MARGINS.indent, y, { link: conf.supportingDocument.url, underline: true });
+            doc.fillColor(COLORS.accent).text(conf.supportingDocument.url, MARGINS.indent, y, { link: conf.supportingDocument.url, underline: true });
             y += 12;
         }
         
@@ -329,7 +441,7 @@ function addAchievements(doc, data, startY) {
             }
             
             if (ach.url && ach.attachmentType === 'url') {
-                doc.fillColor(COLORS.accent).font(FONTS.regular).text('Link', MARGINS.indent, y, { link: ach.url, underline: true });
+                doc.fillColor(COLORS.accent).font(FONTS.regular).text(ach.url, MARGINS.indent, y, { link: ach.url, underline: true });
                 y += 12;
             }
             
@@ -355,7 +467,7 @@ function addSkills(doc, data, startY) {
         y += SIZES.lineHeight;
         
         data.skills.supportingDocuments.forEach((doc_item, index) => {
-            doc.fillColor(COLORS.accent).font(FONTS.regular).text(`${index + 1}. ${doc_item.name}`, MARGINS.indent, y, { link: doc_item.url, underline: true });
+            doc.fillColor(COLORS.accent).font(FONTS.regular).text(`${index + 1}. ${doc_item.url}`, MARGINS.indent, y, { link: doc_item.url, underline: true });
             y += SIZES.lineHeight;
         });
     }
@@ -448,7 +560,10 @@ export async function generateCVPDF(cvData) {
             currentY = addBasicInfo(doc, cvData, currentY);
             currentY = addEducation(doc, cvData, currentY);
             currentY = addUSMLEScores(doc, cvData, currentY);
+            currentY = addACLSBLS(doc, cvData, currentY);
+            currentY = addExperienceSection(doc, cvData.usClinicalExperience?.list, 'US CLINICAL EXPERIENCE', currentY);
             currentY = addExperienceSection(doc, cvData.clinicalExperiences, 'CLINICAL EXPERIENCE', currentY);
+            currentY = addExperienceSection(doc, cvData.workExperience, 'WORK EXPERIENCE', currentY);
             currentY = addExperienceSection(doc, cvData.professionalExperiences, 'PROFESSIONAL EXPERIENCE', currentY);
             currentY = addExperienceSection(doc, cvData.volunteerExperiences, 'VOLUNTEER EXPERIENCE', currentY);
             currentY = addPublications(doc, cvData, currentY);

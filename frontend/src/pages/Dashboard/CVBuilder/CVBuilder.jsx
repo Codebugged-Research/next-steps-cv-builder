@@ -112,6 +112,11 @@ const CVBuilder = ({ onPreview, user, onStepChange, currentStep, onStepComplete 
   const totalSteps = 11;
   const activeStep = currentStep || internalCurrentStep;
 
+  useEffect(() => {
+    console.log('CVBuilder - User prop:', user);
+    console.log('CVBuilder - User ID:', user?._id || user?.id);
+  }, [user]);
+
   const calculateCompletedSteps = useCallback((data) => {
     const checks = [
       { condition: data.basicDetails?.fullName && data.basicDetails?.email, step: 1 },
@@ -130,14 +135,21 @@ const CVBuilder = ({ onPreview, user, onStepChange, currentStep, onStepComplete 
     return checks.filter(({ condition }) => condition).map(({ step }) => step);
   }, []);
 
+  const getUserId = useCallback(() => {
+    return user?._id || user?.id || localStorage.getItem('userId') || null;
+  }, [user]);
+
   const checkExistingCV = useCallback(async () => {
-    if (!user?._id) {
+    const userId = getUserId();
+    
+    if (!userId) {
+      console.warn('No user ID found, skipping CV load');
       setLoading(false);
       return;
     }
 
     try {
-      const response = await api.get(`/cv/${user._id}`);
+      const response = await api.get(`/cv/${userId}`);
       if (response.data.success) {
         const cvData = response.data.data;
         if (typeof cvData.skills === 'string') {
@@ -149,11 +161,11 @@ const CVBuilder = ({ onPreview, user, onStepChange, currentStep, onStepComplete 
         setCompletedSteps(calculateCompletedSteps(cvData));
       }
     } catch (error) {
-      // Silently handle error
+      console.error('Error loading CV:', error);
     } finally {
       setLoading(false);
     }
-  }, [user?._id, calculateCompletedSteps]);
+  }, [getUserId, calculateCompletedSteps]);
 
   const updateCompletedSteps = useCallback((newData) => {
     const newCompleted = calculateCompletedSteps(newData);
@@ -247,18 +259,37 @@ const CVBuilder = ({ onPreview, user, onStepChange, currentStep, onStepComplete 
   }, [activeStep, handleStepChange]);
 
   const handleSave = useCallback(async () => {
-    if (!user?._id) {
+    const userId = getUserId();
+    
+    if (!userId) {
       toast.error('User not authenticated. Please login again.');
       return;
     }
 
     try {
-      await api.post('/cv/save', { ...formData, userId: user._id });
-      toast.success("CV Saved Successfully");
+      const saveData = { 
+        ...formData, 
+        userId: userId 
+      };
+      
+      const response = await api.post('/cv/save', saveData);
+      
+      
+      if (response.data.success) {
+        toast.success("CV Saved Successfully");
+      } else {
+        toast.error(response.data.message || 'Failed to save CV');
+      }
     } catch (error) {
-      toast.error(error.response?.data?.message || 'Failed to save CV');
+      
+      if (error.response?.status === 401) {
+        toast.error('Session expired. Please login again.');
+
+      } else {
+        toast.error(error.response?.data?.message || 'Failed to save CV');
+      }
     }
-  }, [user?._id, formData]);
+  }, [getUserId, user, formData]);
 
   const handlePreview = useCallback(() => setShowPreview(true), []);
   const handleBackFromPreview = useCallback(() => setShowPreview(false), []);
@@ -291,6 +322,7 @@ const CVBuilder = ({ onPreview, user, onStepChange, currentStep, onStepComplete 
   return (
     <div className="bg-white rounded-xl shadow-lg p-4 sm:p-6 md:p-8 mx-auto max-w-full lg:max-w-6xl">
       <ProgressBar currentStep={activeStep} totalSteps={totalSteps} />
+      
       <StepContent
         currentStep={activeStep}
         formData={formData}
@@ -299,6 +331,7 @@ const CVBuilder = ({ onPreview, user, onStepChange, currentStep, onStepComplete 
         onArrayRemove={handleArrayRemove}
         onArrayUpdate={handleArrayUpdate}
       />
+      
       <NavigationControls
         currentStep={activeStep}
         totalSteps={totalSteps}
@@ -308,6 +341,7 @@ const CVBuilder = ({ onPreview, user, onStepChange, currentStep, onStepComplete 
         onPreview={handlePreview}
         completedSteps={completedSteps}
       />
+      
       <SaveProgressModal
         open={showSaveModal}
         onConfirm={confirmSaveProgress}
