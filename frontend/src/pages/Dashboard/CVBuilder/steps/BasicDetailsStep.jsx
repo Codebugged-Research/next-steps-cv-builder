@@ -102,7 +102,7 @@ const BasicDetailsStep = ({ formData, onInputChange }) => {
       const uploadFormData = new FormData();
       uploadFormData.append('document', file);
       
-      const response = await api.post('/documents/upload', uploadFormData);
+      const response = await api.post('/documents/upload-document', uploadFormData);
       
       if (response.data.success) {
         onInputChange('basicDetails', documentType, response.data.data.url);

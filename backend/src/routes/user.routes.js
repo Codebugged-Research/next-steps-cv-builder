@@ -11,7 +11,7 @@ router.route("/current-user").get(verifyJWT, getCurrentUser);
 router.post("/accept-hipaa", verifyJWT, acceptHIPAAagreement);
 router.get("/hipaa-status", verifyJWT, getHIPAAstatus);
 router.post(
-  "/documents/upload", 
+  "/documents/upload-document", 
   verifyJWT, 
   uploadPhoto.single('document'), 
   uploadFile

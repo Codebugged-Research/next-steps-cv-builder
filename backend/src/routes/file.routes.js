@@ -5,12 +5,12 @@ import { uploadPhoto,uploadDocument } from '../middlewares/s3.upload.middleware.
 
 const router = Router();
 
-router.route('/upload').post(
+router.route('/upload-photo').post(
     verifyJWT,
     uploadPhoto.single('document'),
     uploadFile
 );
-router.route('/documents/upload').post(
+router.route('/upload-document').post(
     verifyJWT,
     uploadDocument.single('document'),
     uploadFile

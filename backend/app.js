@@ -25,7 +25,7 @@ import PublicationsRoutes from './src/routes/publication.routes.js';
 
 
 
-app.use('/api/files', FileRoutes);
+// app.use('/api/files', FileRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/cv', cvRoutes);
 app.use('/api/conferences', conferenceRoutes);

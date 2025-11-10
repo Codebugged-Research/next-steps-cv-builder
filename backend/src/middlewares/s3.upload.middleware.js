@@ -62,7 +62,7 @@ const uploadDocument = multer({
       });
     },
   }),
-  limits: { fileSize: 5 * 1024 * 1024 },
+  limits: { fileSize: 10 * 1024 * 1024 },
   fileFilter: (req, file, cb) => {
     const allowedTypes = [
       'image/jpeg',
@@ -72,9 +72,11 @@ const uploadDocument = multer({
       'application/msword',
       'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
     ];
-
-    if (allowedTypes.includes(file.mimetype)) cb(null, true);
-    else cb(new Error('Only image or document files are allowed'), false);
+    if (allowedTypes.includes(file.mimetype)) {
+      cb(null, true);
+    } else {
+      cb(new Error('Only image or document files are allowed'), false);
+    }
   },
 });
 
