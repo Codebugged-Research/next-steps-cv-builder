@@ -15,7 +15,6 @@ const SkillsStep = ({ formData, onInputChange }) => {
     const file = e.target.files[0];
     if (!file) return;
     
-    
     const error = validateFile(file, 'DOCUMENT');
     if (error) {
       setErrors(prev => ({ ...prev, document: error }));
@@ -24,17 +23,17 @@ const SkillsStep = ({ formData, onInputChange }) => {
 
     try {
       setUploading(true);
-
       const formDataObj = new FormData();
       formDataObj.append('document', file);
 
       const response = await api.post('/documents/upload-document', formDataObj, {
-  headers: {
-    'Content-Type': 'multipart/form-data',
-  },
-});
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      });
 
       console.log('Document upload response:', response);
+
       if (response.data.success) {
         const newDocument = {
           id: Date.now(),
@@ -90,7 +89,6 @@ const SkillsStep = ({ formData, onInputChange }) => {
               rows={6}
             />
           </div>
-          
         </div>
 
         <p className="text-sm text-gray-600 bg-blue-50 p-3 rounded-lg">
@@ -164,6 +162,14 @@ const SkillsStep = ({ formData, onInputChange }) => {
                     </div>
                     
                     <div className="flex items-center gap-2">
+                      <a
+                        href={doc.url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-xs text-[#169AB4] hover:text-[#147a8f] underline"
+                      >
+                        View
+                      </a>
                       <button
                         onClick={() => removeDocument(doc.id)}
                         className="p-1 text-red-500 hover:bg-red-50 rounded"
@@ -179,7 +185,6 @@ const SkillsStep = ({ formData, onInputChange }) => {
           )}
         </div>
       </div>
-
     </div>
   );
 };
