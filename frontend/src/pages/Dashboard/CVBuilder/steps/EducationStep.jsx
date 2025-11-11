@@ -18,6 +18,17 @@ const EducationStep = ({ formData, onInputChange }) => {
     setActiveTab(tabId);
   }, []);
 
+  const validatePercentage = (value) => {
+    const regex = /^(\d{0,3}\.?\d{0,2})%?$/;
+    return regex.test(value);
+  };
+
+  const handlePercentageChange = (subsection, field, value) => {
+    if (value === '' || validatePercentage(value)) {
+      updateSubSection(subsection, field, value);
+    }
+  };
+
   const validateYears = (startYear, endYear, section) => {
     if (startYear && endYear) {
       const start = parseInt(startYear);
@@ -217,7 +228,7 @@ const EducationStep = ({ formData, onInputChange }) => {
         
         <div className="relative">
           <label className="block text-sm font-medium text-gray-700 mb-1">
-            Grade/Percentage
+            Percentage
           </label>
           <div className="relative">
             <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -226,7 +237,7 @@ const EducationStep = ({ formData, onInputChange }) => {
             <input
               type="text"
               value={formData.education?.schooling?.grade || ''}
-              onChange={(e) => updateSubSection('schooling', 'grade', e.target.value)}
+              onChange={(e) => handlePercentageChange('schooling', 'grade', e.target.value)}
               className="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-[#169AB4] focus:border-transparent"
               placeholder="e.g., 85% or A+"
             />
@@ -373,7 +384,7 @@ const EducationStep = ({ formData, onInputChange }) => {
             <input
               type="text"
               value={formData.education?.college?.eleventhGrade || ''}
-              onChange={(e) => updateSubSection('college', 'eleventhGrade', e.target.value)}
+              onChange={(e) => handlePercentageChange('college', 'eleventhGrade', e.target.value)}
               className="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-[#169AB4] focus:border-transparent"
               placeholder="e.g., 85%"
             />
@@ -391,7 +402,7 @@ const EducationStep = ({ formData, onInputChange }) => {
             <input
               type="text"
               value={formData.education?.college?.twelfthGrade || ''}
-              onChange={(e) => updateSubSection('college', 'twelfthGrade', e.target.value)}
+              onChange={(e) => handlePercentageChange('college', 'twelfthGrade', e.target.value)}
               className="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-[#169AB4] focus:border-transparent"
               placeholder="e.g., 90%"
             />
@@ -569,7 +580,7 @@ const EducationStep = ({ formData, onInputChange }) => {
             <input
               type="text"
               value={formData.education?.graduation?.firstYearPercentage || ''}
-              onChange={(e) => updateSubSection('graduation', 'firstYearPercentage', e.target.value)}
+              onChange={(e) => handlePercentageChange('graduation', 'firstYearPercentage', e.target.value)}
               className="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-[#169AB4] focus:border-transparent"
               placeholder="e.g., 85%"
             />
@@ -587,7 +598,7 @@ const EducationStep = ({ formData, onInputChange }) => {
             <input
               type="text"
               value={formData.education?.graduation?.secondYearPercentage || ''}
-              onChange={(e) => updateSubSection('graduation', 'secondYearPercentage', e.target.value)}
+              onChange={(e) => handlePercentageChange('graduation', 'secondYearPercentage', e.target.value)}
               className="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-[#169AB4] focus:border-transparent"
               placeholder="e.g., 87%"
             />
@@ -605,7 +616,7 @@ const EducationStep = ({ formData, onInputChange }) => {
             <input
               type="text"
               value={formData.education?.graduation?.thirdYearPercentage || ''}
-              onChange={(e) => updateSubSection('graduation', 'thirdYearPercentage', e.target.value)}
+              onChange={(e) => handlePercentageChange('graduation', 'thirdYearPercentage', e.target.value)}
               className="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-[#169AB4] focus:border-transparent"
               placeholder="e.g., 89%"
             />
@@ -623,7 +634,7 @@ const EducationStep = ({ formData, onInputChange }) => {
             <input
               type="text"
               value={formData.education?.graduation?.finalYearPercentage || ''}
-              onChange={(e) => updateSubSection('graduation', 'finalYearPercentage', e.target.value)}
+              onChange={(e) => handlePercentageChange('graduation', 'finalYearPercentage', e.target.value)}
               className="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-[#169AB4] focus:border-transparent"
               placeholder="e.g., 91%"
             />
