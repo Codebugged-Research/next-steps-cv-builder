@@ -17,7 +17,7 @@ api.interceptors.response.use(
     if (error.response && error.response.status === 401 && !isRedirecting) {
       isRedirecting = true;
       
-      localStorage.removeItem('user');
+      // localStorage.removeItem('user');
       localStorage.removeItem('activeSection');
       localStorage.removeItem('currentCVStep');
       localStorage.removeItem('completedSteps');
