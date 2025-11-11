@@ -5,6 +5,7 @@ import { Plus, Trash2, Heart, Award } from 'lucide-react';
 
 const WorkshopsStep = ({ formData, onInputChange, onArrayAdd, onArrayRemove, onArrayUpdate }) => {
   const [activeTab, setActiveTab] = useState('bls');
+  const [dateErrors, setDateErrors] = useState({});
 
   const tabs = [
     { id: 'bls', label: 'BLS Certification' },
@@ -26,9 +27,42 @@ const WorkshopsStep = ({ formData, onInputChange, onArrayAdd, onArrayRemove, onA
     setActiveTab(tabId);
   }, []);
 
+  const validateDates = (issueDate, expiryDate, certType) => {
+    if (issueDate && expiryDate) {
+      const issue = new Date(issueDate);
+      const expiry = new Date(expiryDate);
+      
+      if (expiry <= issue) {
+        setDateErrors(prev => ({
+          ...prev,
+          [certType]: 'Expiry date must be after issue date'
+        }));
+        return false;
+      } else {
+        setDateErrors(prev => {
+          const newErrors = { ...prev };
+          delete newErrors[certType];
+          return newErrors;
+        });
+        return true;
+      }
+    }
+    return true;
+  };
+
   const updateAclsBls = useCallback((field, value) => {
     onInputChange('aclsBls', field, value);
-  }, [onInputChange]);
+    
+    if (field === 'blsIssueDate') {
+      validateDates(value, formData.aclsBls?.blsExpiryDate, 'bls');
+    } else if (field === 'blsExpiryDate') {
+      validateDates(formData.aclsBls?.blsIssueDate, value, 'bls');
+    } else if (field === 'aclsIssueDate') {
+      validateDates(value, formData.aclsBls?.aclsExpiryDate, 'acls');
+    } else if (field === 'aclsExpiryDate') {
+      validateDates(formData.aclsBls?.aclsIssueDate, value, 'acls');
+    }
+  }, [onInputChange, formData.aclsBls]);
 
   const TabButton = ({ tab, isActive }) => {
     return (
@@ -73,6 +107,7 @@ const WorkshopsStep = ({ formData, onInputChange, onArrayAdd, onArrayRemove, onA
               type="date"
               value={formData.aclsBls?.blsIssueDate || ''}
               onChange={(value) => updateAclsBls('blsIssueDate', value)}
+              max={formData.aclsBls?.blsExpiryDate || undefined}
               required
             />
             <FormField
@@ -80,10 +115,13 @@ const WorkshopsStep = ({ formData, onInputChange, onArrayAdd, onArrayRemove, onA
               type="date"
               value={formData.aclsBls?.blsExpiryDate || ''}
               onChange={(value) => updateAclsBls('blsExpiryDate', value)}
+              min={formData.aclsBls?.blsIssueDate || undefined}
               required
             />
           </FormGrid>
-
+          {dateErrors.bls && (
+            <p className="text-sm text-red-600">{dateErrors.bls}</p>
+          )}
           <FormField
             label="Certification Provider"
             value={formData.aclsBls?.blsProvider || ''}
@@ -91,7 +129,6 @@ const WorkshopsStep = ({ formData, onInputChange, onArrayAdd, onArrayRemove, onA
             placeholder="e.g., American Heart Association, Red Cross"
             required
           />
-
           <FormField
             label="Certificate Number (Optional)"
             value={formData.aclsBls?.blsCertificateNumber || ''}
@@ -109,7 +146,7 @@ const WorkshopsStep = ({ formData, onInputChange, onArrayAdd, onArrayRemove, onA
         </div>
       )}
     </div>
-  ), [formData.aclsBls, updateAclsBls]);
+  ), [formData.aclsBls, updateAclsBls, dateErrors.bls]);
 
   const ACLSTab = useMemo(() => (
     <div className="space-y-6">
@@ -139,6 +176,7 @@ const WorkshopsStep = ({ formData, onInputChange, onArrayAdd, onArrayRemove, onA
               type="date"
               value={formData.aclsBls?.aclsIssueDate || ''}
               onChange={(value) => updateAclsBls('aclsIssueDate', value)}
+              max={formData.aclsBls?.aclsExpiryDate || undefined}
               required
             />
             <FormField
@@ -146,10 +184,13 @@ const WorkshopsStep = ({ formData, onInputChange, onArrayAdd, onArrayRemove, onA
               type="date"
               value={formData.aclsBls?.aclsExpiryDate || ''}
               onChange={(value) => updateAclsBls('aclsExpiryDate', value)}
+              min={formData.aclsBls?.aclsIssueDate || undefined}
               required
             />
           </FormGrid>
-
+          {dateErrors.acls && (
+            <p className="text-sm text-red-600">{dateErrors.acls}</p>
+          )}
           <FormField
             label="Certification Provider"
             value={formData.aclsBls?.aclsProvider || ''}
@@ -157,7 +198,6 @@ const WorkshopsStep = ({ formData, onInputChange, onArrayAdd, onArrayRemove, onA
             placeholder="e.g., American Heart Association"
             required
           />
-
           <FormField
             label="Certificate Number (Optional)"
             value={formData.aclsBls?.aclsCertificateNumber || ''}
@@ -175,7 +215,7 @@ const WorkshopsStep = ({ formData, onInputChange, onArrayAdd, onArrayRemove, onA
         </div>
       )}
     </div>
-  ), [formData.aclsBls, updateAclsBls]);
+  ), [formData.aclsBls, updateAclsBls, dateErrors.acls]);
 
   const WorkshopsTab = useMemo(() => (
     <div className="space-y-6">
