@@ -117,6 +117,71 @@ const CVBuilder = ({ onPreview, user, onStepChange, currentStep, onStepComplete 
     console.log('CVBuilder - User ID:', user?._id || user?.id);
   }, [user]);
 
+  const validateCurrentStep = useCallback(() => {
+    const missingFields = [];
+    
+    switch (activeStep) {
+      case 1:
+        if (!formData.basicDetails?.fullName?.trim()) missingFields.push('Full Name');
+        if (!formData.basicDetails?.email?.trim()) missingFields.push('Email');
+        if (!formData.basicDetails?.phone?.trim()) missingFields.push('Phone');
+        if (!formData.basicDetails?.medicalSchool?.trim()) missingFields.push('Medical School');
+        if (!formData.basicDetails?.graduationYear?.trim()) missingFields.push('Graduation Year');
+        if (!formData.basicDetails?.city?.trim()) missingFields.push('City');
+        break;
+        
+      case 2:
+        if (!formData.education?.schooling?.schoolName?.trim()) missingFields.push('School Name');
+        if (!formData.education?.schooling?.board?.trim()) missingFields.push('Board');
+        if (!formData.education?.schooling?.city?.trim()) missingFields.push('Schooling City');
+        if (!formData.education?.schooling?.state?.trim()) missingFields.push('Schooling State');
+        if (!formData.education?.schooling?.startYear) missingFields.push('Schooling Start Year');
+        if (!formData.education?.schooling?.endYear) missingFields.push('Schooling End Year');
+        
+        if (!formData.education?.college?.collegeName?.trim()) missingFields.push('College Name');
+        if (!formData.education?.college?.stream?.trim()) missingFields.push('Stream');
+        if (!formData.education?.college?.city?.trim()) missingFields.push('College City');
+        if (!formData.education?.college?.state?.trim()) missingFields.push('College State');
+        if (!formData.education?.college?.startYear) missingFields.push('College Start Year');
+        if (!formData.education?.college?.endYear) missingFields.push('College End Year');
+        
+        if (!formData.education?.graduation?.universityName?.trim()) missingFields.push('University Name');
+        if (!formData.education?.graduation?.degree?.trim()) missingFields.push('Degree');
+        if (!formData.education?.graduation?.city?.trim()) missingFields.push('Graduation City');
+        if (!formData.education?.graduation?.state?.trim()) missingFields.push('Graduation State');
+        if (!formData.education?.graduation?.country?.trim()) missingFields.push('Country');
+        if (!formData.education?.graduation?.startDate?.trim()) missingFields.push('Graduation Start Date');
+        if (!formData.education?.graduation?.endDate?.trim()) missingFields.push('Graduation End Date');
+        break;
+        
+      case 3:
+        if (!formData.usmleScores?.step1Status) missingFields.push('USMLE Step 1 Status');
+        break;
+        
+      case 4:
+        if (!formData.usClinicalExperience?.list || formData.usClinicalExperience.list.length === 0) {
+          missingFields.push('At least one US Clinical Experience');
+        } else {
+          formData.usClinicalExperience.list.forEach((exp, index) => {
+            if (!exp.institution?.trim()) missingFields.push(`Experience ${index + 1}: Institution`);
+            if (!exp.role?.trim()) missingFields.push(`Experience ${index + 1}: Role`);
+            if (!exp.startDate) missingFields.push(`Experience ${index + 1}: Start Date`);
+            if (!exp.endDate && !exp.current) missingFields.push(`Experience ${index + 1}: End Date`);
+          });
+        }
+        break;
+        
+      case 5:
+        if (!formData.skills?.skillsList?.trim()) missingFields.push('Skills List');
+        break;
+        
+      default:
+        break;
+    }
+    
+    return missingFields;
+  }, [activeStep, formData]);
+
   const calculateCompletedSteps = useCallback((data) => {
     const checks = [
       { condition: data.basicDetails?.fullName && data.basicDetails?.email, step: 1 },
@@ -186,6 +251,22 @@ const CVBuilder = ({ onPreview, user, onStepChange, currentStep, onStepComplete 
   }, [currentStep, internalCurrentStep]);
 
   const handleSaveProgress = () => {
+    const missingFields = validateCurrentStep();
+    
+    if (missingFields.length > 0) {
+      const fieldsList = missingFields.slice(0, 5).join(', ');
+      const remainingCount = missingFields.length - 5;
+      const message = remainingCount > 0 
+        ? `${fieldsList} and ${remainingCount} more field${remainingCount > 1 ? 's' : ''}`
+        : fieldsList;
+      
+      toast.error(`Please fill in the following required fields: ${message}`, {
+        autoClose: 5000,
+        position: 'top-center'
+      });
+      return;
+    }
+    
     setShowSaveModal(true);
   };
 
@@ -251,57 +332,72 @@ const CVBuilder = ({ onPreview, user, onStepChange, currentStep, onStepComplete 
   }, [onStepChange]);
 
   const handleNext = useCallback(() => {
+    const missingFields = validateCurrentStep();
+    
+    if (missingFields.length > 0 && activeStep <= 5) {
+      const fieldsList = missingFields.slice(0, 5).join(', ');
+      const remainingCount = missingFields.length - 5;
+      const message = remainingCount > 0 
+        ? `${fieldsList} and ${remainingCount} more field${remainingCount > 1 ? 's' : ''}`
+        : fieldsList;
+      
+      toast.warning(`Please fill in the following required fields: ${message}`, {
+        autoClose: 5000,
+        position: 'top-center'
+      });
+      return;
+    }
+    
     handleStepChange(Math.min(totalSteps, activeStep + 1));
-  }, [totalSteps, activeStep, handleStepChange]);
+  }, [totalSteps, activeStep, handleStepChange, validateCurrentStep]);
 
   const handlePrevious = useCallback(() => {
     handleStepChange(Math.max(1, activeStep - 1));
   }, [activeStep, handleStepChange]);
 
   const handleSave = useCallback(async () => {
-  const userId = getUserId();
-  
-  console.log('=== DEBUG INFO ===');
-  console.log('User ID:', userId);
-  console.log('User object:', user);
-  console.log('LocalStorage userId:', localStorage.getItem('userId'));
-  
-  if (!userId) {
-    toast.error('User not authenticated. Please login again.');
-    return;
-  }
-  
-  try {
-    const saveData = { 
-      ...formData, 
-      userId: userId 
-    };
+    const userId = getUserId();
     
-    console.log('Making request to /cv/save');
-    console.log('Request data:', { userId: saveData.userId });
+    console.log('=== DEBUG INFO ===');
+    console.log('User ID:', userId);
+    console.log('User object:', user);
+    console.log('LocalStorage userId:', localStorage.getItem('userId'));
     
-    const response = await api.post('/cv/save', saveData);
-    
-    if (response.data.success) {
-      toast.success("CV Saved Successfully");
-    } else {
-      toast.error(response.data.message || 'Failed to save CV');
+    if (!userId) {
+      toast.error('User not authenticated. Please login again.');
+      return;
     }
-  } catch (error) {
-    console.error('Save error:', error);
-    console.error('Error response:', error.response);
     
-    if (error.response?.status === 401) {
-      toast.error('Session expired. Please login again.');
-    } else {
-      toast.error(error.response?.data?.message || 'Failed to save CV');
+    try {
+      const saveData = { 
+        ...formData, 
+        userId: userId 
+      };
+      
+      console.log('Making request to /cv/save');
+      console.log('Request data:', { userId: saveData.userId });
+      
+      const response = await api.post('/cv/save', saveData);
+      
+      if (response.data.success) {
+        toast.success("CV Saved Successfully");
+      } else {
+        toast.error(response.data.message || 'Failed to save CV');
+      }
+    } catch (error) {
+      console.error('Save error:', error);
+      console.error('Error response:', error.response);
+      
+      if (error.response?.status === 401) {
+        toast.error('Session expired. Please login again.');
+      } else {
+        toast.error(error.response?.data?.message || 'Failed to save CV');
+      }
     }
-  }
-}, [getUserId, user, formData]);
+  }, [getUserId, user, formData]);
 
   const handlePreview = useCallback(() => setShowPreview(true), []);
   const handleBackFromPreview = useCallback(() => setShowPreview(false), []);
-
   const handleDownload = useCallback(() => {
     toast.info('PDF download functionality will be implemented soon');
   }, []);
