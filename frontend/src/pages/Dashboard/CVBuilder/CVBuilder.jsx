@@ -262,7 +262,7 @@ const CVBuilder = ({ onPreview, user, onStepChange, currentStep, onStepComplete 
       
       toast.error(`Please fill in the following required fields: ${message}`, {
         autoClose: 5000,
-        position: 'top-center'
+        position: 'top-right'
       });
       return;
     }
@@ -343,7 +343,7 @@ const CVBuilder = ({ onPreview, user, onStepChange, currentStep, onStepComplete 
       
       toast.warning(`Please fill in the following required fields: ${message}`, {
         autoClose: 5000,
-        position: 'top-center'
+        position: 'top-right'
       });
       return;
     }
