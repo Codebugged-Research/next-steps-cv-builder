@@ -5,6 +5,7 @@ import { GraduationCap, School, BookOpen, Award, Building2, MapPin, Calendar, Ha
 
 const EducationStep = ({ formData, onInputChange }) => {
   const [activeTab, setActiveTab] = useState('schooling');
+  const [dateErrors, setDateErrors] = useState({});
 
   const tabs = [
     { id: 'schooling', label: 'Schooling', icon: School },
@@ -17,11 +18,69 @@ const EducationStep = ({ formData, onInputChange }) => {
     setActiveTab(tabId);
   }, []);
 
+  const validateYears = (startYear, endYear, section) => {
+    if (startYear && endYear) {
+      const start = parseInt(startYear);
+      const end = parseInt(endYear);
+      
+      if (end < start) {
+        setDateErrors(prev => ({
+          ...prev,
+          [`${section}_year`]: 'End year must be after or equal to start year'
+        }));
+        return false;
+      } else {
+        setDateErrors(prev => {
+          const newErrors = { ...prev };
+          delete newErrors[`${section}_year`];
+          return newErrors;
+        });
+        return true;
+      }
+    }
+    return true;
+  };
+
+  const validateDates = (startDate, endDate, section) => {
+    if (startDate && endDate) {
+      const start = new Date(startDate);
+      const end = new Date(endDate);
+      
+      if (end <= start) {
+        setDateErrors(prev => ({
+          ...prev,
+          [`${section}_date`]: 'End date must be after start date'
+        }));
+        return false;
+      } else {
+        setDateErrors(prev => {
+          const newErrors = { ...prev };
+          delete newErrors[`${section}_date`];
+          return newErrors;
+        });
+        return true;
+      }
+    }
+    return true;
+  };
+
   const updateSubSection = useCallback((subsection, field, value) => {
+    const currentData = formData.education?.[subsection] || {};
+    
     onInputChange('education', subsection, {
-      ...(formData.education?.[subsection] || {}),
+      ...currentData,
       [field]: value
     });
+
+    if (field === 'startYear') {
+      validateYears(value, currentData.endYear, subsection);
+    } else if (field === 'endYear') {
+      validateYears(currentData.startYear, value, subsection);
+    } else if (field === 'startDate') {
+      validateDates(value, currentData.endDate, subsection);
+    } else if (field === 'endDate') {
+      validateDates(currentData.startDate, value, subsection);
+    }
   }, [formData.education, onInputChange]);
 
   const TabButton = ({ tab, isActive }) => {
@@ -129,7 +188,7 @@ const EducationStep = ({ formData, onInputChange }) => {
               value={formData.education?.schooling?.startYear || ''}
               onChange={(e) => updateSubSection('schooling', 'startYear', e.target.value)}
               min="1990"
-              max={new Date().getFullYear()}
+              max={formData.education?.schooling?.endYear || new Date().getFullYear()}
               className="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-[#169AB4] focus:border-transparent"
               placeholder="Start year"
             />
@@ -148,7 +207,7 @@ const EducationStep = ({ formData, onInputChange }) => {
               type="number"
               value={formData.education?.schooling?.endYear || ''}
               onChange={(e) => updateSubSection('schooling', 'endYear', e.target.value)}
-              min="1990"
+              min={formData.education?.schooling?.startYear || "1990"}
               max={new Date().getFullYear()}
               className="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-[#169AB4] focus:border-transparent"
               placeholder="End year"
@@ -174,8 +233,11 @@ const EducationStep = ({ formData, onInputChange }) => {
           </div>
         </div>
       </FormGrid>
+      {dateErrors.schooling_year && (
+        <p className="text-sm text-red-600">{dateErrors.schooling_year}</p>
+      )}
     </div>
-  ), [formData.education?.schooling, updateSubSection]);
+  ), [formData.education?.schooling, updateSubSection, dateErrors.schooling_year]);
 
   const CollegeTab = useMemo(() => (
     <div className="space-y-6">
@@ -269,7 +331,7 @@ const EducationStep = ({ formData, onInputChange }) => {
               value={formData.education?.college?.startYear || ''}
               onChange={(e) => updateSubSection('college', 'startYear', e.target.value)}
               min="1990"
-              max={new Date().getFullYear()}
+              max={formData.education?.college?.endYear || new Date().getFullYear()}
               className="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-[#169AB4] focus:border-transparent"
               placeholder="Start year"
             />
@@ -288,7 +350,7 @@ const EducationStep = ({ formData, onInputChange }) => {
               type="number"
               value={formData.education?.college?.endYear || ''}
               onChange={(e) => updateSubSection('college', 'endYear', e.target.value)}
-              min="1990"
+              min={formData.education?.college?.startYear || "1990"}
               max={new Date().getFullYear()}
               className="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-[#169AB4] focus:border-transparent"
               placeholder="End year"
@@ -296,7 +358,9 @@ const EducationStep = ({ formData, onInputChange }) => {
           </div>
         </div>
       </FormGrid>
-
+      {dateErrors.college_year && (
+        <p className="text-sm text-red-600">{dateErrors.college_year}</p>
+      )}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div className="relative">
           <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -335,7 +399,7 @@ const EducationStep = ({ formData, onInputChange }) => {
         </div>
       </div>
     </div>
-  ), [formData.education?.college, updateSubSection]);
+  ), [formData.education?.college, updateSubSection, dateErrors.college_year]);
 
   const GraduationTab = useMemo(() => (
     <div className="space-y-6">
@@ -466,6 +530,7 @@ const EducationStep = ({ formData, onInputChange }) => {
               type="date"
               value={formData.education?.graduation?.startDate || ''}
               onChange={(e) => updateSubSection('graduation', 'startDate', e.target.value)}
+              max={formData.education?.graduation?.endDate || undefined}
               className="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-[#169AB4] focus:border-transparent"
             />
           </div>
@@ -483,12 +548,15 @@ const EducationStep = ({ formData, onInputChange }) => {
               type="date"
               value={formData.education?.graduation?.endDate || ''}
               onChange={(e) => updateSubSection('graduation', 'endDate', e.target.value)}
+              min={formData.education?.graduation?.startDate || undefined}
               className="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-[#169AB4] focus:border-transparent"
             />
           </div>
         </div>
       </FormGrid>
-
+      {dateErrors.graduation_date && (
+        <p className="text-sm text-red-600">{dateErrors.graduation_date}</p>
+      )}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         <div className="relative">
           <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -562,7 +630,6 @@ const EducationStep = ({ formData, onInputChange }) => {
           </div>
         </div>
       </div>
-
       <FormGrid>
         <div className="relative">
           <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -605,7 +672,7 @@ const EducationStep = ({ formData, onInputChange }) => {
         </div>
       </FormGrid>
     </div>
-  ), [formData.education?.graduation, updateSubSection]);
+  ), [formData.education?.graduation, updateSubSection, dateErrors.graduation_date]);
 
   const PostGraduationTab = useMemo(() => (
     <div className="space-y-6">
@@ -614,7 +681,6 @@ const EducationStep = ({ formData, onInputChange }) => {
           Fill this section only if you have completed or are pursuing post-graduation.
         </p>
       </div>
-
       <FormGrid>
         <div className="relative">
           <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -743,6 +809,7 @@ const EducationStep = ({ formData, onInputChange }) => {
               type="date"
               value={formData.education?.postGraduation?.startDate || ''}
               onChange={(e) => updateSubSection('postGraduation', 'startDate', e.target.value)}
+              max={formData.education?.postGraduation?.endDate || undefined}
               className="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-[#169AB4] focus:border-transparent"
             />
           </div>
@@ -760,6 +827,7 @@ const EducationStep = ({ formData, onInputChange }) => {
               type="date"
               value={formData.education?.postGraduation?.endDate || ''}
               onChange={(e) => updateSubSection('postGraduation', 'endDate', e.target.value)}
+              min={formData.education?.postGraduation?.startDate || undefined}
               className="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-[#169AB4] focus:border-transparent"
             />
           </div>
@@ -804,8 +872,11 @@ const EducationStep = ({ formData, onInputChange }) => {
           </div>
         </div>
       </FormGrid>
+      {dateErrors.postGraduation_date && (
+        <p className="text-sm text-red-600">{dateErrors.postGraduation_date}</p>
+      )}
     </div>
-  ), [formData.education?.postGraduation, updateSubSection]);
+  ), [formData.education?.postGraduation, updateSubSection, dateErrors.postGraduation_date]);
 
   const renderActiveTab = () => {
     switch (activeTab) {
