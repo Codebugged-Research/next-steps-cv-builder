@@ -57,7 +57,7 @@ const ConferencesStep = ({ formData, onArrayAdd, onArrayRemove, onArrayUpdate })
       }
     } catch (error) {
       console.error('Document upload error:', error);
-      toast.error(error.response?.data?.message || 'Failed to upload document');
+      toast.error(error.response?.data?.message || 'Failed to upload document .Please try uploading a file under 5 MB.');
     } finally {
       setUploading(prev => ({ ...prev, [`conference_${conferenceIndex}`]: false }));
     }

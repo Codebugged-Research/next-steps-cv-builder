@@ -109,7 +109,7 @@ const USMLEScoresStep = ({ formData, onInputChange }) => {
         oetCert: 'OET'
       };
       
-      toast.error(error.response?.data?.message || `Failed to upload ${certNames[certificateType]} certificate`);
+      toast.error(error.response?.data?.message || `Failed to upload ${certNames[certificateType]} certificate .Please try uploading a file under 5 MB.`);
     } finally {
       setUploading(prev => ({ ...prev, [certificateType]: false }));
     }

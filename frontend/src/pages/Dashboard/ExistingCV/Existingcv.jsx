@@ -76,7 +76,7 @@ const Existingcv = ({ onBack }) => {
         toast.success('CV uploaded successfully!');
       }
     } catch (error) {
-      const errorMessage = error.response?.data?.message || 'Failed to upload CV';
+      const errorMessage = error.response?.data?.message || 'Failed to upload CV ';
       toast.error(errorMessage);
     } finally {
       setUploading(false);

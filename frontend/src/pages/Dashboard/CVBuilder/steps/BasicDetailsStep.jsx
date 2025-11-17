@@ -111,7 +111,7 @@ const BasicDetailsStep = ({ formData, onInputChange }) => {
         toast.success(`${getDocumentLabel(documentType)} uploaded successfully!`);
       }
     } catch (error) {
-      toast.error(error.response?.data?.message || `Failed to upload ${getDocumentLabel(documentType)}`);
+      toast.error(error.response?.data?.message || `Failed to upload ${getDocumentLabel(documentType)}. Please try uploading a file under 5 MB.`);
     } finally {
       setUploading(prev => ({ ...prev, [documentType]: false }));
     }
