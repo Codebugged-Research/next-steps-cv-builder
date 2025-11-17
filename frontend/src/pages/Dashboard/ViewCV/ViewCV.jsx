@@ -34,7 +34,7 @@ const ViewCV = ({ onEdit }) => {
         setError(response.data.message || 'Failed to fetch CV data');
       }
     } catch (error) {
-      console.error('Error fetching CV data:', error);
+    
       setError(error.response?.data?.message || 'Failed to load CV data. Please try again.');
     } finally {
       setLoading(false);
@@ -63,7 +63,7 @@ const ViewCV = ({ onEdit }) => {
 
       toast.success('CV downloaded successfully!');
     } catch (error) {
-      console.error('Error downloading CV:', error);
+
       toast.error('Failed to download CV');
     } finally {
       setDownloading(false);

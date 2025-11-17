@@ -27,7 +27,6 @@ const Conferences = ({ onBack }) => {
                 }));
             }
         } catch (error) {
-            console.error('Error fetching conferences:', error);
             toast.error('Failed to load conferences');
         } finally {
             setLoading(false);
