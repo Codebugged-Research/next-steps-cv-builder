@@ -113,8 +113,6 @@ const CVBuilder = ({ onPreview, user, onStepChange, currentStep, onStepComplete 
   const activeStep = currentStep || internalCurrentStep;
 
   useEffect(() => {
-    console.log('CVBuilder - User prop:', user);
-    console.log('CVBuilder - User ID:', user?._id || user?.id);
   }, [user]);
 
   const validateCurrentStep = useCallback(() => {
@@ -201,7 +199,7 @@ const CVBuilder = ({ onPreview, user, onStepChange, currentStep, onStepComplete 
   }, []);
 
   const getUserId = useCallback(() => {
-    return user?._id || user?.id || localStorage.getItem('userId') || null;
+    return user?._id || user?.id;
   }, [user]);
 
   const checkExistingCV = useCallback(async () => {
@@ -373,9 +371,7 @@ const CVBuilder = ({ onPreview, user, onStepChange, currentStep, onStepComplete 
         ...formData, 
         userId: userId 
       };
-      
-      console.log('Making request to /cv/save');
-      console.log('Request data:', { userId: saveData.userId });
+
       
       const response = await api.post('/cv/save', saveData);
       

@@ -19,8 +19,6 @@ const DashboardLayout = ({ user, onLogout }) => {
     return saved ? JSON.parse(saved) : [];
   });
 
-  console.log('DashboardLayout user prop:', user);
-
   useEffect(() => {
     localStorage.setItem('activeSection', activeSection);
   }, [activeSection]);

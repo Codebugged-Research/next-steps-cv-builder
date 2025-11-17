@@ -20,16 +20,16 @@ const ViewCV = ({ onEdit }) => {
       }
 
       const userId = userResponse.data.data._id;
-      console.log('User ID:', userId);
+
 
       const cvEndpoint = `/cv/${userId}`;
-      console.log('Calling CV endpoint:', cvEndpoint);
+
 
       const response = await api.get(cvEndpoint);
 
       if (response.data.success) {
         setCvData(response.data.data);
-        console.log('CV data fetched successfully');
+
       } else {
         setError(response.data.message || 'Failed to fetch CV data');
       }

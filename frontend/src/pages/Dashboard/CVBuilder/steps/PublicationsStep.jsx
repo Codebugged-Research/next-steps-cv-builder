@@ -40,7 +40,6 @@ const PublicationsStep = ({ formData, onArrayAdd, onArrayRemove, onArrayUpdate }
           'Content-Type': 'multipart/form-data',
         },
       })
-      console.log('Document upload response:', response);
       if (response.data.success) {
         const documentData = {
           url: response.data.data.url,

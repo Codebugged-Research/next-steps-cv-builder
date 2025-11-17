@@ -8,12 +8,10 @@ const NextStepsProjects = () => {
 
   const handleJoinProject = () => {
     setShowJoinForm(true);
-    console.log('Join existing project clicked');
   };
 
   const handleStartNewProject = () => {
     setShowNewForm(true);
-    console.log('Start new project clicked');
   };
 
   return (

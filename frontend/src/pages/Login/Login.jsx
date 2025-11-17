@@ -26,7 +26,6 @@ const Login = ({ onLogin, onNavigateToRegister }) => {
 
     try {
       const response = await api.post('/users/login', formData, { withCredentials: true });
-      console.log(response.data);
       toast.success('Login successful! Welcome back.');
       onLogin(response.data.data);
     } catch (err) {

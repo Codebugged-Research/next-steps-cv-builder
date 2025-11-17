@@ -12,8 +12,6 @@ export const checkConferenceLimit = async (req, res, next) => {
       status: 'registered'
     });
 
-    console.log('Conference limit check - Active:', activeConferences);
-
     if (activeConferences >= 2) {
       throw new ApiError(
         400, 

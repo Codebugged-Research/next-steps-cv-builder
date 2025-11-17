@@ -32,7 +32,6 @@ const SkillsStep = ({ formData, onInputChange }) => {
         },
       });
 
-      console.log('Document upload response:', response);
 
       if (response.data.success) {
         const newDocument = {
