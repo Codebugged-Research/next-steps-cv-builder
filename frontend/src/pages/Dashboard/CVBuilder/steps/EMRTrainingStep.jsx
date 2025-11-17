@@ -49,34 +49,40 @@ const EMRTrainingStep = ({ formData, onInputChange, onArrayAdd, onArrayRemove, o
   const EMRRCMTab = useMemo(() => (
     <div className="space-y-6">
       <div>
-        <label className="block text-sm font-medium text-gray-700 mb-3">EMR Systems Experience</label>
-        <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
-          {emrSystems.map((system) => (
-            <label key={system} className="flex items-center gap-2">
-              <input
-                type="checkbox"
-                checked={formData.emrRcmTraining?.emrSystems?.includes(system) || false}
-                onChange={(e) => {
-                  const currentSystems = formData.emrRcmTraining?.emrSystems || [];
-                  const updated = e.target.checked
-                    ? [...currentSystems, system]
-                    : currentSystems.filter(s => s !== system);
-                  updateEmrRcmTraining('emrSystems', updated);
-                }}
-                className="text-[#169AB4] focus:ring-[#169AB4]"
-              />
-              <span className="text-sm">{system}</span>
-            </label>
-          ))}
-        </div>
-      </div>
+  <label className="block text-sm font-medium text-gray-700 mb-3">EMR Systems Experience</label>
+  <div className="grid grid-cols-2 md:grid-cols-3 gap-x-3 gap-y-5">
+    {emrSystems.map((system) => (
+      <label key={system} className="flex items-center gap-2 cursor-pointer">
+        <input
+          type="checkbox"
+          checked={formData.emrRcmTraining?.emrSystems?.includes(system) || false}
+          onChange={(e) => {
+            const currentSystems = formData.emrRcmTraining?.emrSystems || [];
+            const updated = e.target.checked
+              ? [...currentSystems, system]
+              : currentSystems.filter(s => s !== system);
+            updateEmrRcmTraining('emrSystems', updated);
+          }}
+          className="w-4 h-4 text-[#169AB4] focus:ring-[#169AB4] rounded"
+        />
+        <span className="text-sm">{system}</span>
+      </label>
+    ))}
+  </div>
+</div>
 
-      <FormField
-        label="Revenue Cycle Management (RCM) Training"
-        type="checkbox"
-        value={formData.emrRcmTraining?.rcmTraining || false}
-        onChange={(value) => updateEmrRcmTraining('rcmTraining', value)}
-      />
+      <div className="flex items-center gap-3">
+        <input
+          type="checkbox"
+          id="rcm-training"
+          checked={formData.emrRcmTraining?.rcmTraining || false}
+          onChange={(e) => updateEmrRcmTraining('rcmTraining', e.target.checked)}
+          className="w-4 h-4 text-[#169AB4] focus:ring-[#169AB4] rounded"
+        />
+        <label htmlFor="rcm-training" className="text-sm font-medium text-gray-700 cursor-pointer">
+          Revenue Cycle Management (RCM) Training
+        </label>
+      </div>
 
       {formData.emrRcmTraining?.rcmTraining && (
         <FormField
@@ -144,7 +150,7 @@ const EMRTrainingStep = ({ formData, onInputChange, onArrayAdd, onArrayRemove, o
                 onChange={(e) => onArrayUpdate('workExperience', index, 'currentJob', e.target.checked)}
                 className="w-4 h-4 text-[#169AB4] focus:ring-[#169AB4] rounded"
               />
-              <label htmlFor={`current-job-${index}`} className="text-sm font-medium text-gray-700">
+              <label htmlFor={`current-job-${index}`} className="text-sm font-medium text-gray-700 cursor-pointer">
                 Current Position
               </label>
             </div>

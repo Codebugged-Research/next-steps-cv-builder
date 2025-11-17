@@ -3,7 +3,7 @@ import { toast } from 'react-toastify';
 
 
 const api = axios.create({
-  baseURL: 'https://cv.nextstepsusmle.com/api',
+  baseURL: 'http://localhost:5000/api',
   withCredentials: true,
 });
 
