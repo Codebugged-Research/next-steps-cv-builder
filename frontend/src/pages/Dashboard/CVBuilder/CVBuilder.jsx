@@ -123,8 +123,6 @@ const CVBuilder = ({ onPreview, user, onStepChange, currentStep, onStepComplete 
         if (!formData.basicDetails?.fullName?.trim()) missingFields.push('Full Name');
         if (!formData.basicDetails?.email?.trim()) missingFields.push('Email');
         if (!formData.basicDetails?.phone?.trim()) missingFields.push('Phone');
-        if (!formData.basicDetails?.medicalSchool?.trim()) missingFields.push('Medical School');
-        if (!formData.basicDetails?.graduationYear?.trim()) missingFields.push('Graduation Year');
         if (!formData.basicDetails?.city?.trim()) missingFields.push('City');
         break;
         
