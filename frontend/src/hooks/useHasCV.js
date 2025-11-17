@@ -18,7 +18,6 @@ const useHasCV = () => {
           setHasCV(false);
         }
       } catch (error) {
-        console.error('Error checking CV existence:', error);
         setHasCV(false);
       } finally {
         setLoading(false);

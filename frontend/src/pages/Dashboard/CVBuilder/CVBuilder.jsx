@@ -154,18 +154,6 @@ const CVBuilder = ({ onPreview, user, onStepChange, currentStep, onStepComplete 
         if (!formData.usmleScores?.step1Status) missingFields.push('USMLE Step 1 Status');
         break;
         
-      case 4:
-        if (!formData.usClinicalExperience?.list || formData.usClinicalExperience.list.length === 0) {
-          missingFields.push('At least one US Clinical Experience');
-        } else {
-          formData.usClinicalExperience.list.forEach((exp, index) => {
-            if (!exp.institution?.trim()) missingFields.push(`Experience ${index + 1}: Institution`);
-            if (!exp.role?.trim()) missingFields.push(`Experience ${index + 1}: Role`);
-            if (!exp.startDate) missingFields.push(`Experience ${index + 1}: Start Date`);
-            if (!exp.endDate && !exp.current) missingFields.push(`Experience ${index + 1}: End Date`);
-          });
-        }
-        break;
         
       case 5:
         if (!formData.skills?.skillsList?.trim()) missingFields.push('Skills List');

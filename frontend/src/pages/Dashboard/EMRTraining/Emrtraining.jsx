@@ -322,7 +322,7 @@ const handleCancelRegistration = async (registrationId) => {
 
           <div>
             <h3 className="text-lg sm:text-xl font-semibold text-[#04445E] mb-4">
-              Select Month for Training - 2025
+              Select Month for Training - 2026
             </h3>
             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3 sm:gap-4">
               {months.map((month) => {
