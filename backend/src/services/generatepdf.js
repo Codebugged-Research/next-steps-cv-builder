@@ -37,7 +37,8 @@ const LAYOUT = {
     leftColumnX: 50,
     leftColumnWidth: 180,
     rightColumnX: 240,
-    rightColumnWidth: 315
+    rightColumnWidth: 315,
+    pageHeight: 792
 };
 
 async function fetchImageBuffer(url) {
@@ -48,6 +49,14 @@ async function fetchImageBuffer(url) {
         console.error('Error fetching image:', error);
         return null;
     }
+}
+
+function checkPageBreak(doc, currentY, requiredSpace) {
+    if (currentY + requiredSpace > LAYOUT.pageHeight - MARGINS.bottom) {
+        doc.addPage();
+        return MARGINS.top;
+    }
+    return currentY;
 }
 
 function addHeader(doc, data) {
@@ -100,6 +109,8 @@ function addHeader(doc, data) {
 }
 
 function addLeftColumnSection(doc, title, y) {
+    y = checkPageBreak(doc, y, 30);
+    
     doc.fontSize(SIZES.sectionHeading).fillColor(COLORS.primary).font(FONTS.bold)
         .text(title.toUpperCase(), LAYOUT.leftColumnX, y);
     
@@ -170,6 +181,8 @@ function addEducation(doc, data, startY) {
     educationEntries.forEach((entry, index) => {
         if (index > 0) y += 12;
         
+        y = checkPageBreak(doc, y, 60);
+        
         doc.fontSize(SIZES.body).fillColor(COLORS.primary).font(FONTS.bold)
             .text(entry.degree, LAYOUT.leftColumnX, y, { width: LAYOUT.leftColumnWidth });
         y += SIZES.lineHeight;
@@ -214,6 +227,8 @@ function addLanguages(doc, data, startY) {
     doc.fontSize(SIZES.small).fillColor(COLORS.text).font(FONTS.regular);
     
     data.basicDetails.languages.forEach(lang => {
+        y = checkPageBreak(doc, y, 25);
+        
         const fluencyLevel = lang.fluency.charAt(0).toUpperCase() + lang.fluency.slice(1);
         doc.text(`• ${lang.language}`, LAYOUT.leftColumnX, y, { width: LAYOUT.leftColumnWidth });
         y += 10;
@@ -238,6 +253,7 @@ function addSkillsSection(doc, data, startY) {
         const skills = data.skills.skillsList.split(',').map(s => s.trim()).filter(Boolean);
         
         skills.forEach(skill => {
+            y = checkPageBreak(doc, y, 15);
             doc.text(`• ${skill}`, LAYOUT.leftColumnX, y, { width: LAYOUT.leftColumnWidth });
             y += 11;
         });
@@ -245,12 +261,15 @@ function addSkillsSection(doc, data, startY) {
     
     if (data.skills?.supportingDocuments && data.skills.supportingDocuments.length > 0) {
         y += 5;
+        y = checkPageBreak(doc, y, 30);
+        
         doc.fontSize(SIZES.small).fillColor(COLORS.darkGray).font(FONTS.bold)
             .text('Documents:', LAYOUT.leftColumnX, y, { width: LAYOUT.leftColumnWidth });
         y += 11;
         
         data.skills.supportingDocuments.forEach(docItem => {
             if (docItem.url) {
+                y = checkPageBreak(doc, y, 15);
                 doc.fontSize(SIZES.small).fillColor(COLORS.accent).font(FONTS.regular)
                     .text('View Document', LAYOUT.leftColumnX, y, { 
                         width: LAYOUT.leftColumnWidth,
@@ -281,6 +300,7 @@ function addUSMLEScores(doc, data, startY) {
     doc.fontSize(SIZES.small).fillColor(COLORS.text).font(FONTS.regular);
     
     if (data.usmleScores.step1Status && data.usmleScores.step1Status !== 'not-taken') {
+        y = checkPageBreak(doc, y, 25);
         doc.font(FONTS.bold).text('Step 1:', LAYOUT.leftColumnX, y, { width: LAYOUT.leftColumnWidth, continued: true })
            .font(FONTS.regular).text(` ${data.usmleScores.step1Status.toUpperCase()}`);
         y += 11;
@@ -297,6 +317,7 @@ function addUSMLEScores(doc, data, startY) {
     }
     
     if (data.usmleScores.step2ckScore) {
+        y = checkPageBreak(doc, y, 25);
         doc.fillColor(COLORS.text).font(FONTS.bold).text('Step 2 CK:', LAYOUT.leftColumnX, y, { width: LAYOUT.leftColumnWidth, continued: true })
            .font(FONTS.regular).text(` ${data.usmleScores.step2ckScore}`);
         y += 11;
@@ -313,12 +334,14 @@ function addUSMLEScores(doc, data, startY) {
     }
     
     if (data.usmleScores.step2csStatus && data.usmleScores.step2csStatus !== 'not-taken') {
+        y = checkPageBreak(doc, y, 15);
         doc.fillColor(COLORS.text).font(FONTS.bold).text('Step 2 CS:', LAYOUT.leftColumnX, y, { width: LAYOUT.leftColumnWidth, continued: true })
            .font(FONTS.regular).text(` ${data.usmleScores.step2csStatus.toUpperCase()}`);
         y += 11;
     }
     
     if (data.usmleScores.oetScore) {
+        y = checkPageBreak(doc, y, 25);
         doc.fillColor(COLORS.text).font(FONTS.bold).text('OET Score:', LAYOUT.leftColumnX, y, { width: LAYOUT.leftColumnWidth, continued: true })
            .font(FONTS.regular).text(` ${data.usmleScores.oetScore}`);
         y += 11;
@@ -335,6 +358,7 @@ function addUSMLEScores(doc, data, startY) {
     }
     
     if (data.usmleScores.ecfmgCertified) {
+        y = checkPageBreak(doc, y, 15);
         doc.font(FONTS.bold).fillColor(COLORS.accent)
            .text('✓ ECFMG Certified', LAYOUT.leftColumnX, y, { width: LAYOUT.leftColumnWidth });
         y += 11;
@@ -370,6 +394,8 @@ function addCertifications(doc, data, startY) {
     doc.fontSize(SIZES.small).fillColor(COLORS.text);
     
     certs.forEach(cert => {
+        y = checkPageBreak(doc, y, 40);
+        
         doc.font(FONTS.bold).text(cert.name, LAYOUT.leftColumnX, y, { width: LAYOUT.leftColumnWidth });
         y += 11;
         
@@ -406,10 +432,13 @@ function addEMRTraining(doc, data, startY) {
     doc.fontSize(SIZES.small).fillColor(COLORS.text).font(FONTS.regular);
     
     if (data.emrRcmTraining.emrSystems && data.emrRcmTraining.emrSystems.length > 0) {
+        y = checkPageBreak(doc, y, 30);
+        
         doc.font(FONTS.bold).text('EMR Systems:', LAYOUT.leftColumnX, y, { width: LAYOUT.leftColumnWidth });
         y += 11;
         
         data.emrRcmTraining.emrSystems.forEach(system => {
+            y = checkPageBreak(doc, y, 15);
             doc.font(FONTS.regular).text(`• ${system}`, LAYOUT.leftColumnX, y, { width: LAYOUT.leftColumnWidth });
             y += 10;
         });
@@ -417,6 +446,8 @@ function addEMRTraining(doc, data, startY) {
     }
     
     if (data.emrRcmTraining.rcmTraining) {
+        y = checkPageBreak(doc, y, 25);
+        
         doc.font(FONTS.bold).text('RCM Training', LAYOUT.leftColumnX, y, { width: LAYOUT.leftColumnWidth });
         y += 11;
         
@@ -431,6 +462,8 @@ function addEMRTraining(doc, data, startY) {
 }
 
 function addRightColumnSection(doc, title, y) {
+    y = checkPageBreak(doc, y, 30);
+    
     doc.fontSize(SIZES.sectionHeading).fillColor(COLORS.primary).font(FONTS.bold)
         .text(title.toUpperCase(), LAYOUT.rightColumnX, y);
     
@@ -451,6 +484,8 @@ function addExperienceSection(doc, experiences, title, startY) {
     
     experiences.forEach((exp, index) => {
         if (index > 0) y += 15;
+        
+        y = checkPageBreak(doc, y, 80);
         
         const titleText = exp.title || exp.position || exp.role || '';
         const orgText = exp.hospital || exp.organization || '';
@@ -496,11 +531,14 @@ function addExperienceSection(doc, experiences, title, startY) {
             doc.fontSize(SIZES.small).fillColor(COLORS.text).font(FONTS.regular);
             const lines = exp.description.split('\n').filter(l => l.trim());
             lines.forEach(line => {
+                const lineHeight = doc.heightOfString(line, { width: LAYOUT.rightColumnWidth });
+                y = checkPageBreak(doc, y, lineHeight + 5);
+                
                 doc.text(`• ${line.trim()}`, LAYOUT.rightColumnX, y, { 
                     width: LAYOUT.rightColumnWidth,
                     align: 'left'
                 });
-                y += doc.heightOfString(line, { width: LAYOUT.rightColumnWidth }) + 2;
+                y += lineHeight + 2;
             });
         }
     });
@@ -520,16 +558,21 @@ function addAchievements(doc, data, startY) {
         doc.fontSize(SIZES.small).fillColor(COLORS.text).font(FONTS.regular);
         const lines = data.significantAchievements.split('\n').filter(l => l.trim());
         lines.forEach(line => {
+            const lineHeight = doc.heightOfString(line, { width: LAYOUT.rightColumnWidth });
+            y = checkPageBreak(doc, y, lineHeight + 5);
+            
             doc.text(`• ${line.trim()}`, LAYOUT.rightColumnX, y, {
                 width: LAYOUT.rightColumnWidth
             });
-            y += doc.heightOfString(line, { width: LAYOUT.rightColumnWidth }) + 3;
+            y += lineHeight + 3;
         });
         y += 8;
     }
     
     if (hasAchievements) {
         data.achievements.forEach((achievement, index) => {
+            y = checkPageBreak(doc, y, 60);
+            
             doc.fontSize(SIZES.body).fillColor(COLORS.primary).font(FONTS.bold)
                 .text(achievement.title, LAYOUT.rightColumnX, y, { width: LAYOUT.rightColumnWidth });
             y += SIZES.lineHeight;
@@ -541,9 +584,10 @@ function addAchievements(doc, data, startY) {
             }
             
             if (achievement.description) {
+                const descHeight = doc.heightOfString(achievement.description, { width: LAYOUT.rightColumnWidth });
                 doc.fontSize(SIZES.small).fillColor(COLORS.text).font(FONTS.regular)
                     .text(achievement.description, LAYOUT.rightColumnX, y, { width: LAYOUT.rightColumnWidth });
-                y += doc.heightOfString(achievement.description, { width: LAYOUT.rightColumnWidth }) + 5;
+                y += descHeight + 5;
             }
             
             if (achievement.url && achievement.url.trim()) {
@@ -571,11 +615,14 @@ function addPublications(doc, data, startY) {
     data.publications.forEach((pub, index) => {
         if (index > 0) y += 10;
         
+        y = checkPageBreak(doc, y, 50);
+        
         doc.fontSize(SIZES.small).fillColor(COLORS.text).font(FONTS.regular);
+        const titleHeight = doc.heightOfString(pub.title, { width: LAYOUT.rightColumnWidth });
         doc.text(`${index + 1}. ${pub.title}`, LAYOUT.rightColumnX, y, {
             width: LAYOUT.rightColumnWidth
         });
-        y += doc.heightOfString(pub.title, { width: LAYOUT.rightColumnWidth }) + 2;
+        y += titleHeight + 2;
         
         doc.font(FONTS.italic).fillColor(COLORS.darkGray);
         const pubDetails = [pub.journal, pub.year];
@@ -605,6 +652,8 @@ function addConferences(doc, data, startY) {
     data.conferences.forEach((conf, index) => {
         if (index > 0) y += 12;
         
+        y = checkPageBreak(doc, y, 80);
+        
         doc.fontSize(SIZES.body).fillColor(COLORS.primary).font(FONTS.bold)
             .text(conf.name, LAYOUT.rightColumnX, y, { width: LAYOUT.rightColumnWidth });
         y += SIZES.lineHeight;
@@ -627,9 +676,10 @@ function addConferences(doc, data, startY) {
         }
         
         if (conf.description) {
+            const descHeight = doc.heightOfString(conf.description, { width: LAYOUT.rightColumnWidth });
             doc.fontSize(SIZES.small).fillColor(COLORS.text).font(FONTS.regular)
                 .text(conf.description, LAYOUT.rightColumnX, y, { width: LAYOUT.rightColumnWidth });
-            y += doc.heightOfString(conf.description, { width: LAYOUT.rightColumnWidth }) + 5;
+            y += descHeight + 5;
         }
         
         if (conf.certificateAwarded) {
@@ -660,6 +710,8 @@ function addWorkshops(doc, data, startY) {
     data.workshops.forEach((workshop, index) => {
         if (index > 0) y += 12;
         
+        y = checkPageBreak(doc, y, 60);
+        
         doc.fontSize(SIZES.body).fillColor(COLORS.primary).font(FONTS.bold)
             .text(workshop.name, LAYOUT.rightColumnX, y, { width: LAYOUT.rightColumnWidth });
         y += SIZES.lineHeight;
@@ -675,9 +727,10 @@ function addWorkshops(doc, data, startY) {
         }
         
         if (workshop.description) {
+            const descHeight = doc.heightOfString(workshop.description, { width: LAYOUT.rightColumnWidth });
             doc.fontSize(SIZES.small).fillColor(COLORS.text).font(FONTS.regular)
                 .text(workshop.description, LAYOUT.rightColumnX, y, { width: LAYOUT.rightColumnWidth });
-            y += doc.heightOfString(workshop.description, { width: LAYOUT.rightColumnWidth }) + 5;
+            y += descHeight + 5;
         }
         
         if (workshop.awards) {
