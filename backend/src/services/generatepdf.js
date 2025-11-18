@@ -86,7 +86,6 @@ function addHeader(doc, data) {
         contactY += 11;
     }
     
-    // Medical School and MBBS Reg No
     const medicalInfo = [];
     if (data.basicDetails.medicalSchool) medicalInfo.push(data.basicDetails.medicalSchool);
     if (data.basicDetails.mbbsRegNo) medicalInfo.push(`Reg No: ${data.basicDetails.mbbsRegNo}`);
@@ -95,7 +94,6 @@ function addHeader(doc, data) {
         contactY += 11;
     }
     
-    // USMLE ID if present
     if (data.basicDetails.usmleId) {
         doc.text(`USMLE ID: ${data.basicDetails.usmleId}`, MARGINS.left, contactY);
         contactY += 11;
@@ -241,20 +239,45 @@ function addLanguages(doc, data, startY) {
 }
 
 function addSkillsSection(doc, data, startY) {
-    if (!data.skills?.skillsList) return startY;
+    if (!data.skills?.skillsList && (!data.skills?.supportingDocuments || data.skills.supportingDocuments.length === 0)) {
+        return startY;
+    }
     
     let y = addLeftColumnSection(doc, 'Skills', startY);
     
-    doc.fontSize(SIZES.small).fillColor(COLORS.text).font(FONTS.regular);
+    // Skills list
+    if (data.skills?.skillsList) {
+        doc.fontSize(SIZES.small).fillColor(COLORS.text).font(FONTS.regular);
+        const skills = data.skills.skillsList.split(',').map(s => s.trim()).filter(Boolean);
+        
+        skills.forEach(skill => {
+            doc.text(`• ${skill}`, LAYOUT.leftColumnX, y, { width: LAYOUT.leftColumnWidth });
+            y += 11;
+        });
+        y += 5;
+    }
     
-    const skills = data.skills.skillsList.split(',').map(s => s.trim()).filter(Boolean);
-    
-    skills.forEach(skill => {
-        doc.text(`• ${skill}`, LAYOUT.leftColumnX, y, { width: LAYOUT.leftColumnWidth });
+    // Supporting documents with clickable links
+    if (data.skills?.supportingDocuments && data.skills.supportingDocuments.length > 0) {
+        doc.fontSize(SIZES.small).fillColor(COLORS.darkGray).font(FONTS.bold)
+            .text('Documents:', LAYOUT.leftColumnX, y, { width: LAYOUT.leftColumnWidth });
         y += 11;
-    });
+        
+        data.skills.supportingDocuments.forEach(docItem => {
+            if (docItem.url) {
+                doc.fontSize(SIZES.small).fillColor(COLORS.accent).font(FONTS.regular)
+                    .text(`🔗 ${docItem.name}`, LAYOUT.leftColumnX, y, { 
+                        width: LAYOUT.leftColumnWidth,
+                        link: docItem.url,
+                        underline: true
+                    });
+                y += 11;
+            }
+        });
+        y += 5;
+    }
     
-    return y + 15;
+    return y + 10;
 }
 
 function addUSMLEScores(doc, data, startY) {
@@ -272,30 +295,65 @@ function addUSMLEScores(doc, data, startY) {
     
     doc.fontSize(SIZES.small).fillColor(COLORS.text).font(FONTS.regular);
     
+    // Step 1
     if (data.usmleScores.step1Status && data.usmleScores.step1Status !== 'not-taken') {
         doc.font(FONTS.bold).text('Step 1:', LAYOUT.leftColumnX, y, { width: LAYOUT.leftColumnWidth, continued: true })
            .font(FONTS.regular).text(` ${data.usmleScores.step1Status.toUpperCase()}`);
         y += 11;
+        
+        if (data.usmleScores.step1Cert?.url) {
+            doc.fontSize(SIZES.small).fillColor(COLORS.accent).font(FONTS.regular)
+                .text('  🔗 Certificate', LAYOUT.leftColumnX, y, { 
+                    width: LAYOUT.leftColumnWidth,
+                    link: data.usmleScores.step1Cert.url,
+                    underline: true
+                });
+            y += 11;
+        }
     }
     
+    // Step 2 CK
     if (data.usmleScores.step2ckScore) {
-        doc.font(FONTS.bold).text('Step 2 CK:', LAYOUT.leftColumnX, y, { width: LAYOUT.leftColumnWidth, continued: true })
+        doc.font(FONTS.bold).fillColor(COLORS.text).text('Step 2 CK:', LAYOUT.leftColumnX, y, { width: LAYOUT.leftColumnWidth, continued: true })
            .font(FONTS.regular).text(` ${data.usmleScores.step2ckScore}`);
         y += 11;
+        
+        if (data.usmleScores.step2Cert?.url) {
+            doc.fontSize(SIZES.small).fillColor(COLORS.accent).font(FONTS.regular)
+                .text('  🔗 Certificate', LAYOUT.leftColumnX, y, { 
+                    width: LAYOUT.leftColumnWidth,
+                    link: data.usmleScores.step2Cert.url,
+                    underline: true
+                });
+            y += 11;
+        }
     }
     
+    // Step 2 CS
     if (data.usmleScores.step2csStatus && data.usmleScores.step2csStatus !== 'not-taken') {
-        doc.font(FONTS.bold).text('Step 2 CS:', LAYOUT.leftColumnX, y, { width: LAYOUT.leftColumnWidth, continued: true })
+        doc.font(FONTS.bold).fillColor(COLORS.text).text('Step 2 CS:', LAYOUT.leftColumnX, y, { width: LAYOUT.leftColumnWidth, continued: true })
            .font(FONTS.regular).text(` ${data.usmleScores.step2csStatus.toUpperCase()}`);
         y += 11;
     }
     
+    // OET Score
     if (data.usmleScores.oetScore) {
-        doc.font(FONTS.bold).text('OET Score:', LAYOUT.leftColumnX, y, { width: LAYOUT.leftColumnWidth, continued: true })
+        doc.font(FONTS.bold).fillColor(COLORS.text).text('OET Score:', LAYOUT.leftColumnX, y, { width: LAYOUT.leftColumnWidth, continued: true })
            .font(FONTS.regular).text(` ${data.usmleScores.oetScore}`);
         y += 11;
+        
+        if (data.usmleScores.oetCert?.url) {
+            doc.fontSize(SIZES.small).fillColor(COLORS.accent).font(FONTS.regular)
+                .text('  🔗 Certificate', LAYOUT.leftColumnX, y, { 
+                    width: LAYOUT.leftColumnWidth,
+                    link: data.usmleScores.oetCert.url,
+                    underline: true
+                });
+            y += 11;
+        }
     }
     
+    // ECFMG Certification
     if (data.usmleScores.ecfmgCertified) {
         doc.font(FONTS.bold).fillColor(COLORS.accent)
            .text('✓ ECFMG Certified', LAYOUT.leftColumnX, y, { width: LAYOUT.leftColumnWidth });
@@ -471,7 +529,6 @@ function addExperienceSection(doc, experiences, title, startY) {
 }
 
 function addAchievements(doc, data, startY) {
-    // Check both significantAchievements and achievements array
     const hasSignificant = data.significantAchievements?.trim();
     const hasAchievements = data.achievements && data.achievements.length > 0;
     
@@ -492,7 +549,7 @@ function addAchievements(doc, data, startY) {
         y += 8;
     }
     
-    // Add achievements array
+    // Add achievements array with clickable URLs
     if (hasAchievements) {
         data.achievements.forEach((achievement, index) => {
             doc.fontSize(SIZES.body).fillColor(COLORS.primary).font(FONTS.bold)
@@ -511,13 +568,15 @@ function addAchievements(doc, data, startY) {
                 y += doc.heightOfString(achievement.description, { width: LAYOUT.rightColumnWidth }) + 5;
             }
             
-            if (achievement.url) {
-                doc.fontSize(SIZES.small).fillColor(COLORS.accent).font(FONTS.italic)
-                    .text(achievement.url, LAYOUT.rightColumnX, y, { 
+            // Make URL clickable with underline
+            if (achievement.url && achievement.url.trim()) {
+                doc.fontSize(SIZES.small).fillColor(COLORS.accent).font(FONTS.regular)
+                    .text('🔗 View Certificate/Document', LAYOUT.rightColumnX, y, { 
                         width: LAYOUT.rightColumnWidth,
-                        link: achievement.url 
+                        link: achievement.url,
+                        underline: true
                     });
-                y += 10;
+                y += 11;
             }
             
             if (index < data.achievements.length - 1) y += 8;
@@ -546,6 +605,17 @@ function addPublications(doc, data, startY) {
         if (pub.type) pubDetails.push(`(${pub.type.replace('-', ' ')})`);
         doc.text(pubDetails.join(', '), LAYOUT.rightColumnX, y, { width: LAYOUT.rightColumnWidth });
         y += 10;
+        
+        // Add supporting document link
+        if (pub.supportingDocument?.url) {
+            doc.fontSize(SIZES.small).fillColor(COLORS.accent).font(FONTS.regular)
+                .text('🔗 View Publication', LAYOUT.rightColumnX, y, { 
+                    width: LAYOUT.rightColumnWidth,
+                    link: pub.supportingDocument.url,
+                    underline: true
+                });
+            y += 11;
+        }
     });
     
     return y + 10;
@@ -590,6 +660,17 @@ function addConferences(doc, data, startY) {
             doc.fillColor(COLORS.accent).font(FONTS.italic)
                 .text('✓ Certificate Awarded', LAYOUT.rightColumnX, y);
             y += 10;
+        }
+        
+        // Add supporting document link
+        if (conf.supportingDocument?.url) {
+            doc.fontSize(SIZES.small).fillColor(COLORS.accent).font(FONTS.regular)
+                .text('🔗 View Certificate', LAYOUT.rightColumnX, y, { 
+                    width: LAYOUT.rightColumnWidth,
+                    link: conf.supportingDocument.url,
+                    underline: true
+                });
+            y += 11;
         }
     });
     
