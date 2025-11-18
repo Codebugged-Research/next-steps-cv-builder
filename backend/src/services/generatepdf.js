@@ -2,12 +2,12 @@ import PDFDocument from 'pdfkit';
 import axios from 'axios';
 
 const COLORS = {
-    primary: '#1a1a1a',
+    primary: '#000000',
     accent: '#0066cc',
-    text: '#333333',
-    secondary: '#666666',
-    light: '#999999',
-    divider: '#e0e0e0'
+    text: '#000000',
+    darkGray: '#4a4a4a',
+    lightGray: '#666666',
+    sectionLine: '#cccccc'
 };
 
 const FONTS = {
@@ -17,24 +17,27 @@ const FONTS = {
 };
 
 const SIZES = {
-    name: 24,
-    contact: 9,
-    heading: 12,
-    subheading: 10,
+    name: 20,
+    contactInfo: 9,
+    sectionHeading: 11,
+    jobTitle: 10,
     body: 9,
-    small: 8
+    small: 8,
+    lineHeight: 12
 };
 
 const MARGINS = {
-    page: { top: 50, bottom: 50, left: 50, right: 50 },
-    section: 15
+    top: 40,
+    bottom: 50,
+    left: 50,
+    right: 50
 };
 
 const LAYOUT = {
-    leftCol: { x: 50, width: 170 },
-    rightCol: { x: 235, width: 310 },
-    pageWidth: 595,
-    pageHeight: 842
+    leftColumnX: 50,
+    leftColumnWidth: 180,
+    rightColumnX: 240,
+    rightColumnWidth: 315
 };
 
 async function fetchImageBuffer(url) {
@@ -47,80 +50,77 @@ async function fetchImageBuffer(url) {
     }
 }
 
-function drawSectionDivider(doc, x, width, y) {
-    doc.moveTo(x, y)
-        .lineTo(x + width, y)
-        .strokeColor(COLORS.divider)
-        .lineWidth(1)
-        .stroke();
-    return y + 10;
-}
-
-function addSectionHeader(doc, title, x, width, y) {
-    doc.fontSize(SIZES.heading)
-        .fillColor(COLORS.primary)
-        .font(FONTS.bold)
-        .text(title.toUpperCase(), x, y, { width });
-    
-    return drawSectionDivider(doc, x, width, y + 16);
-}
-
 function addHeader(doc, data) {
     const { fullName, email, phone, city, address, nationality, gender } = data.basicDetails;
     
-    doc.fontSize(SIZES.name)
-        .fillColor(COLORS.primary)
-        .font(FONTS.bold)
-        .text(fullName.toUpperCase(), MARGINS.page.left, MARGINS.page.top, {
-            width: LAYOUT.pageWidth - MARGINS.page.left - MARGINS.page.right
-        });
+    doc.fontSize(SIZES.name).fillColor(COLORS.primary).font(FONTS.bold)
+        .text(fullName.toUpperCase(), MARGINS.left, MARGINS.top);
     
-    let y = MARGINS.page.top + 30;
+    let contactY = MARGINS.top + 25;
+    doc.fontSize(SIZES.contactInfo).fillColor(COLORS.darkGray).font(FONTS.regular);
     
-    doc.fontSize(SIZES.contact).fillColor(COLORS.secondary).font(FONTS.regular);
-    
-    const contactLines = [];
-    if (email || phone) {
-        contactLines.push([email, phone].filter(Boolean).join(' | '));
+    let contactLine1 = [];
+    if (email) contactLine1.push(email);
+    if (phone) contactLine1.push(phone);
+    if (contactLine1.length > 0) {
+        doc.text(contactLine1.join(' | '), MARGINS.left, contactY);
+        contactY += 11;
     }
+    
     if (address || city) {
-        contactLines.push([address, city].filter(Boolean).join(', '));
+        const addressParts = [];
+        if (address) addressParts.push(address);
+        if (city) addressParts.push(city);
+        doc.text(addressParts.join(', '), MARGINS.left, contactY);
+        contactY += 11;
     }
     
     const additionalInfo = [];
     if (nationality) additionalInfo.push(`Nationality: ${nationality}`);
-    if (gender && gender !== 'prefer-not-to-say') {
-        additionalInfo.push(`Gender: ${gender.charAt(0).toUpperCase() + gender.slice(1)}`);
+    if (gender && gender !== 'prefer-not-to-say') additionalInfo.push(`Gender: ${gender.charAt(0).toUpperCase() + gender.slice(1)}`);
+    if (additionalInfo.length > 0) {
+        doc.text(additionalInfo.join(' | '), MARGINS.left, contactY);
+        contactY += 11;
     }
-    if (additionalInfo.length) contactLines.push(additionalInfo.join(' | '));
     
     const medicalInfo = [];
     if (data.basicDetails.medicalSchool) medicalInfo.push(data.basicDetails.medicalSchool);
     if (data.basicDetails.mbbsRegNo) medicalInfo.push(`Reg No: ${data.basicDetails.mbbsRegNo}`);
-    if (medicalInfo.length) contactLines.push(medicalInfo.join(' | '));
-    
-    if (data.basicDetails.usmleId) {
-        contactLines.push(`USMLE ID: ${data.basicDetails.usmleId}`);
+    if (medicalInfo.length > 0) {
+        doc.text(medicalInfo.join(' | '), MARGINS.left, contactY);
+        contactY += 11;
     }
     
-    contactLines.forEach(line => {
-        doc.text(line, MARGINS.page.left, y, {
-            width: LAYOUT.pageWidth - MARGINS.page.left - MARGINS.page.right
-        });
-        y += 12;
-    });
+    if (data.basicDetails.usmleId) {
+        doc.text(`USMLE ID: ${data.basicDetails.usmleId}`, MARGINS.left, contactY);
+        contactY += 11;
+    }
     
-    return y + 15;
+    return contactY + 20;
 }
 
-function addEducation(doc, data, y) {
-    y = addSectionHeader(doc, 'Education', LAYOUT.leftCol.x, LAYOUT.leftCol.width, y);
+function addLeftColumnSection(doc, title, y) {
+    doc.fontSize(SIZES.sectionHeading).fillColor(COLORS.primary).font(FONTS.bold)
+        .text(title.toUpperCase(), LAYOUT.leftColumnX, y);
     
-    const entries = [];
+    const lineY = y + 14;
+    doc.moveTo(LAYOUT.leftColumnX, lineY)
+        .lineTo(LAYOUT.leftColumnX + LAYOUT.leftColumnWidth, lineY)
+        .strokeColor(COLORS.sectionLine)
+        .lineWidth(0.5)
+        .stroke();
+    
+    return lineY + 8;
+}
+
+function addEducation(doc, data, startY) {
+    let y = addLeftColumnSection(doc, 'Education', startY);
+    
+    const educationEntries = [];
     
     if (data.education?.postGraduation?.universityName) {
         const pg = data.education.postGraduation;
-        entries.push({
+        educationEntries.push({
             degree: pg.degree || 'Post Graduation',
             specialization: pg.specialization,
             institution: pg.universityName,
@@ -133,7 +133,7 @@ function addEducation(doc, data, y) {
     
     if (data.education?.graduation?.universityName) {
         const grad = data.education.graduation;
-        entries.push({
+        educationEntries.push({
             degree: grad.degree || 'MBBS',
             specialization: grad.specialization,
             institution: grad.universityName,
@@ -146,7 +146,7 @@ function addEducation(doc, data, y) {
     
     if (data.education?.college?.collegeName) {
         const college = data.education.college;
-        entries.push({
+        educationEntries.push({
             degree: 'Higher Secondary',
             specialization: college.stream,
             institution: college.collegeName,
@@ -158,7 +158,7 @@ function addEducation(doc, data, y) {
     
     if (data.education?.schooling?.schoolName) {
         const school = data.education.schooling;
-        entries.push({
+        educationEntries.push({
             degree: 'Secondary School',
             institution: school.schoolName,
             location: [school.city, school.state].filter(Boolean).join(', '),
@@ -167,86 +167,128 @@ function addEducation(doc, data, y) {
         });
     }
     
-    entries.forEach((entry, index) => {
-        if (index > 0) y += 15;
+    educationEntries.forEach((entry, index) => {
+        if (index > 0) y += 12;
         
         doc.fontSize(SIZES.body).fillColor(COLORS.primary).font(FONTS.bold)
-            .text(entry.degree, LAYOUT.leftCol.x, y, { width: LAYOUT.leftCol.width });
-        y += 12;
+            .text(entry.degree, LAYOUT.leftColumnX, y, { width: LAYOUT.leftColumnWidth });
+        y += SIZES.lineHeight;
         
         if (entry.specialization) {
             doc.fontSize(SIZES.small).fillColor(COLORS.accent).font(FONTS.italic)
-                .text(entry.specialization, LAYOUT.leftCol.x, y, { width: LAYOUT.leftCol.width });
-            y += 11;
+                .text(entry.specialization, LAYOUT.leftColumnX, y, { width: LAYOUT.leftColumnWidth });
+            y += 10;
         }
         
         doc.fontSize(SIZES.small).fillColor(COLORS.text).font(FONTS.regular)
-            .text(entry.institution, LAYOUT.leftCol.x, y, { width: LAYOUT.leftCol.width });
-        y += 11;
+            .text(entry.institution, LAYOUT.leftColumnX, y, { width: LAYOUT.leftColumnWidth });
+        y += 10;
         
         if (entry.location) {
-            doc.fillColor(COLORS.secondary).font(FONTS.italic)
-                .text(entry.location, LAYOUT.leftCol.x, y, { width: LAYOUT.leftCol.width });
-            y += 11;
+            doc.fillColor(COLORS.darkGray).font(FONTS.italic)
+                .text(entry.location, LAYOUT.leftColumnX, y, { width: LAYOUT.leftColumnWidth });
+            y += 10;
         }
         
-        const details = [entry.year, entry.grade, entry.classType, entry.status].filter(Boolean);
-        if (details.length) {
-            doc.fillColor(COLORS.secondary).font(FONTS.regular)
-                .text(details.join(' | '), LAYOUT.leftCol.x, y, { width: LAYOUT.leftCol.width });
-            y += 11;
+        const detailsLine = [];
+        if (entry.year) detailsLine.push(entry.year);
+        if (entry.grade) detailsLine.push(entry.grade);
+        if (entry.classType) detailsLine.push(entry.classType);
+        if (entry.status) detailsLine.push(entry.status);
+        
+        if (detailsLine.length > 0) {
+            doc.fillColor(COLORS.darkGray)
+                .text(detailsLine.join(' | '), LAYOUT.leftColumnX, y, { width: LAYOUT.leftColumnWidth });
+            y += 10;
         }
     });
     
-    return y + MARGINS.section;
+    return y + 15;
 }
 
-function addLanguages(doc, data, y) {
-    if (!data.basicDetails?.languages?.length) return y;
+function addLanguages(doc, data, startY) {
+    if (!data.basicDetails?.languages || data.basicDetails.languages.length === 0) return startY;
     
-    y = addSectionHeader(doc, 'Languages', LAYOUT.leftCol.x, LAYOUT.leftCol.width, y);
+    let y = addLeftColumnSection(doc, 'Languages', startY);
     
     doc.fontSize(SIZES.small).fillColor(COLORS.text).font(FONTS.regular);
     
     data.basicDetails.languages.forEach(lang => {
-        doc.text(`• ${lang.language}`, LAYOUT.leftCol.x, y, { width: LAYOUT.leftCol.width });
-        y += 11;
-        doc.fillColor(COLORS.secondary).font(FONTS.italic)
-            .text(`  ${lang.fluency.charAt(0).toUpperCase() + lang.fluency.slice(1)}`, 
-                  LAYOUT.leftCol.x, y, { width: LAYOUT.leftCol.width });
+        const fluencyLevel = lang.fluency.charAt(0).toUpperCase() + lang.fluency.slice(1);
+        doc.text(`• ${lang.language}`, LAYOUT.leftColumnX, y, { width: LAYOUT.leftColumnWidth });
+        y += 10;
+        doc.fillColor(COLORS.darkGray).font(FONTS.italic)
+            .text(`  ${fluencyLevel}`, LAYOUT.leftColumnX, y, { width: LAYOUT.leftColumnWidth });
         y += 11;
         doc.font(FONTS.regular).fillColor(COLORS.text);
     });
     
-    return y + MARGINS.section;
+    return y + 15;
 }
 
-function addUSMLEScores(doc, data, y) {
-    if (!data.usmleScores) return y;
+function addSkillsSection(doc, data, startY) {
+    if (!data.skills?.skillsList && (!data.skills?.supportingDocuments || data.skills.supportingDocuments.length === 0)) {
+        return startY;
+    }
     
-    const hasInfo = data.usmleScores.step1Status !== 'not-taken' || 
-                    data.usmleScores.step2ckScore || 
-                    data.usmleScores.step2csStatus !== 'not-taken' ||
-                    data.usmleScores.oetScore ||
-                    data.usmleScores.ecfmgCertified;
+    let y = addLeftColumnSection(doc, 'Skills', startY);
     
-    if (!hasInfo) return y;
+    if (data.skills?.skillsList) {
+        doc.fontSize(SIZES.small).fillColor(COLORS.text).font(FONTS.regular);
+        const skills = data.skills.skillsList.split(',').map(s => s.trim()).filter(Boolean);
+        
+        skills.forEach(skill => {
+            doc.text(`• ${skill}`, LAYOUT.leftColumnX, y, { width: LAYOUT.leftColumnWidth });
+            y += 11;
+        });
+    }
     
-    y = addSectionHeader(doc, 'USMLE Scores', LAYOUT.leftCol.x, LAYOUT.leftCol.width, y);
+    if (data.skills?.supportingDocuments && data.skills.supportingDocuments.length > 0) {
+        y += 5;
+        doc.fontSize(SIZES.small).fillColor(COLORS.darkGray).font(FONTS.bold)
+            .text('Documents:', LAYOUT.leftColumnX, y, { width: LAYOUT.leftColumnWidth });
+        y += 11;
+        
+        data.skills.supportingDocuments.forEach(docItem => {
+            if (docItem.url) {
+                doc.fontSize(SIZES.small).fillColor(COLORS.accent).font(FONTS.regular)
+                    .text('View Document', LAYOUT.leftColumnX, y, { 
+                        width: LAYOUT.leftColumnWidth,
+                        link: docItem.url,
+                        underline: true
+                    });
+                y += 11;
+            }
+        });
+    }
+    
+    return y + 15;
+}
+
+function addUSMLEScores(doc, data, startY) {
+    if (!data.usmleScores) return startY;
+    
+    const hasUSMLEInfo = data.usmleScores.step1Status !== 'not-taken' || 
+                         data.usmleScores.step2ckScore || 
+                         data.usmleScores.step2csStatus !== 'not-taken' ||
+                         data.usmleScores.oetScore ||
+                         data.usmleScores.ecfmgCertified;
+    
+    if (!hasUSMLEInfo) return startY;
+    
+    let y = addLeftColumnSection(doc, 'USMLE Scores', startY);
     
     doc.fontSize(SIZES.small).fillColor(COLORS.text).font(FONTS.regular);
     
     if (data.usmleScores.step1Status && data.usmleScores.step1Status !== 'not-taken') {
-        doc.font(FONTS.bold).text('Step 1: ', LAYOUT.leftCol.x, y, { 
-            width: LAYOUT.leftCol.width, 
-            continued: true 
-        }).font(FONTS.regular).text(data.usmleScores.step1Status.toUpperCase());
+        doc.font(FONTS.bold).text('Step 1:', LAYOUT.leftColumnX, y, { width: LAYOUT.leftColumnWidth, continued: true })
+           .font(FONTS.regular).text(` ${data.usmleScores.step1Status.toUpperCase()}`);
         y += 11;
         
         if (data.usmleScores.step1Cert?.url) {
-            doc.fillColor(COLORS.accent).font(FONTS.regular)
-                .text('View Certificate', LAYOUT.leftCol.x + 10, y, { 
-                    width: LAYOUT.leftCol.width - 10,
+            doc.fontSize(SIZES.small).fillColor(COLORS.accent).font(FONTS.regular)
+                .text('View Document', LAYOUT.leftColumnX + 10, y, { 
+                    width: LAYOUT.leftColumnWidth - 10,
                     link: data.usmleScores.step1Cert.url,
                     underline: true
                 });
@@ -255,16 +297,14 @@ function addUSMLEScores(doc, data, y) {
     }
     
     if (data.usmleScores.step2ckScore) {
-        doc.fillColor(COLORS.text).font(FONTS.bold).text('Step 2 CK: ', LAYOUT.leftCol.x, y, { 
-            width: LAYOUT.leftCol.width, 
-            continued: true 
-        }).font(FONTS.regular).text(data.usmleScores.step2ckScore);
+        doc.fillColor(COLORS.text).font(FONTS.bold).text('Step 2 CK:', LAYOUT.leftColumnX, y, { width: LAYOUT.leftColumnWidth, continued: true })
+           .font(FONTS.regular).text(` ${data.usmleScores.step2ckScore}`);
         y += 11;
         
         if (data.usmleScores.step2Cert?.url) {
-            doc.fillColor(COLORS.accent).font(FONTS.regular)
-                .text('View Certificate', LAYOUT.leftCol.x + 10, y, { 
-                    width: LAYOUT.leftCol.width - 10,
+            doc.fontSize(SIZES.small).fillColor(COLORS.accent).font(FONTS.regular)
+                .text('View Document', LAYOUT.leftColumnX + 10, y, { 
+                    width: LAYOUT.leftColumnWidth - 10,
                     link: data.usmleScores.step2Cert.url,
                     underline: true
                 });
@@ -273,24 +313,20 @@ function addUSMLEScores(doc, data, y) {
     }
     
     if (data.usmleScores.step2csStatus && data.usmleScores.step2csStatus !== 'not-taken') {
-        doc.fillColor(COLORS.text).font(FONTS.bold).text('Step 2 CS: ', LAYOUT.leftCol.x, y, { 
-            width: LAYOUT.leftCol.width, 
-            continued: true 
-        }).font(FONTS.regular).text(data.usmleScores.step2csStatus.toUpperCase());
+        doc.fillColor(COLORS.text).font(FONTS.bold).text('Step 2 CS:', LAYOUT.leftColumnX, y, { width: LAYOUT.leftColumnWidth, continued: true })
+           .font(FONTS.regular).text(` ${data.usmleScores.step2csStatus.toUpperCase()}`);
         y += 11;
     }
     
     if (data.usmleScores.oetScore) {
-        doc.fillColor(COLORS.text).font(FONTS.bold).text('OET Score: ', LAYOUT.leftCol.x, y, { 
-            width: LAYOUT.leftCol.width, 
-            continued: true 
-        }).font(FONTS.regular).text(data.usmleScores.oetScore);
+        doc.fillColor(COLORS.text).font(FONTS.bold).text('OET Score:', LAYOUT.leftColumnX, y, { width: LAYOUT.leftColumnWidth, continued: true })
+           .font(FONTS.regular).text(` ${data.usmleScores.oetScore}`);
         y += 11;
         
         if (data.usmleScores.oetCert?.url) {
-            doc.fillColor(COLORS.accent).font(FONTS.regular)
-                .text('View Certificate', LAYOUT.leftCol.x + 10, y, { 
-                    width: LAYOUT.leftCol.width - 10,
+            doc.fontSize(SIZES.small).fillColor(COLORS.accent).font(FONTS.regular)
+                .text('View Document', LAYOUT.leftColumnX + 10, y, { 
+                    width: LAYOUT.leftColumnWidth - 10,
                     link: data.usmleScores.oetCert.url,
                     underline: true
                 });
@@ -300,170 +336,159 @@ function addUSMLEScores(doc, data, y) {
     
     if (data.usmleScores.ecfmgCertified) {
         doc.font(FONTS.bold).fillColor(COLORS.accent)
-           .text('✓ ECFMG Certified', LAYOUT.leftCol.x, y, { width: LAYOUT.leftCol.width });
+           .text('✓ ECFMG Certified', LAYOUT.leftColumnX, y, { width: LAYOUT.leftColumnWidth });
         y += 11;
     }
     
-    return y + MARGINS.section;
+    return y + 15;
 }
 
-function addSkills(doc, data, y) {
-    if (!data.skills?.skillsList && (!data.skills?.supportingDocuments?.length)) return y;
-    
-    y = addSectionHeader(doc, 'Skills', LAYOUT.leftCol.x, LAYOUT.leftCol.width, y);
-    
-    if (data.skills?.skillsList) {
-        doc.fontSize(SIZES.small).fillColor(COLORS.text).font(FONTS.regular);
-        const skills = data.skills.skillsList.split(',').map(s => s.trim()).filter(Boolean);
-        
-        skills.forEach(skill => {
-            doc.text(`• ${skill}`, LAYOUT.leftCol.x, y, { width: LAYOUT.leftCol.width });
-            y += 11;
-        });
-    }
-    
-    if (data.skills?.supportingDocuments?.length) {
-        y += 5;
-        doc.fontSize(SIZES.small).fillColor(COLORS.secondary).font(FONTS.bold)
-            .text('Documents:', LAYOUT.leftCol.x, y, { width: LAYOUT.leftCol.width });
-        y += 11;
-        
-        data.skills.supportingDocuments.forEach(item => {
-            if (item.url) {
-                doc.fillColor(COLORS.accent).font(FONTS.regular)
-                    .text(item.name, LAYOUT.leftCol.x, y, { 
-                        width: LAYOUT.leftCol.width,
-                        link: item.url,
-                        underline: true
-                    });
-                y += 11;
-            }
-        });
-    }
-    
-    return y + MARGINS.section;
-}
-
-function addCertifications(doc, data, y) {
+function addCertifications(doc, data, startY) {
     const certs = [];
     
     if (data.aclsBls?.aclsCertified) {
         certs.push({ 
             name: 'ACLS', 
-            dates: [data.aclsBls.aclsIssueDate, data.aclsBls.aclsExpiryDate].filter(Boolean).join(' - '),
+            issueDate: data.aclsBls.aclsIssueDate,
+            expiryDate: data.aclsBls.aclsExpiryDate,
             provider: data.aclsBls.aclsProvider
         });
     }
     if (data.aclsBls?.blsCertified) {
         certs.push({ 
             name: 'BLS', 
-            dates: [data.aclsBls.blsIssueDate, data.aclsBls.blsExpiryDate].filter(Boolean).join(' - '),
+            issueDate: data.aclsBls.blsIssueDate,
+            expiryDate: data.aclsBls.blsExpiryDate,
             provider: data.aclsBls.blsProvider
         });
     }
     
-    if (!certs.length) return y;
+    if (certs.length === 0) return startY;
     
-    y = addSectionHeader(doc, 'Certifications', LAYOUT.leftCol.x, LAYOUT.leftCol.width, y);
+    let y = addLeftColumnSection(doc, 'Certifications', startY);
     
-    certs.forEach((cert, index) => {
-        if (index > 0) y += 12;
-        
-        doc.fontSize(SIZES.body).fillColor(COLORS.primary).font(FONTS.bold)
-            .text(cert.name, LAYOUT.leftCol.x, y, { width: LAYOUT.leftCol.width });
+    doc.fontSize(SIZES.small).fillColor(COLORS.text);
+    
+    certs.forEach(cert => {
+        doc.font(FONTS.bold).text(cert.name, LAYOUT.leftColumnX, y, { width: LAYOUT.leftColumnWidth });
         y += 11;
         
         if (cert.provider) {
-            doc.fontSize(SIZES.small).font(FONTS.regular).fillColor(COLORS.secondary)
-                .text(cert.provider, LAYOUT.leftCol.x, y, { width: LAYOUT.leftCol.width });
+            doc.font(FONTS.regular).fillColor(COLORS.darkGray)
+                .text(cert.provider, LAYOUT.leftColumnX, y, { width: LAYOUT.leftColumnWidth });
             y += 10;
         }
         
-        if (cert.dates) {
-            doc.font(FONTS.italic).fillColor(COLORS.secondary)
-                .text(cert.dates, LAYOUT.leftCol.x, y, { width: LAYOUT.leftCol.width });
+        if (cert.issueDate && cert.expiryDate) {
+            doc.font(FONTS.italic).fillColor(COLORS.darkGray)
+                .text(`${cert.issueDate} - ${cert.expiryDate}`, LAYOUT.leftColumnX, y, { width: LAYOUT.leftColumnWidth });
+            y += 10;
+        } else if (cert.expiryDate) {
+            doc.font(FONTS.italic).fillColor(COLORS.darkGray)
+                .text(`Expires: ${cert.expiryDate}`, LAYOUT.leftColumnX, y, { width: LAYOUT.leftColumnWidth });
             y += 10;
         }
+        
+        y += 5;
     });
     
-    return y + MARGINS.section;
+    return y + 10;
 }
 
-function addEMRTraining(doc, data, y) {
-    if (!data.emrRcmTraining || (!data.emrRcmTraining.emrSystems?.length && !data.emrRcmTraining.rcmTraining)) {
-        return y;
+function addEMRTraining(doc, data, startY) {
+    if (!data.emrRcmTraining || 
+        (!data.emrRcmTraining.emrSystems?.length && !data.emrRcmTraining.rcmTraining)) {
+        return startY;
     }
     
-    y = addSectionHeader(doc, 'EMR/RCM Training', LAYOUT.leftCol.x, LAYOUT.leftCol.width, y);
+    let y = addLeftColumnSection(doc, 'EMR/RCM Training', startY);
     
     doc.fontSize(SIZES.small).fillColor(COLORS.text).font(FONTS.regular);
     
-    if (data.emrRcmTraining.emrSystems?.length) {
-        doc.font(FONTS.bold).text('EMR Systems:', LAYOUT.leftCol.x, y, { width: LAYOUT.leftCol.width });
+    if (data.emrRcmTraining.emrSystems && data.emrRcmTraining.emrSystems.length > 0) {
+        doc.font(FONTS.bold).text('EMR Systems:', LAYOUT.leftColumnX, y, { width: LAYOUT.leftColumnWidth });
         y += 11;
         
         data.emrRcmTraining.emrSystems.forEach(system => {
-            doc.font(FONTS.regular).text(`• ${system}`, LAYOUT.leftCol.x, y, { width: LAYOUT.leftCol.width });
+            doc.font(FONTS.regular).text(`• ${system}`, LAYOUT.leftColumnX, y, { width: LAYOUT.leftColumnWidth });
             y += 10;
         });
+        y += 5;
     }
     
     if (data.emrRcmTraining.rcmTraining) {
-        y += 5;
-        doc.font(FONTS.bold).text('RCM Training', LAYOUT.leftCol.x, y, { width: LAYOUT.leftCol.width });
+        doc.font(FONTS.bold).text('RCM Training', LAYOUT.leftColumnX, y, { width: LAYOUT.leftColumnWidth });
         y += 11;
         
         if (data.emrRcmTraining.duration) {
-            doc.font(FONTS.regular).fillColor(COLORS.secondary)
-                .text(`Duration: ${data.emrRcmTraining.duration}`, LAYOUT.leftCol.x, y, { width: LAYOUT.leftCol.width });
+            doc.font(FONTS.regular).fillColor(COLORS.darkGray)
+                .text(`Duration: ${data.emrRcmTraining.duration}`, LAYOUT.leftColumnX, y, { width: LAYOUT.leftColumnWidth });
             y += 10;
         }
     }
     
-    return y + MARGINS.section;
+    return y + 15;
 }
 
-function addExperience(doc, experiences, title, y) {
-    if (!experiences?.length) return y;
+function addRightColumnSection(doc, title, y) {
+    doc.fontSize(SIZES.sectionHeading).fillColor(COLORS.primary).font(FONTS.bold)
+        .text(title.toUpperCase(), LAYOUT.rightColumnX, y);
     
-    y = addSectionHeader(doc, title, LAYOUT.rightCol.x, LAYOUT.rightCol.width, y);
+    const lineY = y + 14;
+    doc.moveTo(LAYOUT.rightColumnX, lineY)
+        .lineTo(doc.page.width - MARGINS.right, lineY)
+        .strokeColor(COLORS.sectionLine)
+        .lineWidth(0.5)
+        .stroke();
+    
+    return lineY + 8;
+}
+
+function addExperienceSection(doc, experiences, title, startY) {
+    if (!experiences || experiences.length === 0) return startY;
+    
+    let y = addRightColumnSection(doc, title, startY);
     
     experiences.forEach((exp, index) => {
         if (index > 0) y += 15;
         
-        const jobTitle = exp.title || exp.position || exp.role || '';
-        const org = exp.hospital || exp.organization || '';
+        const titleText = exp.title || exp.position || exp.role || '';
+        const orgText = exp.hospital || exp.organization || '';
         
-        if (jobTitle) {
-            doc.fontSize(SIZES.subheading).fillColor(COLORS.primary).font(FONTS.bold)
-                .text(jobTitle, LAYOUT.rightCol.x, y, { width: LAYOUT.rightCol.width });
-            y += 13;
+        if (titleText) {
+            doc.fontSize(SIZES.jobTitle).fillColor(COLORS.primary).font(FONTS.bold)
+                .text(titleText, LAYOUT.rightColumnX, y, { width: LAYOUT.rightColumnWidth });
+            y += SIZES.lineHeight;
         }
         
-        if (org) {
+        if (orgText) {
             doc.fontSize(SIZES.small).fillColor(COLORS.text).font(FONTS.regular)
-                .text(org, LAYOUT.rightCol.x, y, { width: LAYOUT.rightCol.width });
-            y += 11;
+                .text(orgText, LAYOUT.rightColumnX, y, { width: LAYOUT.rightColumnWidth });
+            y += 10;
         }
         
-        const locationParts = [exp.city, exp.state, exp.country, exp.location].filter(Boolean);
+        const locationParts = [];
+        if (exp.city) locationParts.push(exp.city);
+        if (exp.state) locationParts.push(exp.state);
+        if (exp.country) locationParts.push(exp.country);
+        if (exp.location) locationParts.push(exp.location);
+        
         const dateStr = exp.duration || 
                        (exp.startDate && exp.endDate ? `${exp.startDate} - ${exp.current ? 'Present' : exp.endDate}` : '');
         
-        const info = [];
-        if (locationParts.length) info.push(locationParts.join(', '));
-        if (dateStr) info.push(dateStr);
-        
-        if (info.length) {
-            doc.fillColor(COLORS.secondary).font(FONTS.italic)
-                .text(info.join(' | '), LAYOUT.rightCol.x, y, { width: LAYOUT.rightCol.width });
-            y += 11;
+        if (locationParts.length > 0 || dateStr) {
+            doc.fillColor(COLORS.darkGray).font(FONTS.italic);
+            const infoLine = [];
+            if (locationParts.length > 0) infoLine.push(locationParts.join(', '));
+            if (dateStr) infoLine.push(dateStr);
+            doc.text(infoLine.join(' | '), LAYOUT.rightColumnX, y, { width: LAYOUT.rightColumnWidth });
+            y += 10;
         }
         
         if (exp.supervisor) {
-            doc.fillColor(COLORS.secondary).font(FONTS.italic)
-                .text(`Supervisor: ${exp.supervisor}`, LAYOUT.rightCol.x, y, { width: LAYOUT.rightCol.width });
-            y += 11;
+            doc.fillColor(COLORS.darkGray).font(FONTS.italic)
+                .text(`Supervisor: ${exp.supervisor}`, LAYOUT.rightColumnX, y, { width: LAYOUT.rightColumnWidth });
+            y += 10;
         }
         
         if (exp.description) {
@@ -471,94 +496,97 @@ function addExperience(doc, experiences, title, y) {
             doc.fontSize(SIZES.small).fillColor(COLORS.text).font(FONTS.regular);
             const lines = exp.description.split('\n').filter(l => l.trim());
             lines.forEach(line => {
-                const text = `• ${line.trim()}`;
-                doc.text(text, LAYOUT.rightCol.x, y, { width: LAYOUT.rightCol.width, align: 'left' });
-                y += doc.heightOfString(text, { width: LAYOUT.rightCol.width }) + 2;
+                doc.text(`• ${line.trim()}`, LAYOUT.rightColumnX, y, { 
+                    width: LAYOUT.rightColumnWidth,
+                    align: 'left'
+                });
+                y += doc.heightOfString(line, { width: LAYOUT.rightColumnWidth }) + 2;
             });
         }
     });
     
-    return y + MARGINS.section;
+    return y + 10;
 }
 
-function addAchievements(doc, data, y) {
+function addAchievements(doc, data, startY) {
     const hasSignificant = data.significantAchievements?.trim();
-    const hasArray = data.achievements?.length;
+    const hasAchievements = data.achievements && data.achievements.length > 0;
     
-    if (!hasSignificant && !hasArray) return y;
+    if (!hasSignificant && !hasAchievements) return startY;
     
-    y = addSectionHeader(doc, 'Achievements', LAYOUT.rightCol.x, LAYOUT.rightCol.width, y);
+    let y = addRightColumnSection(doc, 'Achievements', startY);
     
     if (hasSignificant) {
         doc.fontSize(SIZES.small).fillColor(COLORS.text).font(FONTS.regular);
         const lines = data.significantAchievements.split('\n').filter(l => l.trim());
         lines.forEach(line => {
-            const text = `• ${line.trim()}`;
-            doc.text(text, LAYOUT.rightCol.x, y, { width: LAYOUT.rightCol.width });
-            y += doc.heightOfString(text, { width: LAYOUT.rightCol.width }) + 3;
+            doc.text(`• ${line.trim()}`, LAYOUT.rightColumnX, y, {
+                width: LAYOUT.rightColumnWidth
+            });
+            y += doc.heightOfString(line, { width: LAYOUT.rightColumnWidth }) + 3;
         });
         y += 8;
     }
     
-    if (hasArray) {
+    if (hasAchievements) {
         data.achievements.forEach((achievement, index) => {
-            if (index > 0 || hasSignificant) y += 10;
-            
             doc.fontSize(SIZES.body).fillColor(COLORS.primary).font(FONTS.bold)
-                .text(achievement.title, LAYOUT.rightCol.x, y, { width: LAYOUT.rightCol.width });
-            y += 13;
+                .text(achievement.title, LAYOUT.rightColumnX, y, { width: LAYOUT.rightColumnWidth });
+            y += SIZES.lineHeight;
             
             if (achievement.date) {
-                doc.fontSize(SIZES.small).fillColor(COLORS.secondary).font(FONTS.italic)
-                    .text(achievement.date, LAYOUT.rightCol.x, y);
-                y += 11;
+                doc.fontSize(SIZES.small).fillColor(COLORS.darkGray).font(FONTS.italic)
+                    .text(achievement.date, LAYOUT.rightColumnX, y);
+                y += 10;
             }
             
             if (achievement.description) {
                 doc.fontSize(SIZES.small).fillColor(COLORS.text).font(FONTS.regular)
-                    .text(achievement.description, LAYOUT.rightCol.x, y, { width: LAYOUT.rightCol.width });
-                y += doc.heightOfString(achievement.description, { width: LAYOUT.rightCol.width }) + 5;
+                    .text(achievement.description, LAYOUT.rightColumnX, y, { width: LAYOUT.rightColumnWidth });
+                y += doc.heightOfString(achievement.description, { width: LAYOUT.rightColumnWidth }) + 5;
             }
             
-            if (achievement.url?.trim()) {
+            if (achievement.url && achievement.url.trim()) {
                 doc.fontSize(SIZES.small).fillColor(COLORS.accent).font(FONTS.regular)
-                    .text('View Document', LAYOUT.rightCol.x, y, { 
-                        width: LAYOUT.rightCol.width,
+                    .text('View Document', LAYOUT.rightColumnX, y, { 
+                        width: LAYOUT.rightColumnWidth,
                         link: achievement.url,
                         underline: true
                     });
-                y += 11;
+                y += 10;
             }
+            
+            if (index < data.achievements.length - 1) y += 8;
         });
     }
     
-    return y + MARGINS.section;
+    return y + 10;
 }
 
-function addPublications(doc, data, y) {
-    if (!data.publications?.length) return y;
+function addPublications(doc, data, startY) {
+    if (!data.publications || data.publications.length === 0) return startY;
     
-    y = addSectionHeader(doc, 'Publications', LAYOUT.rightCol.x, LAYOUT.rightCol.width, y);
+    let y = addRightColumnSection(doc, 'Publications', startY);
     
     data.publications.forEach((pub, index) => {
-        if (index > 0) y += 12;
+        if (index > 0) y += 10;
         
         doc.fontSize(SIZES.small).fillColor(COLORS.text).font(FONTS.regular);
-        const title = `${index + 1}. ${pub.title}`;
-        doc.text(title, LAYOUT.rightCol.x, y, { width: LAYOUT.rightCol.width });
-        y += doc.heightOfString(title, { width: LAYOUT.rightCol.width }) + 2;
+        doc.text(`${index + 1}. ${pub.title}`, LAYOUT.rightColumnX, y, {
+            width: LAYOUT.rightColumnWidth
+        });
+        y += doc.heightOfString(pub.title, { width: LAYOUT.rightColumnWidth }) + 2;
         
-        const details = [pub.journal, pub.year];
-        if (pub.type) details.push(`(${pub.type.replace('-', ' ')})`);
-        
-        doc.font(FONTS.italic).fillColor(COLORS.secondary)
-            .text(details.join(', '), LAYOUT.rightCol.x, y, { width: LAYOUT.rightCol.width });
-        y += 11;
+        doc.font(FONTS.italic).fillColor(COLORS.darkGray);
+        const pubDetails = [pub.journal, pub.year];
+        if (pub.type) pubDetails.push(`(${pub.type.replace('-', ' ')})`);
+        doc.text(pubDetails.join(', '), LAYOUT.rightColumnX, y, { width: LAYOUT.rightColumnWidth });
+        y += 10;
         
         if (pub.supportingDocument?.url) {
             doc.fillColor(COLORS.accent).font(FONTS.regular)
-                .text('View Publication', LAYOUT.rightCol.x, y, { 
-                    width: LAYOUT.rightCol.width,
+                .text('View Document', LAYOUT.rightColumnX, y, { 
+                    width: LAYOUT.rightColumnWidth,
                     link: pub.supportingDocument.url,
                     underline: true
                 });
@@ -566,51 +594,54 @@ function addPublications(doc, data, y) {
         }
     });
     
-    return y + MARGINS.section;
+    return y + 10;
 }
 
-function addConferences(doc, data, y) {
-    if (!data.conferences?.length) return y;
+function addConferences(doc, data, startY) {
+    if (!data.conferences || data.conferences.length === 0) return startY;
     
-    y = addSectionHeader(doc, 'Conferences', LAYOUT.rightCol.x, LAYOUT.rightCol.width, y);
+    let y = addRightColumnSection(doc, 'Conferences', startY);
     
     data.conferences.forEach((conf, index) => {
-        if (index > 0) y += 15;
+        if (index > 0) y += 12;
         
         doc.fontSize(SIZES.body).fillColor(COLORS.primary).font(FONTS.bold)
-            .text(conf.name, LAYOUT.rightCol.x, y, { width: LAYOUT.rightCol.width });
-        y += 13;
+            .text(conf.name, LAYOUT.rightColumnX, y, { width: LAYOUT.rightColumnWidth });
+        y += SIZES.lineHeight;
         
-        const details = [conf.role, conf.year].filter(Boolean);
-        if (details.length) {
+        const confDetails = [];
+        if (conf.role) confDetails.push(conf.role);
+        if (conf.year) confDetails.push(conf.year);
+        
+        if (confDetails.length > 0) {
             doc.fontSize(SIZES.small).fillColor(COLORS.text).font(FONTS.regular)
-                .text(details.join(' | '), LAYOUT.rightCol.x, y);
-            y += 11;
+                .text(confDetails.join(' | '), LAYOUT.rightColumnX, y);
+            y += 10;
         }
         
         const location = [conf.location, conf.country].filter(Boolean).join(', ');
         if (location) {
-            doc.fillColor(COLORS.secondary).font(FONTS.italic)
-                .text(location, LAYOUT.rightCol.x, y);
-            y += 11;
+            doc.fillColor(COLORS.darkGray).font(FONTS.italic)
+                .text(location, LAYOUT.rightColumnX, y);
+            y += 10;
         }
         
         if (conf.description) {
             doc.fontSize(SIZES.small).fillColor(COLORS.text).font(FONTS.regular)
-                .text(conf.description, LAYOUT.rightCol.x, y, { width: LAYOUT.rightCol.width });
-            y += doc.heightOfString(conf.description, { width: LAYOUT.rightCol.width }) + 5;
+                .text(conf.description, LAYOUT.rightColumnX, y, { width: LAYOUT.rightColumnWidth });
+            y += doc.heightOfString(conf.description, { width: LAYOUT.rightColumnWidth }) + 5;
         }
         
         if (conf.certificateAwarded) {
             doc.fillColor(COLORS.accent).font(FONTS.italic)
-                .text('✓ Certificate Awarded', LAYOUT.rightCol.x, y);
-            y += 11;
+                .text('✓ Certificate Awarded', LAYOUT.rightColumnX, y);
+            y += 10;
         }
         
         if (conf.supportingDocument?.url) {
             doc.fillColor(COLORS.accent).font(FONTS.regular)
-                .text('View Certificate', LAYOUT.rightCol.x, y, { 
-                    width: LAYOUT.rightCol.width,
+                .text('View Document', LAYOUT.rightColumnX, y, { 
+                    width: LAYOUT.rightColumnWidth,
                     link: conf.supportingDocument.url,
                     underline: true
                 });
@@ -618,42 +649,45 @@ function addConferences(doc, data, y) {
         }
     });
     
-    return y + MARGINS.section;
+    return y + 10;
 }
 
-function addWorkshops(doc, data, y) {
-    if (!data.workshops?.length) return y;
+function addWorkshops(doc, data, startY) {
+    if (!data.workshops || data.workshops.length === 0) return startY;
     
-    y = addSectionHeader(doc, 'Workshops & Training', LAYOUT.rightCol.x, LAYOUT.rightCol.width, y);
+    let y = addRightColumnSection(doc, 'Workshops & Training', startY);
     
     data.workshops.forEach((workshop, index) => {
-        if (index > 0) y += 15;
+        if (index > 0) y += 12;
         
         doc.fontSize(SIZES.body).fillColor(COLORS.primary).font(FONTS.bold)
-            .text(workshop.name, LAYOUT.rightCol.x, y, { width: LAYOUT.rightCol.width });
-        y += 13;
+            .text(workshop.name, LAYOUT.rightColumnX, y, { width: LAYOUT.rightColumnWidth });
+        y += SIZES.lineHeight;
         
-        const details = [workshop.organizer, workshop.year || workshop.date].filter(Boolean);
-        if (details.length) {
+        const workshopDetails = [];
+        if (workshop.organizer) workshopDetails.push(workshop.organizer);
+        if (workshop.year || workshop.date) workshopDetails.push(workshop.year || workshop.date);
+        
+        if (workshopDetails.length > 0) {
             doc.fontSize(SIZES.small).fillColor(COLORS.text).font(FONTS.regular)
-                .text(details.join(' | '), LAYOUT.rightCol.x, y);
-            y += 11;
+                .text(workshopDetails.join(' | '), LAYOUT.rightColumnX, y);
+            y += 10;
         }
         
         if (workshop.description) {
             doc.fontSize(SIZES.small).fillColor(COLORS.text).font(FONTS.regular)
-                .text(workshop.description, LAYOUT.rightCol.x, y, { width: LAYOUT.rightCol.width });
-            y += doc.heightOfString(workshop.description, { width: LAYOUT.rightCol.width }) + 5;
+                .text(workshop.description, LAYOUT.rightColumnX, y, { width: LAYOUT.rightColumnWidth });
+            y += doc.heightOfString(workshop.description, { width: LAYOUT.rightColumnWidth }) + 5;
         }
         
         if (workshop.awards) {
             doc.fillColor(COLORS.accent).font(FONTS.italic)
-                .text(`Awards: ${workshop.awards}`, LAYOUT.rightCol.x, y, { width: LAYOUT.rightCol.width });
-            y += 11;
+                .text(`Awards: ${workshop.awards}`, LAYOUT.rightColumnX, y, { width: LAYOUT.rightColumnWidth });
+            y += 10;
         }
     });
     
-    return y + MARGINS.section;
+    return y + 10;
 }
 
 export async function generateCVPDF(cvData) {
@@ -661,7 +695,12 @@ export async function generateCVPDF(cvData) {
         try {
             const doc = new PDFDocument({ 
                 size: 'A4', 
-                margins: MARGINS.page,
+                margins: { 
+                    top: MARGINS.top, 
+                    bottom: MARGINS.bottom, 
+                    left: MARGINS.left, 
+                    right: MARGINS.right 
+                },
                 bufferPages: true
             });
             
@@ -672,21 +711,21 @@ export async function generateCVPDF(cvData) {
             
             let headerEndY = addHeader(doc, cvData);
             
-            let leftY = headerEndY;
-            let rightY = headerEndY;
+            let leftY = headerEndY + 10;
+            let rightY = headerEndY + 10;
             
             leftY = addEducation(doc, cvData, leftY);
             leftY = addLanguages(doc, cvData, leftY);
             leftY = addUSMLEScores(doc, cvData, leftY);
-            leftY = addSkills(doc, cvData, leftY);
+            leftY = addSkillsSection(doc, cvData, leftY);
             leftY = addCertifications(doc, cvData, leftY);
             leftY = addEMRTraining(doc, cvData, leftY);
             
-            rightY = addExperience(doc, cvData.usClinicalExperience?.list, 'US Clinical Experience', rightY);
-            rightY = addExperience(doc, cvData.clinicalExperiences, 'Clinical Experience', rightY);
-            rightY = addExperience(doc, cvData.workExperience, 'Work Experience', rightY);
-            rightY = addExperience(doc, cvData.professionalExperiences, 'Professional Experience', rightY);
-            rightY = addExperience(doc, cvData.volunteerExperiences, 'Volunteer Experience', rightY);
+            rightY = addExperienceSection(doc, cvData.usClinicalExperience?.list, 'US Clinical Experience', rightY);
+            rightY = addExperienceSection(doc, cvData.clinicalExperiences, 'Clinical Experience', rightY);
+            rightY = addExperienceSection(doc, cvData.workExperience, 'Work Experience', rightY);
+            rightY = addExperienceSection(doc, cvData.professionalExperiences, 'Professional Experience', rightY);
+            rightY = addExperienceSection(doc, cvData.volunteerExperiences, 'Volunteer Experience', rightY);
             rightY = addAchievements(doc, cvData, rightY);
             rightY = addPublications(doc, cvData, rightY);
             rightY = addConferences(doc, cvData, rightY);
@@ -695,14 +734,12 @@ export async function generateCVPDF(cvData) {
             const pageCount = doc.bufferedPageRange().count;
             for (let i = 0; i < pageCount; i++) {
                 doc.switchToPage(i);
-                doc.fontSize(7).fillColor(COLORS.light)
-                    .text(`${cvData.basicDetails.fullName} - Page ${i + 1}`, 
-                          MARGINS.page.left, 
-                          LAYOUT.pageHeight - 35, 
-                          { 
-                              align: 'center', 
-                              width: LAYOUT.pageWidth - MARGINS.page.left - MARGINS.page.right 
-                          });
+                doc.fontSize(7).fillColor(COLORS.lightGray).text(
+                    `${cvData.basicDetails.fullName} - Page ${i + 1}`,
+                    MARGINS.left,
+                    doc.page.height - 30,
+                    { align: 'center', width: doc.page.width - MARGINS.left - MARGINS.right }
+                );
             }
             
             doc.end();
