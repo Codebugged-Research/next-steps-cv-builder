@@ -34,7 +34,8 @@ const MARGINS = {
 
 const LAYOUT = {
     contentWidth: 475,
-    pageHeight: 792
+    pageHeight: 792,
+    photoSize: 80
 };
 
 async function fetchImageBuffer(url) {
@@ -73,14 +74,39 @@ function addSectionHeader(doc, title, y) {
     return lineY + 12;
 }
 
-function addHeader(doc, data) {
-    const { fullName, email, phone, city, address, nationality, gender } = data.basicDetails;
+async function addHeader(doc, data) {
+    const { fullName, email, phone, city, address, nationality, gender, photo } = data.basicDetails;
+    
+    const photoX = doc.page.width - MARGINS.right - LAYOUT.photoSize;
+    const photoY = MARGINS.top;
+    
+    if (photo) {
+        try {
+            const imageBuffer = await fetchImageBuffer(photo);
+            if (imageBuffer) {
+                doc.save();
+                doc.circle(photoX + LAYOUT.photoSize / 2, photoY + LAYOUT.photoSize / 2, LAYOUT.photoSize / 2)
+                    .clip();
+                doc.image(imageBuffer, photoX, photoY, {
+                    width: LAYOUT.photoSize,
+                    height: LAYOUT.photoSize,
+                    align: 'center',
+                    valign: 'center'
+                });
+                doc.restore();
+            }
+        } catch (error) {
+            console.error('Error adding photo:', error);
+        }
+    }
+    
+    const nameWidth = photo ? LAYOUT.contentWidth - LAYOUT.photoSize - 20 : LAYOUT.contentWidth;
     
     doc.fontSize(SIZES.name)
         .fillColor(COLORS.primary)
         .font(FONTS.bold)
         .text(fullName.toUpperCase(), MARGINS.left, MARGINS.top, {
-            width: LAYOUT.contentWidth,
+            width: nameWidth,
             align: 'left'
         });
     
@@ -113,11 +139,13 @@ function addHeader(doc, data) {
     }
     
     contactLines.forEach(line => {
-        doc.text(line, MARGINS.left, y, { width: LAYOUT.contentWidth });
+        doc.text(line, MARGINS.left, y, { width: nameWidth });
         y += 14;
     });
     
-    return y + 20;
+    const headerEndY = Math.max(y, photoY + LAYOUT.photoSize);
+    
+    return headerEndY + 20;
 }
 
 function addEducation(doc, data, y) {
@@ -693,7 +721,7 @@ export async function generateCVPDF(cvData) {
             doc.on('end', () => resolve(Buffer.concat(chunks)));
             doc.on('error', reject);
             
-            let y = addHeader(doc, cvData);
+            let y = await addHeader(doc, cvData);
             
             y = addEducation(doc, cvData, y);
             y = addLanguages(doc, cvData, y);
