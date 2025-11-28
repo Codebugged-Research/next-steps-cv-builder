@@ -472,7 +472,7 @@ const WorkshopsComponent = () => {
                       </div>
                     )}
 
-                    {registration.certificate && (
+                    {/* {registration.certificate && (
                       <div className="mb-4 p-4 bg-green-50 border border-green-200 rounded-lg">
                         <div className="flex items-start gap-3">
                           <CheckCircle className="h-5 w-5 text-green-600 mt-0.5 flex-shrink-0" />
@@ -496,7 +496,7 @@ const WorkshopsComponent = () => {
                           </div>
                         </div>
                       </div>
-                    )}
+                    )} */}
 
                     <div className="space-y-3 mb-4">
                       <div className="flex items-center gap-2 text-sm text-gray-600">
