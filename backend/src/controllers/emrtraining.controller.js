@@ -18,9 +18,9 @@ const registerForTraining = asyncHandler(async (req, res) => {
     throw new ApiError(404, 'User not found');
   }
 
-  const registrationYear = 2026
+  const registrationYear = 2026;
 
-  const existingRegistrations = await EmrTrainingRegistration.find({ 
+  const existingRegistrations = await EmrTrainingRegistration.find({
     user: userId,
     status: { $in: ['pending', 'confirmed'] }
   });
@@ -55,7 +55,6 @@ const registerForTraining = asyncHandler(async (req, res) => {
         emrTrainingRegistrations: {
           month,
           year: registrationYear,
-          registeredAt: new Date(),
           status: 'pending'
         }
       }
@@ -107,13 +106,13 @@ const cancelRegistration = asyncHandler(async (req, res) => {
 
   await User.findByIdAndUpdate(
     userId,
-    { 
-      $pull: { 
-        emrTrainingRegistrations: { 
+    {
+      $pull: {
+        emrTrainingRegistrations: {
           month: registration.month,
           year: registration.year
-        } 
-      } 
+        }
+      }
     }
   );
 
@@ -145,7 +144,7 @@ const getAllRegistrations = asyncHandler(async (req, res) => {
 
   return res.status(200).json(
     new ApiResponse(
-      200, 
+      200,
       {
         registrations,
         pagination: {
@@ -187,16 +186,16 @@ const confirmRegistration = asyncHandler(async (req, res) => {
   await registration.save();
 
   await User.updateOne(
-    { 
-      _id: registration.user, 
+    {
+      _id: registration.user,
       'emrTrainingRegistrations.month': registration.month,
       'emrTrainingRegistrations.year': registration.year
     },
-    { 
-      $set: { 
+    {
+      $set: {
         'emrTrainingRegistrations.$.status': 'confirmed',
         'emrTrainingRegistrations.$.confirmedAt': new Date()
-      } 
+      }
     }
   );
 
@@ -237,16 +236,16 @@ const rejectRegistration = asyncHandler(async (req, res) => {
   await registration.save();
 
   await User.updateOne(
-    { 
-      _id: registration.user, 
+    {
+      _id: registration.user,
       'emrTrainingRegistrations.month': registration.month,
       'emrTrainingRegistrations.year': registration.year
     },
-    { 
-      $set: { 
+    {
+      $set: {
         'emrTrainingRegistrations.$.status': 'rejected',
         'emrTrainingRegistrations.$.rejectedAt': new Date()
-      } 
+      }
     }
   );
 
@@ -281,16 +280,16 @@ const markAsCompleted = asyncHandler(async (req, res) => {
   await registration.save();
 
   await User.updateOne(
-    { 
-      _id: registration.user, 
+    {
+      _id: registration.user,
       'emrTrainingRegistrations.month': registration.month,
       'emrTrainingRegistrations.year': registration.year
     },
-    { 
-      $set: { 
+    {
+      $set: {
         'emrTrainingRegistrations.$.status': 'completed',
         'emrTrainingRegistrations.$.completedAt': new Date()
-      } 
+      }
     }
   );
 
@@ -346,7 +345,7 @@ const getRegistrationStats = asyncHandler(async (req, res) => {
 
   return res.status(200).json(
     new ApiResponse(
-      200, 
+      200,
       {
         statusStats: stats,
         monthlyStats
@@ -391,15 +390,15 @@ const uploadCertificate = asyncHandler(async (req, res) => {
   await registration.save();
 
   await User.updateOne(
-    { 
-      _id: registration.user, 
+    {
+      _id: registration.user,
       'emrTrainingRegistrations.month': registration.month,
       'emrTrainingRegistrations.year': registration.year
     },
-    { 
-      $set: { 
+    {
+      $set: {
         'emrTrainingRegistrations.$.certificate': req.file.location
-      } 
+      }
     }
   );
 
@@ -433,15 +432,15 @@ const deleteCertificate = asyncHandler(async (req, res) => {
   await registration.save();
 
   await User.updateOne(
-    { 
-      _id: registration.user, 
+    {
+      _id: registration.user,
       'emrTrainingRegistrations.month': registration.month,
       'emrTrainingRegistrations.year': registration.year
     },
-    { 
-      $set: { 
+    {
+      $set: {
         'emrTrainingRegistrations.$.certificate': null
-      } 
+      }
     }
   );
 
