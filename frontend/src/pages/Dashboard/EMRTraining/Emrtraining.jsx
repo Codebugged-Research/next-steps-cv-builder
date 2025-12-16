@@ -101,6 +101,7 @@ const EmrTrainingComponent = () => {
       year: 2026
 
     });
+    console.log(selectedSession)
     
     if (response.data.success) {
       toast.success('Registration request submitted successfully! Awaiting admin approval.');
