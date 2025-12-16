@@ -190,7 +190,7 @@ const handleCancelRegistration = async (registrationId) => {
       <div className="space-y-3 mb-6">
         <div className="flex items-center gap-2 text-sm text-gray-600">
           <Calendar className="h-4 w-4 text-[#169AB4] flex-shrink-0" />
-          <span>{registration.month} 2025</span>
+          <span>{registration.month} 2026</span>
         </div>
         <div className="flex items-center gap-2 text-sm text-gray-600">
           <Clock className="h-4 w-4 text-[#169AB4] flex-shrink-0" />
@@ -425,7 +425,7 @@ const handleCancelRegistration = async (registrationId) => {
           </p>
           {selectedSession && (
             <div className="bg-gray-50 rounded-lg p-4 space-y-2">
-              <p className="text-sm"><strong>Month:</strong> {selectedSession.month} 2025</p>
+              <p className="text-sm"><strong>Month:</strong> {selectedSession.month} 2026</p>
               <p className="text-sm"><strong>Time:</strong> {selectedSession.time}</p>
               <p className="text-sm"><strong>Duration:</strong> {selectedSession.duration}</p>
               <p className="text-sm"><strong>Location:</strong> {selectedSession.location}</p>

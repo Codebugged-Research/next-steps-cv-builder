@@ -13,12 +13,12 @@ const emrTrainingRegistrationSchema = new mongoose.Schema({
   },
   year: {
     type: Number,
-    required: true,
+    required: false,
     default: 2025
   },
   sessionTime: {
     type: String,
-    required: true,
+    required: false,
     default: '2:00 PM - 5:00 PM'
   },
   status: {
