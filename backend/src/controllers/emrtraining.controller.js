@@ -18,7 +18,7 @@ const registerForTraining = asyncHandler(async (req, res) => {
     throw new ApiError(404, 'User not found');
   }
 
-  const registrationYear = year
+  const registrationYear = 2026
 
   const existingRegistrations = await EmrTrainingRegistration.find({ 
     user: userId,
