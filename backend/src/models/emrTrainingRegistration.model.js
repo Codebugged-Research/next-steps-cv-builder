@@ -74,7 +74,7 @@ const emrTrainingRegistrationSchema = new mongoose.Schema({
   timestamps: true 
 });
 
-emrTrainingRegistrationSchema.index({ user: 1, month: 1, date: 1, year: 1 }, { unique: true });
+emrTrainingRegistrationSchema.index({ user: 1, month: 1, year: 1 }, { unique: true });
 emrTrainingRegistrationSchema.index({ status: 1 });
 emrTrainingRegistrationSchema.index({ registeredAt: -1 });
 

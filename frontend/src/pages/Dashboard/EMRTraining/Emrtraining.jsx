@@ -97,7 +97,9 @@ const EmrTrainingComponent = () => {
   try {
     const response = await api.post('/emr-training/register', {
       month: selectedSession.month,
-      sessionTime: selectedSession.time
+      sessionTime: selectedSession.time,
+      year: 2026
+
     });
     
     if (response.data.success) {
