@@ -96,8 +96,8 @@ const EmrTrainingComponent = () => {
   const confirmRegistration = async () => {
   try {
     const response = await api.post('/emr-training/register', {
-      month: "January",
-      sessionTime: "2:00 PM - 5:00 PM",
+      month: selectedSession.month,
+      sessionTime: selectedSession.time,
       year: 2026
 
     });
@@ -111,7 +111,7 @@ const EmrTrainingComponent = () => {
   } catch (error) {
     const errorMessage = error.response?.data?.message || 'Registration failed. Please try again.';
     toast.error(errorMessage);
-    console.log('Registration error:', error);
+    console('Registration error:', error);
   } finally {
     setShowRegistrationModal(false);
     setSelectedSession(null);
