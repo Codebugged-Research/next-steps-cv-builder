@@ -6,7 +6,7 @@ import { ApiResponse } from '../utils/ApiResponse.js';
 import { asyncHandler } from '../utils/asyncHandler.js';
 
 const registerForTraining = asyncHandler(async (req, res) => {
-  const { month, sessionTime } = req.body;
+  const { month, sessionTime, year } = req.body;
   const userId = req.user._id;
 
   if (!month) {
@@ -17,6 +17,8 @@ const registerForTraining = asyncHandler(async (req, res) => {
   if (!user) {
     throw new ApiError(404, 'User not found');
   }
+
+  const registrationYear = year || new Date().getFullYear();
 
   const existingRegistrations = await EmrTrainingRegistration.find({ 
     user: userId,
@@ -30,18 +32,18 @@ const registerForTraining = asyncHandler(async (req, res) => {
   const alreadyRegistered = await EmrTrainingRegistration.findOne({
     user: userId,
     month,
-    year: 2025,
+    year: registrationYear,
     status: { $in: ['pending', 'confirmed'] }
   });
 
   if (alreadyRegistered) {
-    throw new ApiError(400, 'You are already registered for this date');
+    throw new ApiError(400, 'You are already registered for this month');
   }
 
   const registration = await EmrTrainingRegistration.create({
     user: userId,
     month,
-    year: 2025,
+    year: registrationYear,
     sessionTime: sessionTime || '2:00 PM - 5:00 PM',
     status: 'pending'
   });
@@ -52,7 +54,7 @@ const registerForTraining = asyncHandler(async (req, res) => {
       $push: {
         emrTrainingRegistrations: {
           month,
-          year: 2025,
+          year: registrationYear,
           registeredAt: new Date(),
           status: 'pending'
         }
@@ -109,7 +111,6 @@ const cancelRegistration = asyncHandler(async (req, res) => {
       $pull: { 
         emrTrainingRegistrations: { 
           month: registration.month,
-          date: registration.date,
           year: registration.year
         } 
       } 
@@ -122,12 +123,11 @@ const cancelRegistration = asyncHandler(async (req, res) => {
 });
 
 const getAllRegistrations = asyncHandler(async (req, res) => {
-  const { status, month, date, page = 1, limit = 20 } = req.query;
+  const { status, month, page = 1, limit = 20 } = req.query;
 
   const filter = {};
   if (status) filter.status = status;
   if (month) filter.month = month;
-  if (date) filter.date = parseInt(date);
 
   const skip = (page - 1) * limit;
 
@@ -190,7 +190,6 @@ const confirmRegistration = asyncHandler(async (req, res) => {
     { 
       _id: registration.user, 
       'emrTrainingRegistrations.month': registration.month,
-      'emrTrainingRegistrations.date': registration.date,
       'emrTrainingRegistrations.year': registration.year
     },
     { 
@@ -241,7 +240,6 @@ const rejectRegistration = asyncHandler(async (req, res) => {
     { 
       _id: registration.user, 
       'emrTrainingRegistrations.month': registration.month,
-      'emrTrainingRegistrations.date': registration.date,
       'emrTrainingRegistrations.year': registration.year
     },
     { 
@@ -286,7 +284,6 @@ const markAsCompleted = asyncHandler(async (req, res) => {
     { 
       _id: registration.user, 
       'emrTrainingRegistrations.month': registration.month,
-      'emrTrainingRegistrations.date': registration.date,
       'emrTrainingRegistrations.year': registration.year
     },
     { 
@@ -397,7 +394,6 @@ const uploadCertificate = asyncHandler(async (req, res) => {
     { 
       _id: registration.user, 
       'emrTrainingRegistrations.month': registration.month,
-      'emrTrainingRegistrations.date': registration.date,
       'emrTrainingRegistrations.year': registration.year
     },
     { 
@@ -440,7 +436,6 @@ const deleteCertificate = asyncHandler(async (req, res) => {
     { 
       _id: registration.user, 
       'emrTrainingRegistrations.month': registration.month,
-      'emrTrainingRegistrations.date': registration.date,
       'emrTrainingRegistrations.year': registration.year
     },
     { 
