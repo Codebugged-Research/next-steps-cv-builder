@@ -42,17 +42,17 @@ export const PUBLICATION_TYPES = [
 
 export const FILE_CONSTRAINTS = {
   PHOTO: {
-    MAX_SIZE: 5 * 1024 * 1024, // 5MB
+    MAX_SIZE: 8 * 1024 * 1024, // 5MB
     ACCEPTED_TYPES: ['image/jpeg', 'image/jpg', 'image/png', 'image/gif'],
     ACCEPTED_EXTENSIONS: '.jpg,.jpeg,.png,.gif'
   },
   CV: {
-    MAX_SIZE: 10 * 1024 * 1024, // 10MB
+    MAX_SIZE: 15 * 1024 * 1024, // 10MB
     ACCEPTED_TYPES: ['application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'],
     ACCEPTED_EXTENSIONS: '.pdf,.doc,.docx'
   },
   DOCUMENT: {   
-    MAX_SIZE: 5 * 1024 * 1024, // 5 MB
+    MAX_SIZE: 8 * 1024 * 1024, // 5 MB
     ACCEPTED_TYPES: ['application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document', 'image/jpeg', 'image/png'],
     ACCEPTED_EXTENSIONS: '.pdf, .doc, .docx, .jpg, .jpeg, .png',
   },
