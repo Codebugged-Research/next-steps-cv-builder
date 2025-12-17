@@ -7,6 +7,7 @@ import { asyncHandler } from '../utils/asyncHandler.js';
 
 const registerForTraining = asyncHandler(async (req, res) => {
   const { month, sessionTime, year } = req.body;
+  console.log(month, sessionTime, year);
   const userId = req.user._id;
 
   if (!month) {
@@ -47,6 +48,7 @@ const registerForTraining = asyncHandler(async (req, res) => {
     sessionTime: sessionTime || '2:00 PM - 5:00 PM',
     status: 'pending'
   });
+
 
   await User.findByIdAndUpdate(
     userId,
