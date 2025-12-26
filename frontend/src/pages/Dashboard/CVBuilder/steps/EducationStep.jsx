@@ -1,7 +1,7 @@
 import React, { useState, useCallback, useMemo } from 'react';
 import FormField from '../forms/FormField';
 import FormGrid from '../forms/FormGrid';
-import { GraduationCap, School, BookOpen, Award, Building2, MapPin, Calendar, Hash, TrendingUp, Globe } from 'lucide-react';
+import { GraduationCap, School, BookOpen, Award, Building2, MapPin, Calendar, Hash, TrendingUp, Globe, Briefcase } from 'lucide-react';
 
 const EducationStep = ({ formData, onInputChange }) => {
   const [activeTab, setActiveTab] = useState('schooling');
@@ -11,6 +11,7 @@ const EducationStep = ({ formData, onInputChange }) => {
     { id: 'schooling', label: 'Schooling', icon: School },
     { id: 'college', label: 'College (+1 & +2)', icon: BookOpen },
     { id: 'graduation', label: 'Graduation', icon: GraduationCap },
+    { id: 'internship', label: 'Internship', icon: Briefcase },
     { id: 'postGraduation', label: 'Post Graduation', icon: Award }
   ];
 
@@ -33,7 +34,7 @@ const EducationStep = ({ formData, onInputChange }) => {
     if (startYear && endYear) {
       const start = parseInt(startYear);
       const end = parseInt(endYear);
-      
+
       if (end < start) {
         setDateErrors(prev => ({
           ...prev,
@@ -56,7 +57,7 @@ const EducationStep = ({ formData, onInputChange }) => {
     if (startDate && endDate) {
       const start = new Date(startDate);
       const end = new Date(endDate);
-      
+
       if (end <= start) {
         setDateErrors(prev => ({
           ...prev,
@@ -77,7 +78,7 @@ const EducationStep = ({ formData, onInputChange }) => {
 
   const updateSubSection = useCallback((subsection, field, value) => {
     const currentData = formData.education?.[subsection] || {};
-    
+
     onInputChange('education', subsection, {
       ...currentData,
       [field]: value
@@ -99,11 +100,10 @@ const EducationStep = ({ formData, onInputChange }) => {
     return (
       <button
         onClick={() => handleTabClick(tab.id)}
-        className={`flex items-center gap-2 px-4 py-3 rounded-lg transition-all duration-200 ${
-          isActive
+        className={`flex items-center gap-2 px-4 py-3 rounded-lg transition-all duration-200 ${isActive
             ? 'bg-[#169AB4] text-white shadow-md'
             : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-        }`}
+          }`}
       >
         <Icon className="h-4 w-4" />
         <span className="font-medium">{tab.label}</span>
@@ -131,7 +131,7 @@ const EducationStep = ({ formData, onInputChange }) => {
             />
           </div>
         </div>
-        
+
         <div className="relative">
           <label className="block text-sm font-medium text-gray-700 mb-1">
             Board <span className="text-red-500">*</span>
@@ -149,7 +149,7 @@ const EducationStep = ({ formData, onInputChange }) => {
             />
           </div>
         </div>
-        
+
         <div className="relative">
           <label className="block text-sm font-medium text-gray-700 mb-1">
             City <span className="text-red-500">*</span>
@@ -167,7 +167,7 @@ const EducationStep = ({ formData, onInputChange }) => {
             />
           </div>
         </div>
-        
+
         <div className="relative">
           <label className="block text-sm font-medium text-gray-700 mb-1">
             State <span className="text-red-500">*</span>
@@ -185,7 +185,7 @@ const EducationStep = ({ formData, onInputChange }) => {
             />
           </div>
         </div>
-        
+
         <div className="relative">
           <label className="block text-sm font-medium text-gray-700 mb-1">
             Start Year <span className="text-red-500">*</span>
@@ -205,7 +205,7 @@ const EducationStep = ({ formData, onInputChange }) => {
             />
           </div>
         </div>
-        
+
         <div className="relative">
           <label className="block text-sm font-medium text-gray-700 mb-1">
             End Year <span className="text-red-500">*</span>
@@ -225,7 +225,7 @@ const EducationStep = ({ formData, onInputChange }) => {
             />
           </div>
         </div>
-        
+
         <div className="relative">
           <label className="block text-sm font-medium text-gray-700 mb-1">
             Percentage
@@ -270,7 +270,7 @@ const EducationStep = ({ formData, onInputChange }) => {
             />
           </div>
         </div>
-        
+
         <div className="relative">
           <label className="block text-sm font-medium text-gray-700 mb-1">
             Stream <span className="text-red-500">*</span>
@@ -292,7 +292,7 @@ const EducationStep = ({ formData, onInputChange }) => {
             </select>
           </div>
         </div>
-        
+
         <div className="relative">
           <label className="block text-sm font-medium text-gray-700 mb-1">
             City <span className="text-red-500">*</span>
@@ -310,7 +310,7 @@ const EducationStep = ({ formData, onInputChange }) => {
             />
           </div>
         </div>
-        
+
         <div className="relative">
           <label className="block text-sm font-medium text-gray-700 mb-1">
             State <span className="text-red-500">*</span>
@@ -328,7 +328,7 @@ const EducationStep = ({ formData, onInputChange }) => {
             />
           </div>
         </div>
-        
+
         <div className="relative">
           <label className="block text-sm font-medium text-gray-700 mb-1">
             Start Year <span className="text-red-500">*</span>
@@ -348,7 +348,7 @@ const EducationStep = ({ formData, onInputChange }) => {
             />
           </div>
         </div>
-        
+
         <div className="relative">
           <label className="block text-sm font-medium text-gray-700 mb-1">
             End Year <span className="text-red-500">*</span>
@@ -390,7 +390,7 @@ const EducationStep = ({ formData, onInputChange }) => {
             />
           </div>
         </div>
-        
+
         <div className="relative">
           <label className="block text-sm font-medium text-gray-700 mb-1">
             12th Grade (%)
@@ -432,7 +432,7 @@ const EducationStep = ({ formData, onInputChange }) => {
             />
           </div>
         </div>
-        
+
         <div className="relative">
           <label className="block text-sm font-medium text-gray-700 mb-1">
             Degree <span className="text-red-500">*</span>
@@ -456,7 +456,7 @@ const EducationStep = ({ formData, onInputChange }) => {
             </select>
           </div>
         </div>
-        
+
         <div className="relative">
           <label className="block text-sm font-medium text-gray-700 mb-1">
             Specialization
@@ -474,7 +474,7 @@ const EducationStep = ({ formData, onInputChange }) => {
             />
           </div>
         </div>
-        
+
         <div className="relative">
           <label className="block text-sm font-medium text-gray-700 mb-1">
             City <span className="text-red-500">*</span>
@@ -492,7 +492,7 @@ const EducationStep = ({ formData, onInputChange }) => {
             />
           </div>
         </div>
-        
+
         <div className="relative">
           <label className="block text-sm font-medium text-gray-700 mb-1">
             State <span className="text-red-500">*</span>
@@ -510,7 +510,7 @@ const EducationStep = ({ formData, onInputChange }) => {
             />
           </div>
         </div>
-        
+
         <div className="relative">
           <label className="block text-sm font-medium text-gray-700 mb-1">
             Country <span className="text-red-500">*</span>
@@ -528,7 +528,7 @@ const EducationStep = ({ formData, onInputChange }) => {
             />
           </div>
         </div>
-        
+
         <div className="relative">
           <label className="block text-sm font-medium text-gray-700 mb-1">
             Start Date <span className="text-red-500">*</span>
@@ -546,7 +546,7 @@ const EducationStep = ({ formData, onInputChange }) => {
             />
           </div>
         </div>
-        
+
         <div className="relative">
           <label className="block text-sm font-medium text-gray-700 mb-1">
             End Date <span className="text-red-500">*</span>
@@ -586,7 +586,7 @@ const EducationStep = ({ formData, onInputChange }) => {
             />
           </div>
         </div>
-        
+
         <div className="relative">
           <label className="block text-sm font-medium text-gray-700 mb-1">
             2nd Year (%)
@@ -604,7 +604,7 @@ const EducationStep = ({ formData, onInputChange }) => {
             />
           </div>
         </div>
-        
+
         <div className="relative">
           <label className="block text-sm font-medium text-gray-700 mb-1">
             3rd Year (%)
@@ -622,7 +622,7 @@ const EducationStep = ({ formData, onInputChange }) => {
             />
           </div>
         </div>
-        
+
         <div className="relative">
           <label className="block text-sm font-medium text-gray-700 mb-1">
             Final Year (%)
@@ -659,7 +659,7 @@ const EducationStep = ({ formData, onInputChange }) => {
             />
           </div>
         </div>
-        
+
         <div className="relative">
           <label className="block text-sm font-medium text-gray-700 mb-1">
             Class Type
@@ -684,6 +684,92 @@ const EducationStep = ({ formData, onInputChange }) => {
       </FormGrid>
     </div>
   ), [formData.education?.graduation, updateSubSection, dateErrors.graduation_date]);
+
+  const InternshipTab = useMemo(() => (
+    <div className="space-y-6">
+      <div className="bg-blue-50 rounded-lg p-4 mb-6">
+        <p className="text-blue-800 text-sm">
+          Fill this section if you completed an internship after your graduation.
+        </p>
+      </div>
+      <FormGrid>
+        <div className="relative">
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            College/Hospital <span className="text-red-500">*</span>
+          </label>
+          <div className="relative">
+            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+              <Building2 className="h-5 w-5 text-gray-400" />
+            </div>
+            <input
+              type="text"
+              value={formData.education?.internship?.institution || ''}
+              onChange={(e) => updateSubSection('internship', 'institution', e.target.value)}
+              className="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-[#169AB4] focus:border-transparent"
+              placeholder="Enter college/hospital name"
+            />
+          </div>
+        </div>
+
+        <div className="relative">
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            City
+          </label>
+          <div className="relative">
+            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+              <MapPin className="h-5 w-5 text-gray-400" />
+            </div>
+            <input
+              type="text"
+              value={formData.education?.internship?.city || ''}
+              onChange={(e) => updateSubSection('internship', 'city', e.target.value)}
+              className="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-[#169AB4] focus:border-transparent"
+              placeholder="Enter city"
+            />
+          </div>
+        </div>
+
+        <div className="relative">
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            From <span className="text-red-500">*</span>
+          </label>
+          <div className="relative">
+            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+              <Calendar className="h-5 w-5 text-gray-400" />
+            </div>
+            <input
+              type="date"
+              value={formData.education?.internship?.startDate || ''}
+              onChange={(e) => updateSubSection('internship', 'startDate', e.target.value)}
+              max={formData.education?.internship?.endDate || undefined}
+              className="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-[#169AB4] focus:border-transparent"
+            />
+          </div>
+        </div>
+
+        <div className="relative">
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            To <span className="text-red-500">*</span>
+          </label>
+          <div className="relative">
+            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+              <Calendar className="h-5 w-5 text-gray-400" />
+            </div>
+            <input
+              type="date"
+              value={formData.education?.internship?.endDate || ''}
+              onChange={(e) => updateSubSection('internship', 'endDate', e.target.value)}
+              min={formData.education?.internship?.startDate || undefined}
+              className="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-[#169AB4] focus:border-transparent"
+            />
+          </div>
+        </div>
+      </FormGrid>
+      {dateErrors.internship_date && (
+        <p className="text-sm text-red-600">{dateErrors.internship_date}</p>
+      )}
+    </div>
+  ), [formData.education?.internship, updateSubSection, dateErrors.internship_date]);
 
   const PostGraduationTab = useMemo(() => (
     <div className="space-y-6">
@@ -710,7 +796,7 @@ const EducationStep = ({ formData, onInputChange }) => {
             />
           </div>
         </div>
-        
+
         <div className="relative">
           <label className="block text-sm font-medium text-gray-700 mb-1">
             Degree
@@ -735,7 +821,7 @@ const EducationStep = ({ formData, onInputChange }) => {
             </select>
           </div>
         </div>
-        
+
         <div className="relative">
           <label className="block text-sm font-medium text-gray-700 mb-1">
             Specialization
@@ -753,7 +839,7 @@ const EducationStep = ({ formData, onInputChange }) => {
             />
           </div>
         </div>
-        
+
         <div className="relative">
           <label className="block text-sm font-medium text-gray-700 mb-1">
             City
@@ -771,7 +857,7 @@ const EducationStep = ({ formData, onInputChange }) => {
             />
           </div>
         </div>
-        
+
         <div className="relative">
           <label className="block text-sm font-medium text-gray-700 mb-1">
             State
@@ -789,7 +875,7 @@ const EducationStep = ({ formData, onInputChange }) => {
             />
           </div>
         </div>
-        
+
         <div className="relative">
           <label className="block text-sm font-medium text-gray-700 mb-1">
             Country
@@ -807,7 +893,7 @@ const EducationStep = ({ formData, onInputChange }) => {
             />
           </div>
         </div>
-        
+
         <div className="relative">
           <label className="block text-sm font-medium text-gray-700 mb-1">
             Start Date
@@ -825,7 +911,7 @@ const EducationStep = ({ formData, onInputChange }) => {
             />
           </div>
         </div>
-        
+
         <div className="relative">
           <label className="block text-sm font-medium text-gray-700 mb-1">
             End Date
@@ -843,7 +929,7 @@ const EducationStep = ({ formData, onInputChange }) => {
             />
           </div>
         </div>
-        
+
         <div className="relative">
           <label className="block text-sm font-medium text-gray-700 mb-1">
             Status
@@ -864,7 +950,7 @@ const EducationStep = ({ formData, onInputChange }) => {
             </select>
           </div>
         </div>
-        
+
         <div className="relative">
           <label className="block text-sm font-medium text-gray-700 mb-1">
             Overall Grade/CGPA
@@ -897,6 +983,8 @@ const EducationStep = ({ formData, onInputChange }) => {
         return CollegeTab;
       case 'graduation':
         return GraduationTab;
+      case 'internship':
+        return InternshipTab;
       case 'postGraduation':
         return PostGraduationTab;
       default:
@@ -907,7 +995,7 @@ const EducationStep = ({ formData, onInputChange }) => {
   return (
     <div className="space-y-6">
       <h2 className="text-2xl font-bold text-[#04445E] mb-6">Education Details</h2>
-      
+
       <div className="flex flex-wrap gap-2 mb-6 p-2 bg-gray-50 rounded-lg">
         {tabs.map((tab) => (
           <TabButton

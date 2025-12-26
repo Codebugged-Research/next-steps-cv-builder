@@ -225,6 +225,24 @@ const cvSchema = new mongoose.Schema({
                 default: ""
             }
         },
+        internship: {
+            institution: {
+                type: String,
+                default: ""
+            },
+            city: {
+                type: String,
+                default: ""
+            },
+            startDate: {
+                type: String,
+                default: ""
+            },
+            endDate: {
+                type: String,
+                default: ""
+            }
+        },
         postGraduation: {
             universityName: {
                 type: String,
