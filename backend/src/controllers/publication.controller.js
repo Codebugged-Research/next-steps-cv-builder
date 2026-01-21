@@ -52,7 +52,7 @@ const createPublication = asyncHandler(async (req, res) => {
 
 const getAllPublications = asyncHandler(async (req, res) => {
   const { status, stage } = req.query;
-  
+
   let query = {};
 
   if (status) {
@@ -94,9 +94,9 @@ const getPublicationById = asyncHandler(async (req, res) => {
 });
 
 const getUserPublications = asyncHandler(async (req, res) => {
-  const userId = req.user._id;
+  const userEmail = req.user.email;
 
-  const publications = await Publication.find({ user: userId })
+  const publications = await Publication.find({ userEmail: userEmail })
     .populate('user', 'firstName lastName email fullName')
     .populate('projects.stageHistory.movedBy', 'firstName lastName email')
     .populate('certificate.uploadedBy', 'firstName lastName email')
@@ -113,7 +113,7 @@ const updatePublication = asyncHandler(async (req, res) => {
   const { userName, userEmail, teamSize, status } = req.body;
 
   const updateData = {};
-  
+
   if (userName) updateData.userName = userName;
   if (userEmail) updateData.userEmail = userEmail;
   if (teamSize) updateData.teamSize = teamSize;
@@ -186,7 +186,7 @@ const updateProjectStage = asyncHandler(async (req, res) => {
   }
 
   project.stage = parseInt(stage);
-  
+
   project.stageHistory.push({
     stage: parseInt(stage),
     movedAt: new Date(),
