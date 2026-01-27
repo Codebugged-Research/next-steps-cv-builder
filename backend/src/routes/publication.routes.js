@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { 
+import {
   createPublication,
   getAllPublications,
   getPublicationById,
@@ -21,10 +21,9 @@ const router = Router();
 router.route('/').get(getAllPublications);
 router.route('/stats').get(getPublicationStats);
 router.route('/stage/:stage').get(getPublicationsByStage);
-router.route('/:id').get(getPublicationById);
-
-router.route('/create').post(verifyJWT, createPublication);
 router.route('/user/publications').get(verifyJWT, getUserPublications);
+router.route('/create').post(verifyJWT, createPublication);
+router.route('/:id').get(getPublicationById);
 router.route('/:id').put(verifyJWT, updatePublication);
 router.route('/:id').delete(verifyJWT, deletePublication);
 

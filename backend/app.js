@@ -23,10 +23,10 @@ import FileRoutes from './src/routes/file.routes.js';
 import workshopRoutes from './src/routes/workshop.routes.js';
 import EMRTrainingRoutes from './src/routes/emrTraining.routes.js';
 import PublicationsRoutes from './src/routes/publication.routes.js';
-
-
+import HealthRoutes from './src/routes/health.routes.js';
 
 // app.use('/api/files', FileRoutes);
+app.use('/api/health', HealthRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/cv', cvRoutes);
 app.use('/api/conferences', conferenceRoutes);
