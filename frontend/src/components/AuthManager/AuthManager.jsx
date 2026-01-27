@@ -13,13 +13,13 @@ const AuthManager = () => {
 
   useEffect(() => {
     initializeAuth();
-    
+
     const handleSessionExpired = () => {
       handleSessionExpiration();
     };
-    
+
     window.addEventListener('session-expired', handleSessionExpired);
-    
+
     return () => {
       window.removeEventListener('session-expired', handleSessionExpired);
     };
@@ -39,25 +39,27 @@ const AuthManager = () => {
       }
 
       const wasLoggedOut = localStorage.getItem('wasLoggedOut') === 'true';
-      
+
       if (wasLoggedOut) {
         setLoading(false);
         return;
       }
 
       const storedUser = localStorage.getItem('user');
-      
+
       if (!storedUser) {
         setLoading(false);
         return;
       }
 
       const userData = JSON.parse(storedUser);
-      setUser(userData);
+      // Use the nested user object if it exists
+      const userObj = userData.user || userData;
+      setUser(userObj);
       setIsAuthenticated(true);
 
       const response = await api.get('/users/current-user', { withCredentials: true });
-      
+
       if (response.data.success) {
         const freshUserData = response.data.data;
         setUser(freshUserData);
@@ -82,7 +84,7 @@ const AuthManager = () => {
     localStorage.removeItem('activeSection');
     localStorage.removeItem('currentCVStep');
     localStorage.removeItem('completedSteps');
-    
+
     setUser(null);
     setIsAuthenticated(false);
     setShowRegister(false);
@@ -93,16 +95,24 @@ const AuthManager = () => {
     setUser(actualUser);
     setIsAuthenticated(true);
     setShowRegister(false);
-    localStorage.setItem('user', JSON.stringify(userData));
+
+    // Crucial: Clear activeSection to force re-evaluation of default route based on role
+    localStorage.removeItem('activeSection');
+
+    localStorage.setItem('user', JSON.stringify(actualUser));
     localStorage.removeItem('wasLoggedOut');
     localStorage.removeItem('sessionExpired');
   };
 
   const handleRegister = (userData) => {
-    setUser(userData);
+    const actualUser = userData.user || userData;
+    setUser(actualUser);
     setIsAuthenticated(true);
     setShowRegister(false);
-    localStorage.setItem('user', JSON.stringify(userData));
+
+    localStorage.removeItem('activeSection');
+
+    localStorage.setItem('user', JSON.stringify(actualUser));
     localStorage.removeItem('wasLoggedOut');
     localStorage.removeItem('sessionExpired');
   };

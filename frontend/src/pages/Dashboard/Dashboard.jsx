@@ -7,8 +7,14 @@ import MainContentRouter from '../../components/MainRouterComponent/MainRouterCo
 const DashboardLayout = ({ user, onLogout }) => {
   const [activeSection, setActiveSection] = useState(() => {
     const saved = localStorage.getItem('activeSection');
-    if (saved) return saved;
-    return user?.role === 'admin' ? 'admin-publications' : 'cv-builder';
+    const isAdmin = user?.role === 'admin';
+
+    if (saved) {
+      if (isAdmin && !saved.startsWith('admin-')) return 'admin-publications';
+      if (!isAdmin && saved.startsWith('admin-')) return 'cv-builder';
+      return saved;
+    }
+    return isAdmin ? 'admin-publications' : 'cv-builder';
   });
 
   const [currentCVStep, setCurrentCVStep] = useState(() => {
