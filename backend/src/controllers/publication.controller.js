@@ -96,7 +96,7 @@ const getPublicationById = asyncHandler(async (req, res) => {
 const getUserPublications = asyncHandler(async (req, res) => {
   const userEmail = req.user.email;
 
-  const publications = await Publication.find({ userEmail: userEmail })
+  const publications = await Publication.find({ userEmail: userEmail.toLowerCase() })
     .populate('user', 'firstName lastName email fullName')
     .populate('projects.stageHistory.movedBy', 'firstName lastName email')
     .populate('certificate.uploadedBy', 'firstName lastName email')
