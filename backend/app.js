@@ -5,9 +5,9 @@ import dotenv from 'dotenv';
 dotenv.config();
 
 const app = express();
-//checking for publication
+
 app.use(cors({
-    origin: 'http://localhost:5173',
+    origin: '*',
     credentials: true
 
 }));
