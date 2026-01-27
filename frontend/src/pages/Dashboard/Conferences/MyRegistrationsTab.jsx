@@ -1,4 +1,4 @@
-import { Calendar, MapPin, CheckCircle, X, Loader, ExternalLink } from 'lucide-react';
+import { Calendar, MapPin, CheckCircle, X, Loader, ExternalLink, Download } from 'lucide-react';
 import { useState } from 'react';
 import { toast } from 'react-toastify';
 import api from '../../../services/api';
@@ -22,9 +22,9 @@ const MyRegistrationsTab = ({ registrations, onRefreshRegistrations }) => {
 
     try {
       setCancellingId(registrationId);
-      
+
       const response = await api.delete(`/conferences/registrations/${registrationId}`);
-      
+
       if (response.data.success) {
         toast.success('Registration cancelled successfully');
         if (onRefreshRegistrations) {
@@ -78,6 +78,29 @@ const MyRegistrationsTab = ({ registrations, onRefreshRegistrations }) => {
               </div>
             </div>
 
+            {registration.certificate?.url && (
+              <div className="mb-6 p-5 bg-gradient-to-r from-green-50 to-emerald-50 border border-green-200 rounded-2xl shadow-sm">
+                <div className="flex flex-col sm:flex-row items-center gap-5">
+                  <div className="w-12 h-12 bg-white rounded-full flex items-center justify-center text-green-600 shadow-sm">
+                    <CheckCircle className="h-7 w-7" />
+                  </div>
+                  <div className="flex-1 text-center sm:text-left">
+                    <h5 className="text-green-900 font-bold text-lg">Certificate Awarded!</h5>
+                    <p className="text-green-700 text-sm italic">
+                      Thank you for attending {conferenceName}.
+                    </p>
+                  </div>
+                  <button
+                    onClick={() => window.open(registration.certificate.url, '_blank')}
+                    className="w-full sm:w-auto flex items-center justify-center gap-2 px-6 py-3 bg-green-600 text-white rounded-xl hover:bg-green-700 transition-all font-bold shadow-md shadow-green-200 active:scale-95"
+                  >
+                    <Download className="h-5 w-5" />
+                    Download
+                  </button>
+                </div>
+              </div>
+            )}
+
             <div className="space-y-3 mb-4">
               {(conferenceMonth && conferenceDates) && (
                 <div className="flex items-center gap-2 text-sm text-gray-600">
@@ -99,48 +122,49 @@ const MyRegistrationsTab = ({ registrations, onRefreshRegistrations }) => {
               </div>
             </div>
 
-            <div className="flex justify-end gap-3">
-              {conferenceBrochure && (
-                <a
-                  href={conferenceBrochure}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="px-4 py-2 text-[#169AB4] border border-[#169AB4] rounded-lg hover:bg-[#169AB4] hover:text-white transition-colors text-sm"
-                >
-                  View Brochure
-                </a>
-              )}
+            {!registration.certificate?.url && (
+              <div className="flex justify-end gap-3">
+                {conferenceBrochure && (
+                  <a
+                    href={conferenceBrochure}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="px-4 py-2 text-[#169AB4] border border-[#169AB4] rounded-lg hover:bg-[#169AB4] hover:text-white transition-colors text-sm"
+                  >
+                    View Brochure
+                  </a>
+                )}
 
-              <button
-                onClick={handleJoinConference}
-                className="flex items-center gap-2 px-4 py-2 bg-[#169AB4] text-white rounded-lg hover:bg-[#147a8f] transition-colors text-sm"
-              >
-                <ExternalLink className="h-4 w-4" />
-                Join Now
-              </button>
-              
-              <button
-                onClick={() => handleCancelRegistration(registration._id)}
-                disabled={cancellingId === registration._id}
-                className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-colors text-sm ${
-                  cancellingId === registration._id
+                <button
+                  onClick={handleJoinConference}
+                  className="flex items-center gap-2 px-4 py-2 bg-[#169AB4] text-white rounded-lg hover:bg-[#147a8f] transition-colors text-sm"
+                >
+                  <ExternalLink className="h-4 w-4" />
+                  Join Now
+                </button>
+
+                <button
+                  onClick={() => handleCancelRegistration(registration._id)}
+                  disabled={cancellingId === registration._id}
+                  className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-colors text-sm ${cancellingId === registration._id
                     ? 'bg-gray-400 cursor-not-allowed text-white'
                     : 'bg-red-500 text-white hover:bg-red-600'
-                }`}
-              >
-                {cancellingId === registration._id ? (
-                  <>
-                    <Loader className="h-4 w-4 animate-spin" />
-                    Cancelling...
-                  </>
-                ) : (
-                  <>
-                    <X className="h-4 w-4" />
-                    Cancel Registration
-                  </>
-                )}
-              </button>
-            </div>
+                    }`}
+                >
+                  {cancellingId === registration._id ? (
+                    <>
+                      <Loader className="h-4 w-4 animate-spin" />
+                      Cancelling...
+                    </>
+                  ) : (
+                    <>
+                      <X className="h-4 w-4" />
+                      Cancel Registration
+                    </>
+                  )}
+                </button>
+              </div>
+            )}
           </div>
         );
       })}

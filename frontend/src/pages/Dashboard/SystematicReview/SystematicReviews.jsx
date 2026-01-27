@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { ArrowLeft, BookOpen, Search, FileText, Edit, CheckCircle, Eye, Download, Users, Calendar, Target, ChevronLeft, ChevronRight, List } from 'lucide-react';
+import { ArrowLeft, BookOpen, Search, FileText, Edit, CheckCircle, Eye, Download, Upload, Users, Calendar, Target, ChevronLeft, ChevronRight, List } from 'lucide-react';
 import ProjectHeader from '../../../components/Common/ProjectHeader';
 import api from '../../../services/api';
+import { toast } from 'react-toastify';
 
-const PublicationTimeline = () => {
+const PublicationTimeline = ({ user }) => {
   const [activeStage, setActiveStage] = useState(0);
   const [currentPage, setCurrentPage] = useState(0);
   const [selectedProject, setSelectedProject] = useState(null);
@@ -177,14 +178,18 @@ const PublicationTimeline = () => {
   ];
 
   useEffect(() => {
-    fetchUserPublications();
-  }, []);
+    if (user) {
+      fetchUserPublications();
+    }
+  }, [user?.role, user?._id]);
 
   const fetchUserPublications = async () => {
     try {
       setLoading(true);
-      const response = await api.get('/publications/user/publications');
-      
+      const isAdmin = user?.role === 'admin';
+      const endpoint = isAdmin ? '/publications' : '/publications/user/publications';
+      const response = await api.get(endpoint);
+
       if (response.data.success) {
         setPublications(response.data.data);
         if (response.data.data.length > 0) {
@@ -206,7 +211,7 @@ const PublicationTimeline = () => {
 
   const getStatusForStage = (stageNumber) => {
     if (!selectedProject || !selectedProjectId) return 'pending';
-    
+
     const publication = publications.find(p => p._id === selectedProject);
     if (!publication) return 'pending';
 
@@ -214,14 +219,14 @@ const PublicationTimeline = () => {
     if (!project) return 'pending';
 
     const currentStage = project.stage;
-    
+
     if (stageNumber < currentStage) return 'completed';
     if (stageNumber === currentStage) return 'in-progress';
     return 'pending';
   };
 
   const getStatusColor = (status) => {
-    switch(status) {
+    switch (status) {
       case 'completed': return 'bg-green-500';
       case 'in-progress': return 'bg-[#04445E]';
       case 'pending': return 'bg-gray-400';
@@ -230,7 +235,7 @@ const PublicationTimeline = () => {
   };
 
   const getStatusIcon = (status) => {
-    switch(status) {
+    switch (status) {
       case 'completed': return '✓';
       case 'in-progress': return '◐';
       case 'pending': return '○';
@@ -240,7 +245,7 @@ const PublicationTimeline = () => {
 
   const totalPages = Math.ceil(timelineStages.length / stagesPerPage);
   const currentStages = timelineStages.slice(
-    currentPage * stagesPerPage, 
+    currentPage * stagesPerPage,
     (currentPage + 1) * stagesPerPage
   );
 
@@ -262,7 +267,7 @@ const PublicationTimeline = () => {
     setSelectedProject(publicationId);
     setSelectedProjectId(projectId);
     setShowProjectSelector(false);
-    
+
     const publication = publications.find(p => p._id === publicationId);
     if (publication) {
       const project = publication.projects.find(proj => proj._id === projectId);
@@ -273,12 +278,45 @@ const PublicationTimeline = () => {
     }
   };
 
-  const currentPublication = publications.find(p => p._id === selectedProject);
-  const currentProjectData = currentPublication?.projects.find(p => p._id === selectedProjectId);
+  const currentPublication = publications.find(p => String(p._id) === String(selectedProject));
+  const currentProjectData = currentPublication?.projects?.find(p => String(p._id) === String(selectedProjectId));
+
+  const [uploadingProjectFile, setUploadingProjectFile] = useState(false);
 
   const downloadCertificate = (certificateUrl) => {
     if (certificateUrl) {
       window.open(certificateUrl, '_blank');
+    }
+  };
+
+  const handleProjectFileUpload = async (e) => {
+    const file = e.target.files[0];
+    if (!file || !selectedProject || !selectedProjectId) return;
+
+    if (file.type !== 'application/pdf') {
+      toast.error('Please upload a PDF file');
+      return;
+    }
+
+    try {
+      setUploadingProjectFile(true);
+      const formData = new FormData();
+      formData.append('document', file);
+
+      const response = await api.post(`/publications/${selectedProject}/projects/${selectedProjectId}/file`, formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      });
+
+      if (response.data.success) {
+        toast.success('Project document uploaded successfully');
+        fetchUserPublications(); // Refresh data
+      }
+    } catch (err) {
+      toast.error(err.response?.data?.message || 'Failed to upload document');
+    } finally {
+      setUploadingProjectFile(false);
     }
   };
 
@@ -321,11 +359,10 @@ const PublicationTimeline = () => {
             <h3 className="text-sm font-medium text-gray-600 mb-1">Currently Viewing</h3>
             <p className="text-lg font-semibold text-gray-900">{currentProjectData?.name || 'Select a project'}</p>
             <div className="flex items-center gap-4 mt-2">
-              <span className={`text-xs px-2 py-1 rounded-full ${
-                currentPublication?.status === 'active' ? 'bg-yellow-100 text-yellow-700' : 
+              <span className={`text-xs px-2 py-1 rounded-full ${currentPublication?.status === 'active' ? 'bg-yellow-100 text-yellow-700' :
                 currentPublication?.status === 'completed' ? 'bg-green-100 text-green-700' :
-                'bg-gray-100 text-gray-700'
-              }`}>
+                  'bg-gray-100 text-gray-700'
+                }`}>
                 {currentPublication?.status}
               </span>
               <span className="text-xs text-gray-600">
@@ -352,40 +389,67 @@ const PublicationTimeline = () => {
             <div className="p-3 bg-gray-50 border-b border-gray-200">
               <h4 className="font-semibold text-gray-900">Your Projects</h4>
             </div>
-            <div className="divide-y divide-gray-200 max-h-96 overflow-y-auto">
+            <div className="divide-y divide-gray-100 max-h-96 overflow-y-auto">
               {publications.map((publication) => (
-                <div key={publication._id}>
+                <div key={publication._id} className="p-2 space-y-1">
+                  <div className="text-[10px] font-bold text-gray-400 uppercase px-3 py-1 bg-gray-50/50 rounded-md">
+                    {publication.userName}'s Research
+                  </div>
                   {publication.projects.map((project) => (
-                    <button
+                    <div
                       key={project._id}
                       onClick={() => handleProjectSelect(publication._id, project._id)}
-                      className={`w-full text-left p-4 hover:bg-gray-50 transition-colors ${
-                        selectedProjectId === project._id ? 'bg-blue-50 border-l-4 border-[#04445E]' : ''
-                      }`}
+                      className={`group relative flex flex-col sm:flex-row sm:items-center justify-between p-4 rounded-xl cursor-pointer transition-all duration-300 border ${selectedProjectId === project._id
+                        ? 'bg-[#04445E] border-[#04445E] text-white shadow-lg'
+                        : 'bg-white border-gray-100 hover:border-blue-200 hover:bg-blue-50/30'
+                        }`}
                     >
-                      <div className="flex items-start justify-between">
-                        <div className="flex-1">
-                          <h5 className="font-medium text-gray-900 mb-1">{project.name}</h5>
-                          <div className="flex items-center gap-3 text-sm text-gray-600">
-                            <span className="flex items-center gap-1">
-                              <Calendar className="w-3 h-3" />
-                              {new Date(publication.createdAt).toLocaleDateString()}
-                            </span>
-                            <span className="flex items-center gap-1">
-                              <Users className="w-3 h-3" />
-                              {publication.teamSize} members
-                            </span>
-                            <span className="flex items-center gap-1">
-                              <Target className="w-3 h-3" />
-                              Stage {project.stage}
-                            </span>
-                          </div>
+                      <div className="flex-1 min-w-0 mb-3 sm:mb-0">
+                        <div className="flex items-center gap-2 mb-1">
+                          <h5 className={`font-bold text-sm sm:text-base truncate transition-colors ${selectedProjectId === project._id ? 'text-white' : 'text-gray-900 group-hover:text-[#04445E]'
+                            }`}>
+                            {project.name}
+                          </h5>
+                          {selectedProjectId === project._id && (
+                            <span className="flex h-2 w-2 rounded-full bg-green-400 animate-pulse"></span>
+                          )}
                         </div>
-                        {selectedProjectId === project._id && (
-                          <CheckCircle className="w-5 h-5 text-[#04445E]" />
-                        )}
+                        <div className="flex flex-wrap items-center gap-x-4 gap-y-1">
+                          <span className={`flex items-center gap-1.5 text-xs ${selectedProjectId === project._id ? 'text-blue-100/80' : 'text-gray-500'
+                            }`}>
+                            <Calendar className="w-3.5 h-3.5" />
+                            {new Date(publication.createdAt).toLocaleDateString()}
+                          </span>
+                          <span className={`flex items-center gap-1.5 text-xs font-medium ${selectedProjectId === project._id ? 'text-blue-100' : 'text-[#169AB4]'
+                            }`}>
+                            <Target className="w-3.5 h-3.5" />
+                            Stage {project.stage}
+                          </span>
+                        </div>
                       </div>
-                    </button>
+
+                      <div className="flex items-center gap-3 shrink-0 self-end sm:self-center">
+                        {project.file?.url && (
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              downloadCertificate(project.file.url);
+                            }}
+                            className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-bold transition-all transform hover:scale-105 active:scale-95 ${selectedProjectId === project._id
+                              ? 'bg-white/20 text-white hover:bg-white/30 border border-white/30'
+                              : 'bg-green-600 text-white hover:bg-green-700 shadow-md shadow-green-200'
+                              }`}
+                          >
+                            <Download className="w-3.5 h-3.5" />
+                            Download
+                          </button>
+                        )}
+                        <div className={`p-1.5 rounded-full transition-colors ${selectedProjectId === project._id ? 'bg-white/10 text-white' : 'bg-gray-100 text-gray-400 group-hover:bg-blue-100 group-hover:text-[#04445E]'
+                          }`}>
+                          <ChevronRight className="w-4 h-4" />
+                        </div>
+                      </div>
+                    </div>
                   ))}
                 </div>
               ))}
@@ -405,22 +469,20 @@ const PublicationTimeline = () => {
             <button
               onClick={prevPage}
               disabled={currentPage === 0}
-              className={`p-2 rounded-lg transition-colors ${
-                currentPage === 0 
-                  ? 'bg-gray-100 text-gray-400 cursor-not-allowed' 
-                  : 'bg-[#04445E] text-white hover:bg-[#033852]'
-              }`}
+              className={`p-2 rounded-lg transition-colors ${currentPage === 0
+                ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                : 'bg-[#04445E] text-white hover:bg-[#033852]'
+                }`}
             >
               <ChevronLeft className="w-4 h-4" />
             </button>
             <button
               onClick={nextPage}
               disabled={currentPage === totalPages - 1}
-              className={`p-2 rounded-lg transition-colors ${
-                currentPage === totalPages - 1 
-                  ? 'bg-gray-100 text-gray-400 cursor-not-allowed' 
-                  : 'bg-[#04445E] text-white hover:bg-[#033852]'
-              }`}
+              className={`p-2 rounded-lg transition-colors ${currentPage === totalPages - 1
+                ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                : 'bg-[#04445E] text-white hover:bg-[#033852]'
+                }`}
             >
               <ChevronRight className="w-4 h-4" />
             </button>
@@ -433,39 +495,39 @@ const PublicationTimeline = () => {
         <div className="relative px-8">
           {/* Background line */}
           <div className="absolute top-8 left-16 right-16 h-1 bg-gray-200 rounded"></div>
-          
+
           {/* Progress line */}
-          <div 
+          <div
             className="absolute top-8 h-1 bg-[#04445E] rounded transition-all duration-500"
-            style={{ 
+            style={{
               left: '4rem',
               width: `${(() => {
                 if (!currentProjectData) return '0%';
-                
+
                 const currentStageNumber = currentProjectData.stage;
                 const totalStages = currentStages.length;
                 const firstStageNumber = (currentPage * stagesPerPage) + 1;
                 const lastStageNumber = firstStageNumber + totalStages - 1;
-                
+
                 if (currentStageNumber < firstStageNumber) {
                   return '0%';
                 }
-                
+
                 if (currentStageNumber > lastStageNumber) {
                   return 'calc(100% - 8rem)';
                 }
-                
+
                 const relativeStageIndex = currentStageNumber - firstStageNumber;
-                
+
                 if (relativeStageIndex === 0) {
                   return '0%';
                 }
-                
+
                 const segmentWidth = 100 / (totalStages - 1);
                 const progressPercent = segmentWidth * relativeStageIndex;
-                
-                return `calc(${progressPercent}% - ${4 * (1 - progressPercent/100)}rem)`;
-              })()}` 
+
+                return `calc(${progressPercent}% - ${4 * (1 - progressPercent / 100)}rem)`;
+              })()}`
             }}
           ></div>
 
@@ -478,24 +540,23 @@ const PublicationTimeline = () => {
               const currentStageNumber = currentProjectData?.stage || 0;
               const isPast = stageNumber < currentStageNumber;
               const isCurrent = stageNumber === currentStageNumber;
-              
+
               return (
                 <div key={stage.id} className="flex flex-col items-center min-w-0 flex-1">
                   <button
                     onClick={() => setActiveStage(stage.id)}
-                    className={`w-16 h-16 rounded-full border-4 flex items-center justify-center transition-all duration-300 mb-3 ${
-                      isActive 
-                        ? 'border-[#04445E] bg-[#04445E] text-white shadow-lg scale-110' 
-                        : isPast 
+                    className={`w-16 h-16 rounded-full border-4 flex items-center justify-center transition-all duration-300 mb-3 ${isActive
+                      ? 'border-[#04445E] bg-[#04445E] text-white shadow-lg scale-110'
+                      : isPast
                         ? 'border-green-500 bg-green-500 text-white'
                         : isCurrent
-                        ? 'border-blue-500 bg-blue-500 text-white'
-                        : 'border-gray-300 bg-white text-gray-500 hover:border-[#04445E] hover:scale-105'
-                    }`}
+                          ? 'border-blue-500 bg-blue-500 text-white'
+                          : 'border-gray-300 bg-white text-gray-500 hover:border-[#04445E] hover:scale-105'
+                      }`}
                   >
                     <Icon className="w-6 h-6" />
                   </button>
-                  
+
                   <div className="text-center max-w-20">
                     <div className={`text-sm font-semibold mb-1 ${isActive ? 'text-[#04445E]' : 'text-gray-700'}`}>
                       {stage.title}
@@ -503,11 +564,10 @@ const PublicationTimeline = () => {
                     <div className={`text-xs mb-2 ${isActive ? 'text-[#04445E]' : 'text-gray-500'}`}>
                       {stage.duration}
                     </div>
-                    <div className={`text-xs px-2 py-1 rounded-full inline-block ${
-                      status === 'completed' ? 'bg-green-100 text-green-700' :
+                    <div className={`text-xs px-2 py-1 rounded-full inline-block ${status === 'completed' ? 'bg-green-100 text-green-700' :
                       status === 'in-progress' ? 'bg-blue-100 text-[#04445E]' :
-                      'bg-gray-100 text-gray-600'
-                    }`}>
+                        'bg-gray-100 text-gray-600'
+                      }`}>
                       {getStatusIcon(status)}
                     </div>
                   </div>
@@ -526,15 +586,50 @@ const PublicationTimeline = () => {
               {timelineStages.find(s => s.id === activeStage)?.title}
             </h3>
           </div>
-          <div className="flex flex-col md:flex-row gap-4">
+          <div className="flex flex-col sm:flex-row gap-3">
             {currentPublication?.certificate?.url && (
-              <button 
+              <button
                 onClick={() => downloadCertificate(currentPublication?.certificate?.url)}
-                className="flex items-center gap-2 px-4 py-2 rounded-lg transition-colors bg-green-600 text-white hover:bg-green-700"
+                className="flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl transition-all font-bold bg-green-600 text-white hover:bg-green-700 shadow-md shadow-green-100 active:scale-95"
               >
-                <Download className="w-4 h-4" />
+                <Download className="w-5 h-5" />
                 Download Certificate
               </button>
+            )}
+            {currentProjectData?.file?.url && (
+              <button
+                onClick={() => downloadCertificate(currentProjectData.file.url)}
+                className="flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl transition-all font-bold bg-[#04445E] text-white hover:bg-[#033647] shadow-md shadow-blue-100 active:scale-95"
+              >
+                <Download className="w-5 h-5" />
+                Download PDF
+              </button>
+            )}
+            {user?.role === 'admin' && selectedProjectId && (
+              <div className="relative">
+                <input
+                  type="file"
+                  id="project-file-upload"
+                  className="hidden"
+                  accept=".pdf"
+                  onChange={handleProjectFileUpload}
+                  disabled={uploadingProjectFile}
+                />
+                <label
+                  htmlFor="project-file-upload"
+                  className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-colors cursor-pointer ${uploadingProjectFile
+                    ? 'bg-gray-400 cursor-not-allowed'
+                    : 'bg-indigo-600 hover:bg-indigo-700 text-white'
+                    }`}
+                >
+                  {uploadingProjectFile ? (
+                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                  ) : (
+                    <Upload className="w-4 h-4" />
+                  )}
+                  {uploadingProjectFile ? 'Uploading...' : 'Upload Project PDF'}
+                </label>
+              </div>
             )}
           </div>
         </div>
@@ -560,15 +655,15 @@ const PublicationTimeline = () => {
   );
 };
 
-const NextStepsProjects = () => {
+const NextStepsProjects = ({ user }) => {
   return (
     <div className="mb-8">
-      <PublicationTimeline />
+      <PublicationTimeline user={user} />
     </div>
   );
 };
 
-const SystematicReviews = ({ onBack }) => {
+const SystematicReviews = ({ onBack, user }) => {
   const [publications, setPublications] = useState([]);
 
   useEffect(() => {
@@ -577,8 +672,10 @@ const SystematicReviews = ({ onBack }) => {
 
   const fetchStats = async () => {
     try {
-      const response = await api.get('/publications/user/publications');
-      
+      const isAdmin = user?.role === 'admin';
+      const endpoint = isAdmin ? '/publications' : '/publications/user/publications';
+      const response = await api.get(endpoint);
+
       if (response.data.success) {
         setPublications(response.data.data);
       }
@@ -588,12 +685,12 @@ const SystematicReviews = ({ onBack }) => {
   };
 
   const totalProjects = publications.reduce((acc, pub) => acc + pub.numberOfProjects, 0);
-  const avgTeamSize = publications.length > 0 
-    ? Math.round(publications.reduce((acc, pub) => acc + pub.teamSize, 0) / publications.length) 
+  const avgTeamSize = publications.length > 0
+    ? Math.round(publications.reduce((acc, pub) => acc + pub.teamSize, 0) / publications.length)
     : 0;
 
   const headerConfig = {
-    backgroundImage: '/publications.jpg',  
+    backgroundImage: '/publications.jpg',
     title: 'Publications',
     subtitle: 'Collaborate with peers and Next Steps team for publication-ready research',
     stats: [
@@ -607,7 +704,7 @@ const SystematicReviews = ({ onBack }) => {
     <div className="min-h-screen bg-gray-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <ProjectHeader {...headerConfig} />
-        <NextStepsProjects />
+        <NextStepsProjects user={user} />
       </div>
     </div>
   );

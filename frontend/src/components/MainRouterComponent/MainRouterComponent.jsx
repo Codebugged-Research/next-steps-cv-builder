@@ -6,14 +6,16 @@ import SystematicReviews from '../../pages/Dashboard/SystematicReview/Systematic
 import Conferences from '../../pages/Dashboard/Conferences/Conferences.jsx';
 import Emrtraining from '../../pages/Dashboard/EMRTraining/Emrtraining.jsx';
 import WorkshopsComponent from '../../pages/Dashboard/Workshops/Workshops.jsx';
+import AdminPublications from '../../pages/Dashboard/Admin/AdminPublications.jsx';
+import AdminRegistrations from '../../pages/Dashboard/Admin/AdminRegistrations.jsx';
 
-const MainContentRouter = ({ 
-  activeSection, 
-  onSectionChange, 
-  user, 
-  currentCVStep, 
-  onCVStepChange, 
-  onStepComplete 
+const MainContentRouter = ({
+  activeSection,
+  onSectionChange,
+  user,
+  currentCVStep,
+  onCVStepChange,
+  onStepComplete
 }) => {
   const renderContent = () => {
     switch (activeSection) {
@@ -39,6 +41,12 @@ const MainContentRouter = ({
         return (
           <Existingcv onBack={() => onSectionChange('cv-builder')} />
         );
+
+      case 'admin-publications':
+        return <AdminPublications />;
+
+      case 'admin-registrations':
+        return <AdminRegistrations />;
 
       case 'systematic-reviews':
         return (

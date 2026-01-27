@@ -52,7 +52,7 @@ const getAllWorkshops = asyncHandler(async (req, res) => {
       const registrations = await WorkshopRegistration.find({ workshop: workshop._id })
         .populate('user', 'firstName lastName email fullName')
         .lean();
-      
+
       return {
         ...workshop,
         registeredUsers: registrations
@@ -138,7 +138,7 @@ const getUpcomingWorkshops = asyncHandler(async (req, res) => {
       const registrations = await WorkshopRegistration.find({ workshop: workshop._id })
         .populate('user', 'firstName lastName email fullName')
         .lean();
-      
+
       return {
         ...workshop,
         registeredUsers: registrations
@@ -156,12 +156,12 @@ const registerForWorkshop = asyncHandler(async (req, res) => {
   const userId = req.user._id;
 
   const user = await User.findById(userId);
-  
+
   if (!user) {
     throw new ApiError(404, 'User not found');
   }
 
-  const existingRegistrations = await WorkshopRegistration.find({ 
+  const existingRegistrations = await WorkshopRegistration.find({
     user: userId,
     status: { $in: ['pending', 'confirmed'] }
   });
@@ -296,11 +296,11 @@ const confirmRegistration = asyncHandler(async (req, res) => {
 
   await User.updateOne(
     { _id: registration.user, 'workshopRegistrations.workshop': registration.workshop },
-    { 
-      $set: { 
+    {
+      $set: {
         'workshopRegistrations.$.status': 'confirmed',
         'workshopRegistrations.$.confirmedAt': new Date()
-      } 
+      }
     }
   );
 
@@ -326,11 +326,11 @@ const rejectRegistration = asyncHandler(async (req, res) => {
 
   await User.updateOne(
     { _id: registration.user, 'workshopRegistrations.workshop': registration.workshop },
-    { 
-      $set: { 
+    {
+      $set: {
         'workshopRegistrations.$.status': 'rejected',
         'workshopRegistrations.$.rejectedAt': new Date()
-      } 
+      }
     }
   );
 
@@ -340,7 +340,7 @@ const rejectRegistration = asyncHandler(async (req, res) => {
 });
 
 const getPendingRegistrations = asyncHandler(async (req, res) => {
-  const registrations = await WorkshopRegistration.find({ status: 'pending' })
+  const registrations = await WorkshopRegistration.find({ status: { $in: ['pending', 'confirmed'] } })
     .populate('workshop', 'title type date location capacity')
     .populate('user', 'firstName lastName email fullName')
     .sort({ registeredAt: -1 })
@@ -387,10 +387,10 @@ const uploadCertificate = asyncHandler(async (req, res) => {
 
   await User.updateOne(
     { _id: registration.user, 'workshopRegistrations.workshop': registration.workshop },
-    { 
-      $set: { 
+    {
+      $set: {
         'workshopRegistrations.$.certificate': req.file.location
-      } 
+      }
     }
   );
 
@@ -425,10 +425,10 @@ const deleteCertificate = asyncHandler(async (req, res) => {
 
   await User.updateOne(
     { _id: registration.user, 'workshopRegistrations.workshop': registration.workshop },
-    { 
-      $set: { 
+    {
+      $set: {
         'workshopRegistrations.$.certificate': null
-      } 
+      }
     }
   );
 

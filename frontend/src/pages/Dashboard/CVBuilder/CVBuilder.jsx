@@ -70,7 +70,7 @@ const initialCVData = {
     step2ckScore: '',
     ecfmgCertified: false
   },
-  usClinicalExperience: {  
+  usClinicalExperience: {
     list: []
   },
   clinicalExperiences: [],
@@ -108,7 +108,7 @@ const CVBuilder = ({ onPreview, user, onStepChange, currentStep, onStepComplete 
   const [loading, setLoading] = useState(true);
   const [completedSteps, setCompletedSteps] = useState([]);
   const [showSaveModal, setShowSaveModal] = useState(false);
-  
+
   const totalSteps = 11;
   const activeStep = currentStep || internalCurrentStep;
 
@@ -117,7 +117,7 @@ const CVBuilder = ({ onPreview, user, onStepChange, currentStep, onStepComplete 
 
   const validateCurrentStep = useCallback(() => {
     const missingFields = [];
-    
+
     switch (activeStep) {
       case 1:
         if (!formData.basicDetails?.fullName?.trim()) missingFields.push('Full Name');
@@ -125,7 +125,7 @@ const CVBuilder = ({ onPreview, user, onStepChange, currentStep, onStepComplete 
         if (!formData.basicDetails?.phone?.trim()) missingFields.push('Phone');
         if (!formData.basicDetails?.city?.trim()) missingFields.push('City');
         break;
-        
+
       case 2:
         if (!formData.education?.schooling?.schoolName?.trim()) missingFields.push('School Name');
         if (!formData.education?.schooling?.board?.trim()) missingFields.push('Board');
@@ -133,14 +133,14 @@ const CVBuilder = ({ onPreview, user, onStepChange, currentStep, onStepComplete 
         if (!formData.education?.schooling?.state?.trim()) missingFields.push('Schooling State');
         if (!formData.education?.schooling?.startYear) missingFields.push('Schooling Start Year');
         if (!formData.education?.schooling?.endYear) missingFields.push('Schooling End Year');
-        
+
         if (!formData.education?.college?.collegeName?.trim()) missingFields.push('College Name');
         if (!formData.education?.college?.stream?.trim()) missingFields.push('Stream');
         if (!formData.education?.college?.city?.trim()) missingFields.push('College City');
         if (!formData.education?.college?.state?.trim()) missingFields.push('College State');
         if (!formData.education?.college?.startYear) missingFields.push('College Start Year');
         if (!formData.education?.college?.endYear) missingFields.push('College End Year');
-        
+
         if (!formData.education?.graduation?.universityName?.trim()) missingFields.push('University Name');
         if (!formData.education?.graduation?.degree?.trim()) missingFields.push('Degree');
         if (!formData.education?.graduation?.city?.trim()) missingFields.push('Graduation City');
@@ -149,20 +149,20 @@ const CVBuilder = ({ onPreview, user, onStepChange, currentStep, onStepComplete 
         if (!formData.education?.graduation?.startDate?.trim()) missingFields.push('Graduation Start Date');
         if (!formData.education?.graduation?.endDate?.trim()) missingFields.push('Graduation End Date');
         break;
-        
+
       case 3:
         if (!formData.usmleScores?.step1Status) missingFields.push('USMLE Step 1 Status');
         break;
-        
-        
+
+
       case 5:
         if (!formData.skills?.skillsList?.trim()) missingFields.push('Skills List');
         break;
-        
+
       default:
         break;
     }
-    
+
     return missingFields;
   }, [activeStep, formData]);
 
@@ -180,7 +180,7 @@ const CVBuilder = ({ onPreview, user, onStepChange, currentStep, onStepComplete 
       { condition: data.workshops?.length > 0, step: 10 },
       { condition: true, step: 11 }
     ];
-    
+
     return checks.filter(({ condition }) => condition).map(({ step }) => step);
   }, []);
 
@@ -190,7 +190,7 @@ const CVBuilder = ({ onPreview, user, onStepChange, currentStep, onStepComplete 
 
   const checkExistingCV = useCallback(async () => {
     const userId = getUserId();
-    
+
     if (!userId) {
       console.warn('No user ID found, skipping CV load');
       setLoading(false);
@@ -236,21 +236,21 @@ const CVBuilder = ({ onPreview, user, onStepChange, currentStep, onStepComplete 
 
   const handleSaveProgress = () => {
     const missingFields = validateCurrentStep();
-    
+
     if (missingFields.length > 0) {
       const fieldsList = missingFields.slice(0, 5).join(', ');
       const remainingCount = missingFields.length - 5;
-      const message = remainingCount > 0 
+      const message = remainingCount > 0
         ? `${fieldsList} and ${remainingCount} more field${remainingCount > 1 ? 's' : ''}`
         : fieldsList;
-      
+
       toast.error(`Please fill in the following required fields: ${message}`, {
         autoClose: 5000,
         position: 'top-right'
       });
       return;
     }
-    
+
     setShowSaveModal(true);
   };
 
@@ -317,21 +317,21 @@ const CVBuilder = ({ onPreview, user, onStepChange, currentStep, onStepComplete 
 
   const handleNext = useCallback(() => {
     const missingFields = validateCurrentStep();
-    
+
     if (missingFields.length > 0 && activeStep <= 5) {
       const fieldsList = missingFields.slice(0, 5).join(', ');
       const remainingCount = missingFields.length - 5;
-      const message = remainingCount > 0 
+      const message = remainingCount > 0
         ? `${fieldsList} and ${remainingCount} more field${remainingCount > 1 ? 's' : ''}`
         : fieldsList;
-      
+
       toast.warning(`Please fill in the following required fields: ${message}`, {
         autoClose: 5000,
         position: 'top-right'
       });
       return;
     }
-    
+
     handleStepChange(Math.min(totalSteps, activeStep + 1));
   }, [totalSteps, activeStep, handleStepChange, validateCurrentStep]);
 
@@ -341,26 +341,22 @@ const CVBuilder = ({ onPreview, user, onStepChange, currentStep, onStepComplete 
 
   const handleSave = useCallback(async () => {
     const userId = getUserId();
-    
-    console.log('=== DEBUG INFO ===');
-    console.log('User ID:', userId);
-    console.log('User object:', user);
-    console.log('LocalStorage userId:', localStorage.getItem('userId'));
-    
+
+
     if (!userId) {
       toast.error('User not authenticated. Please login again.');
       return;
     }
-    
+
     try {
-      const saveData = { 
-        ...formData, 
-        userId: userId 
+      const saveData = {
+        ...formData,
+        userId: userId
       };
 
-      
+
       const response = await api.post('/cv/save', saveData);
-      
+
       if (response.data.success) {
         toast.success("CV Saved Successfully");
       } else {
@@ -369,7 +365,7 @@ const CVBuilder = ({ onPreview, user, onStepChange, currentStep, onStepComplete 
     } catch (error) {
       console.error('Save error:', error);
       console.error('Error response:', error.response);
-      
+
       if (error.response?.status === 401) {
         toast.error('Session expired. Please login again.');
       } else {
@@ -408,7 +404,7 @@ const CVBuilder = ({ onPreview, user, onStepChange, currentStep, onStepComplete 
   return (
     <div className="bg-white rounded-xl shadow-lg p-4 sm:p-6 md:p-8 mx-auto max-w-full lg:max-w-6xl">
       <ProgressBar currentStep={activeStep} totalSteps={totalSteps} />
-      
+
       <StepContent
         currentStep={activeStep}
         formData={formData}
@@ -417,7 +413,7 @@ const CVBuilder = ({ onPreview, user, onStepChange, currentStep, onStepComplete 
         onArrayRemove={handleArrayRemove}
         onArrayUpdate={handleArrayUpdate}
       />
-      
+
       <NavigationControls
         currentStep={activeStep}
         totalSteps={totalSteps}
@@ -427,7 +423,7 @@ const CVBuilder = ({ onPreview, user, onStepChange, currentStep, onStepComplete 
         onPreview={handlePreview}
         completedSteps={completedSteps}
       />
-      
+
       <SaveProgressModal
         open={showSaveModal}
         onConfirm={confirmSaveProgress}

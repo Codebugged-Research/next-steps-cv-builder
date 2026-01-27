@@ -33,9 +33,18 @@ const workshopRegistrationSchema = new mongoose.Schema({
   rejectedBy: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'User'
+  },
+  certificate: {
+    url: String,
+    key: String,
+    uploadedAt: Date,
+    uploadedBy: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'User'
+    }
   }
-}, { 
-  timestamps: true 
+}, {
+  timestamps: true
 });
 
 workshopRegistrationSchema.index({ workshop: 1, user: 1 }, { unique: true });

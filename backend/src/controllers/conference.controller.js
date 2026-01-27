@@ -22,7 +22,7 @@ export const getAllConferences = async (req, res) => {
     try {
         const { category, isActive = true } = req.query;
         const filter = { isActive };
-        
+
         if (category) {
             filter.category = category;
         }
@@ -46,7 +46,7 @@ export const getAllConferences = async (req, res) => {
 export const getConferenceById = async (req, res) => {
     try {
         const conference = await Conference.findById(req.params.id);
-        
+
         if (!conference) {
             return res.status(404).json({
                 success: false,
@@ -234,9 +234,9 @@ export const getUserRegistrations = async (req, res) => {
     try {
         const userId = req.user._id;
 
-        const registrations = await ConferenceRegistration.find({ 
+        const registrations = await ConferenceRegistration.find({
             user: userId,
-            status: 'registered'
+            status: { $in: ['registered', 'attended'] }
         })
             .sort({ registeredAt: -1 });
 
@@ -289,6 +289,99 @@ export const cancelRegistration = async (req, res) => {
             success: false,
             message: 'Failed to cancel registration',
             error: error.message
+        });
+    }
+};
+
+export const getPendingRegistrations = async (req, res) => {
+    try {
+        const registrations = await ConferenceRegistration.find({ status: { $in: ['pending', 'registered', 'attended'] } })
+            .populate('user', 'firstName lastName email fullName')
+            .populate('conference', 'name location dates month modality')
+            .sort({ registeredAt: -1 });
+
+        res.status(200).json({
+            success: true,
+            data: registrations
+        });
+    } catch (error) {
+        res.status(500).json({
+            success: false,
+            message: error.message
+        });
+    }
+};
+
+export const updateRegistrationStatus = async (req, res) => {
+    try {
+        const { registrationId } = req.params;
+        const { status } = req.body;
+
+        const registration = await ConferenceRegistration.findByIdAndUpdate(
+            registrationId,
+            { status },
+            { new: true }
+        );
+
+        if (!registration) {
+            return res.status(404).json({
+                success: false,
+                message: "Registration not found"
+            });
+        }
+
+        res.status(200).json({
+            success: true,
+            data: registration,
+            message: `Registration status updated to ${status}`
+        });
+    } catch (error) {
+        res.status(500).json({
+            success: false,
+            message: error.message
+        });
+    }
+};
+
+export const uploadCertificate = async (req, res) => {
+    try {
+        const { registrationId } = req.params;
+        const adminId = req.user._id;
+
+        if (!req.file) {
+            return res.status(400).json({
+                success: false,
+                message: "Certificate file is required"
+            });
+        }
+
+        const registration = await ConferenceRegistration.findById(registrationId);
+        if (!registration) {
+            return res.status(404).json({
+                success: false,
+                message: "Registration not found"
+            });
+        }
+
+        registration.certificate = {
+            url: req.file.location,
+            key: req.file.key,
+            uploadedAt: new Date(),
+            uploadedBy: adminId
+        };
+        registration.status = 'attended'; // Auto mark as attended if certificate is uploaded
+
+        await registration.save();
+
+        res.status(200).json({
+            success: true,
+            data: registration,
+            message: "Certificate uploaded successfully"
+        });
+    } catch (error) {
+        res.status(500).json({
+            success: false,
+            message: error.message
         });
     }
 };

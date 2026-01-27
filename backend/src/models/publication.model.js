@@ -25,7 +25,18 @@ const projectSchema = new mongoose.Schema({
       type: mongoose.Schema.Types.ObjectId,
       ref: 'User'
     }
-  }]
+  }],
+  file: {
+    url: String,
+    key: String,
+    fileName: String,
+    fileSize: Number,
+    mimeType: String,
+    uploadedAt: {
+      type: Date,
+      default: Date.now
+    }
+  }
 }, { _id: true });
 
 const publicationSchema = new mongoose.Schema({
@@ -76,8 +87,8 @@ const publicationSchema = new mongoose.Schema({
     enum: ['active', 'completed', 'cancelled'],
     default: 'active'
   }
-}, { 
-  timestamps: true 
+}, {
+  timestamps: true
 });
 
 publicationSchema.index({ user: 1 });
@@ -85,7 +96,7 @@ publicationSchema.index({ userEmail: 1 });
 publicationSchema.index({ status: 1 });
 publicationSchema.index({ 'projects.stage': 1 });
 
-publicationSchema.pre('save', function(next) {
+publicationSchema.pre('save', function (next) {
   if (this.projects.length !== this.numberOfProjects) {
     next(new Error('Number of projects must match the numberOfProjects field'));
   }

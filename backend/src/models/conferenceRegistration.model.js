@@ -65,8 +65,17 @@ const conferenceRegistrationSchema = new mongoose.Schema({
     },
     status: {
         type: String,
-        enum: ['registered', 'cancelled', 'attended'],
+        enum: ['pending', 'registered', 'cancelled', 'attended'],
         default: 'pending'
+    },
+    certificate: {
+        url: String,
+        key: String,
+        uploadedAt: Date,
+        uploadedBy: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'User'
+        }
     }
 }, {
     timestamps: true

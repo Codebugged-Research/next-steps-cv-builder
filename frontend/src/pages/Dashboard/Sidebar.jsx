@@ -1,30 +1,30 @@
 import React, { useState, useEffect } from 'react';
-import { User, FileText, Heart, ArrowRight, CheckCircle, ChevronDown, ChevronRight, Eye, Menu, X } from 'lucide-react';
+import { User, FileText, Heart, ArrowRight, CheckCircle, ChevronDown, ChevronRight, Eye, Menu, X, Award } from 'lucide-react';
 import NavigationItem from './NavigationItem';
 import CVStrengtheningSection from './CVStrengtheningSection';
 import useHasCV from '../../hooks/useHasCV';
 
-const Sidebar = ({ 
-  activeSection, 
-  onSectionChange, 
-  user, 
-  currentStep, 
-  onStepChange, 
-  completedSteps = [] 
+const Sidebar = ({
+  activeSection,
+  onSectionChange,
+  user,
+  currentStep,
+  onStepChange,
+  completedSteps = []
 }) => {
   const [showCVSteps, setShowCVSteps] = useState(false);
   const [showPrograms, setShowPrograms] = useState(
     ['systematic-reviews', 'case-reports', 'conferences', 'workshops', 'emr-training'].includes(activeSection)
   );
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  
+
   const { hasCV, loading } = useHasCV();
 
   const mainNavigationItems = [
     { id: 'cv-builder', label: 'CV Builder', icon: FileText },
     ...(hasCV ? [{ id: 'cv-status', label: 'View CV', icon: Eye }] : []),
   ];
-  
+
   const cvSteps = [
     { id: 1, label: 'Basic Details', shortLabel: 'Basic Details' },
     { id: 2, label: 'Education', shortLabel: 'Education' },
@@ -41,7 +41,7 @@ const Sidebar = ({
 
   const handleCVBuilderClick = () => {
     onSectionChange('cv-builder');
-    setShowCVSteps(!showCVSteps); 
+    setShowCVSteps(!showCVSteps);
     setShowPrograms(false);
   };
 
@@ -120,90 +120,105 @@ const Sidebar = ({
       </div>
 
       <nav className="space-y-2 overflow-y-auto max-h-[calc(100vh-180px)] lg:max-h-none">
-        {mainNavigationItems.map((item) => {
-          if (item.id === 'cv-builder') {
-            return (
-              <div key={item.id}>
-                <button
-                  onClick={handleCVBuilderClick}
-                  className={`w-full flex items-center gap-3 px-3 sm:px-4 py-2.5 sm:py-3 rounded-lg text-left transition-all duration-200 group ${
-                    activeSection === item.id
-                      ? 'bg-[#04445E] text-white shadow-sm'
-                      : 'text-gray-700 hover:bg-gray-50'
-                  }`}
-                >
-                  <item.icon className={`h-4 w-4 sm:h-5 sm:w-5 flex-shrink-0 ${
-                    activeSection === item.id ? 'text-white' : 'text-gray-500'
-                  }`} />
-                  <span className="font-medium flex-1 text-sm sm:text-base">{item.label}</span>
-                  {showCVSteps ? (
-                    <ChevronDown className={`h-4 w-4 flex-shrink-0 transition-transform ${
-                      activeSection === item.id ? 'text-white' : 'text-gray-400'
-                    }`} />
-                  ) : (
-                    <ChevronRight className={`h-4 w-4 flex-shrink-0 transition-transform ${
-                      activeSection === item.id ? 'text-white' : 'text-gray-400'
-                    }`} />
-                  )}
-                </button>
-
-                {showCVSteps && (
-                  <div className="mt-2 ml-3 sm:ml-4 space-y-1 border-l-2 border-gray-100 pl-3 sm:pl-4">
-                    {cvSteps.map((step) => {
-                      const isActive = currentStep === step.id && activeSection === 'cv-builder';
-                      const isCompleted = completedSteps.includes(step.id);
-                      return (
-                        <button
-                          key={step.id}
-                          onClick={() => handleStepClick(step.id)}
-                          className={`w-full flex items-center gap-2 sm:gap-3 px-2 sm:px-3 py-2 rounded-lg text-left text-xs sm:text-sm transition-all duration-200 ${
-                            isActive
-                              ? 'bg-[#169AB4] text-white shadow-sm'
-                              : isCompleted
-                              ? 'bg-green-50 text-green-700 hover:bg-green-100'
-                              : 'text-gray-600 hover:bg-gray-50'
-                          }`}
-                        >
-                          <div className="flex items-center justify-center w-4 h-4 sm:w-5 sm:h-5 rounded-full flex-shrink-0">
-                            {isCompleted ? (
-                              <CheckCircle className="h-3 w-3 sm:h-4 sm:w-4 text-green-600" />
-                            ) : (
-                              <span className={`text-xs font-medium ${
-                                isActive ? 'text-white' : 'text-gray-500'
-                              }`}>
-                                {step.id}
-                              </span>
-                            )}
-                          </div>
-                          <span className="truncate">{step.shortLabel}</span>
-                          {isActive && (
-                            <ArrowRight className="h-3 w-3 text-white ml-auto flex-shrink-0" />
-                          )}
-                        </button>
-                      );
-                    })}
-                  </div>
-                )}
-              </div>
-            );
-          }
-          return (
+        {user?.role === 'admin' ? (
+          <div className="space-y-4">
             <NavigationItem
-              key={item.id}
-              {...item}
-              isActive={activeSection === item.id}
-              onClick={() => handleNavigationClick(item.id)}
-              color={item.color}
+              id="admin-publications"
+              label="Publications Management"
+              icon={FileText}
+              isActive={activeSection === 'admin-publications'}
+              onClick={() => handleNavigationClick('admin-publications')}
             />
-          );
-        })}
-        
-        <CVStrengtheningSection
-          activeSection={activeSection}
-          onSectionChange={handleProgramSectionChange}
-          showPrograms={showPrograms}
-          onTogglePrograms={handleTogglePrograms}
-        />
+            <NavigationItem
+              id="admin-registrations"
+              label="Registrations & Certificates"
+              icon={Award}
+              isActive={activeSection === 'admin-registrations'}
+              onClick={() => handleNavigationClick('admin-registrations')}
+            />
+          </div>
+        ) : (
+          <>
+            {mainNavigationItems.map((item) => {
+              if (item.id === 'cv-builder') {
+                return (
+                  <div key={item.id}>
+                    <button
+                      onClick={handleCVBuilderClick}
+                      className={`w-full flex items-center gap-3 px-3 sm:px-4 py-2.5 sm:py-3 rounded-lg text-left transition-all duration-200 group ${activeSection === item.id
+                        ? 'bg-[#04445E] text-white shadow-sm'
+                        : 'text-gray-700 hover:bg-gray-50'
+                        }`}
+                    >
+                      <item.icon className={`h-4 w-4 sm:h-5 sm:w-5 flex-shrink-0 ${activeSection === item.id ? 'text-white' : 'text-gray-50'
+                        }`} />
+                      <span className="font-medium flex-1 text-sm sm:text-base">{item.label}</span>
+                      {showCVSteps ? (
+                        <ChevronDown className={`h-4 w-4 flex-shrink-0 transition-transform ${activeSection === item.id ? 'text-white' : 'text-gray-400'
+                          }`} />
+                      ) : (
+                        <ChevronRight className={`h-4 w-4 flex-shrink-0 transition-transform ${activeSection === item.id ? 'text-white' : 'text-gray-400'
+                          }`} />
+                      )}
+                    </button>
+
+                    {showCVSteps && (
+                      <div className="mt-2 ml-3 sm:ml-4 space-y-1 border-l-2 border-gray-100 pl-3 sm:pl-4">
+                        {cvSteps.map((step) => {
+                          const isActive = currentStep === step.id && activeSection === 'cv-builder';
+                          const isCompleted = completedSteps.includes(step.id);
+                          return (
+                            <button
+                              key={step.id}
+                              onClick={() => handleStepClick(step.id)}
+                              className={`w-full flex items-center gap-2 sm:gap-3 px-2 sm:px-3 py-2 rounded-lg text-left text-xs sm:text-sm transition-all duration-200 ${isActive
+                                ? 'bg-[#169AB4] text-white shadow-sm'
+                                : isCompleted
+                                  ? 'bg-green-50 text-green-700 hover:bg-green-100'
+                                  : 'text-gray-600 hover:bg-gray-50'
+                                }`}
+                            >
+                              <div className="flex items-center justify-center w-4 h-4 sm:w-5 sm:h-5 rounded-full flex-shrink-0">
+                                {isCompleted ? (
+                                  <CheckCircle className="h-3 w-3 sm:h-4 sm:w-4 text-green-600" />
+                                ) : (
+                                  <span className={`text-xs font-medium ${isActive ? 'text-white' : 'text-gray-500'
+                                    }`}>
+                                    {step.id}
+                                  </span>
+                                )}
+                              </div>
+                              <span className="truncate">{step.shortLabel}</span>
+                              {isActive && (
+                                <ArrowRight className="h-3 w-3 text-white ml-auto flex-shrink-0" />
+                              )}
+                            </button>
+                          );
+                        })}
+                      </div>
+                    )}
+                  </div>
+                );
+              }
+              return (
+                <NavigationItem
+                  key={item.id}
+                  {...item}
+                  isActive={activeSection === item.id}
+                  onClick={() => handleNavigationClick(item.id)}
+                  color={item.color}
+                />
+              );
+            })}
+
+            <CVStrengtheningSection
+              activeSection={activeSection}
+              onSectionChange={handleProgramSectionChange}
+              showPrograms={showPrograms}
+              onTogglePrograms={handleTogglePrograms}
+            />
+          </>
+        )}
       </nav>
     </>
   );

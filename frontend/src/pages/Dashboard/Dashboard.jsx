@@ -6,14 +6,16 @@ import MainContentRouter from '../../components/MainRouterComponent/MainRouterCo
 
 const DashboardLayout = ({ user, onLogout }) => {
   const [activeSection, setActiveSection] = useState(() => {
-    return localStorage.getItem('activeSection') || 'cv-builder';
+    const saved = localStorage.getItem('activeSection');
+    if (saved) return saved;
+    return user?.role === 'admin' ? 'admin-publications' : 'cv-builder';
   });
-  
+
   const [currentCVStep, setCurrentCVStep] = useState(() => {
     const saved = localStorage.getItem('currentCVStep');
     return saved ? parseInt(saved, 10) : 1;
   });
-  
+
   const [completedSteps, setCompletedSteps] = useState(() => {
     const saved = localStorage.getItem('completedSteps');
     return saved ? JSON.parse(saved) : [];
@@ -61,7 +63,7 @@ const DashboardLayout = ({ user, onLogout }) => {
             onStepChange={activeSection === 'cv-builder' ? handleCVStepChange : null}
             completedSteps={activeSection === 'cv-builder' ? completedSteps : []}
           />
-          
+
           <MainContentRouter
             activeSection={activeSection}
             onSectionChange={handleSectionChange}

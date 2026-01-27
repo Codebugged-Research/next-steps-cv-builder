@@ -7,7 +7,6 @@ import { asyncHandler } from '../utils/asyncHandler.js';
 
 const registerForTraining = asyncHandler(async (req, res) => {
   const { month, sessionTime, year } = req.body;
-  console.log(month, sessionTime, year);
   const userId = req.user._id;
 
   if (!month) {
@@ -306,7 +305,7 @@ const markAsCompleted = asyncHandler(async (req, res) => {
 
 const getPendingRegistrations = asyncHandler(async (req, res) => {
   const registrations = await EmrTrainingRegistration
-    .find({ status: 'pending' })
+    .find({ status: { $in: ['pending', 'confirmed', 'completed'] } })
     .populate('user', 'firstName lastName email fullName phone medicalSchool')
     .sort({ registeredAt: -1 })
     .lean();

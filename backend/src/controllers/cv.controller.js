@@ -41,31 +41,31 @@ const getCV = asyncHandler(async (req, res) => {
 
 const uploadGovCV = asyncHandler(async (req, res) => {
     const userId = req.user._id;
-    
+
     if (!req.file) {
         throw new ApiError(400, "Government CV file is required");
     }
-    
+
     if (!req.file.gridfsId) {
         throw new ApiError(500, "File upload to GridFS failed");
     }
-    
+
     const govCVData = {
         userId: userId,
         originalName: req.file.originalname,
         filename: req.file.gridfsFilename,
-        fileId: req.file.gridfsId, 
+        fileId: req.file.gridfsId,
         size: req.file.size,
         uploadDate: new Date(),
         type: 'government',
         status: 'pending'
     };
-    
+
     const existingGovCV = await CV.findOne({
         userId,
         'govCV.type': 'government'
     });
-    
+
     if (existingGovCV) {
         const updatedCV = await CV.findOneAndUpdate(
             { userId },
@@ -80,7 +80,7 @@ const uploadGovCV = asyncHandler(async (req, res) => {
         return res.status(200).json(new ApiResponse(200, updatedCV, "Government CV uploaded successfully"));
     } else {
         const existingCV = await CV.findOne({ userId });
-        
+
         if (existingCV) {
             const updatedCV = await CV.findOneAndUpdate(
                 { userId },
@@ -106,28 +106,26 @@ const uploadGovCV = asyncHandler(async (req, res) => {
 const downloadCVPDF = async (req, res) => {
     try {
         const userId = req.params.userId || req.user._id;
-        
-        console.log('==========================================');
-        console.log('Downloading CV for userId:', userId);
-        
+
+
         // FIX: Use 'userId' instead of 'user'
         const cvData = await CV.findOne({ userId: userId });
-        
+
         if (!cvData) {
-     
+
             return res.status(404).json({
                 success: false,
                 message: 'CV not found for this user'
             });
         }
-        
 
-        
+
+
 
         const pdfBuffer = await generateCVPDF(cvData);
-        
-  
-        
+
+
+
         // Check if basicDetails exists
         if (!cvData.basicDetails || !cvData.basicDetails.fullName) {
 
@@ -136,20 +134,20 @@ const downloadCVPDF = async (req, res) => {
                 message: 'CV is missing basic details'
             });
         }
-        
+
         const filename = `${cvData.basicDetails.fullName.replace(/\s+/g, '_')}_CV.pdf`;
-        
+
         res.setHeader('Content-Type', 'application/pdf');
         res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
         res.setHeader('Content-Length', pdfBuffer.length);
-        
+
         res.send(pdfBuffer);
-        
+
     } catch (error) {
         console.error('❌ Download CV Error Details:', error.message);
         console.error('Error stack:', error.stack);
         console.error('==========================================');
-        
+
         if (!res.headersSent) {
             res.status(500).json({
                 success: false,

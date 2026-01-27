@@ -20,16 +20,16 @@ const generateAccessAndRefreshTokens = async (userId) => {
 
 const registerUser = asyncHandler(async (req, res) => {
     const { email, password, fullName, phone, medicalSchool, graduationYear } = req.body;
-    
+
     if (!email || !password || !fullName || !phone || !medicalSchool || !graduationYear) {
         throw new ApiError(400, 'All fields are required');
     }
-    
+
     const existingUser = await User.findOne({ email });
     if (existingUser) {
         throw new ApiError(409, "User with this email already exists");
     }
-    
+
     const user = await User.create({
         email,
         password,
@@ -38,19 +38,19 @@ const registerUser = asyncHandler(async (req, res) => {
         medicalSchool,
         graduationYear
     });
-    
+
     const { accessToken, refreshToken } = await generateAccessAndRefreshTokens(user._id);
     const createdUser = await User.findById(user._id).select("-password -refreshToken");
-    
+
     if (!createdUser) {
         throw new ApiError(500, "Something went wrong while creating user");
     }
-    
+
     const options = {
         httpOnly: true,
         secure: process.env.NODE_ENV === 'production'
     };
-    
+
     return res
         .status(201)
         .cookie("accessToken", accessToken, options)
@@ -94,22 +94,22 @@ const loginUser = asyncHandler(async (req, res) => {
 
 });
 
-const getCurrentUser = asyncHandler(async(req, res) => {
+const getCurrentUser = asyncHandler(async (req, res) => {
     return res
-    .status(200)
-    .json(new ApiResponse(
-        200,
-        req.user,
-        "User fetched successfully"
-    ))
+        .status(200)
+        .json(new ApiResponse(
+            200,
+            req.user,
+            "User fetched successfully"
+        ))
 })
 
-const logoutUser = asyncHandler(async(req, res) => {
+const logoutUser = asyncHandler(async (req, res) => {
     await User.findByIdAndUpdate(
         req.user._id,
         {
             $unset: {
-                refreshToken: 1 
+                refreshToken: 1
             }
         },
         {
@@ -123,10 +123,10 @@ const logoutUser = asyncHandler(async(req, res) => {
     }
 
     return res
-    .status(200)
-    .clearCookie("accessToken", options)
-    .clearCookie("refreshToken", options)
-    .json(new ApiResponse(200, {}, "User logged Out"))
+        .status(200)
+        .clearCookie("accessToken", options)
+        .clearCookie("refreshToken", options)
+        .json(new ApiResponse(200, {}, "User logged Out"))
 })
 
 const acceptHIPAAagreement = asyncHandler(async (req, res) => {
@@ -162,7 +162,7 @@ const acceptHIPAAagreement = asyncHandler(async (req, res) => {
 
 const getHIPAAstatus = asyncHandler(async (req, res) => {
     const user = await User.findById(req.user._id);
-    
+
     if (!user) {
         throw new ApiError(404, "User not found");
     }
@@ -180,4 +180,11 @@ const getHIPAAstatus = asyncHandler(async (req, res) => {
         ));
 });
 
-export { loginUser , getCurrentUser , registerUser , logoutUser , acceptHIPAAagreement , getHIPAAstatus };
+const getAllUsers = asyncHandler(async (req, res) => {
+    const users = await User.find({ role: 'student' }).select('-password -refreshToken');
+    return res.status(200).json(
+        new ApiResponse(200, users, "Users fetched successfully")
+    );
+});
+
+export { loginUser, getCurrentUser, registerUser, logoutUser, acceptHIPAAagreement, getHIPAAstatus, getAllUsers };

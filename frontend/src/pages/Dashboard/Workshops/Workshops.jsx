@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Calendar, Users, MapPin, CheckCircle, Loader, BookOpen, X, RefreshCw, AlertCircle } from 'lucide-react';
+import { Calendar, Users, MapPin, CheckCircle, Loader, BookOpen, X, RefreshCw, AlertCircle, Download } from 'lucide-react';
 import api from '../../../services/api.js';
 import { toast } from 'react-toastify';
 import ProjectHeader from '../../../components/Common/ProjectHeader';
@@ -37,14 +37,14 @@ const WorkshopsComponent = () => {
       const response = await api.get('/workshops');
       if (response.data.success) {
         const allWorkshops = response.data.data;
-        
+
         const monthsMap = new Map();
         allWorkshops.forEach(workshop => {
           const date = new Date(workshop.date);
           const month = date.toLocaleDateString('en-US', { month: 'long' });
           const year = date.getFullYear();
           const key = `${month}-${year}`;
-          
+
           if (!monthsMap.has(key)) {
             monthsMap.set(key, { month, year, date: workshop.date });
           }
@@ -197,7 +197,7 @@ const WorkshopsComponent = () => {
     };
     const badge = badges[status] || badges.pending;
     const Icon = badge.icon;
-    
+
     return (
       <span className={`inline-block px-3 py-1 rounded-full text-xs font-medium ${badge.bg} ${badge.text}`}>
         <Icon className="h-3 w-3 inline mr-1" />
@@ -226,11 +226,10 @@ const WorkshopsComponent = () => {
             <button
               onClick={handleRefresh}
               disabled={refreshing}
-              className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-all ${
-                refreshing
-                  ? 'bg-gray-300 cursor-not-allowed text-gray-500'
-                  : 'bg-[#169AB4] hover:bg-[#147a8f] text-white shadow-md hover:shadow-lg'
-              }`}
+              className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-all ${refreshing
+                ? 'bg-gray-300 cursor-not-allowed text-gray-500'
+                : 'bg-[#169AB4] hover:bg-[#147a8f] text-white shadow-md hover:shadow-lg'
+                }`}
             >
               <RefreshCw className={`h-4 w-4 ${refreshing ? 'animate-spin' : ''}`} />
               <span className="font-medium">{refreshing ? 'Refreshing...' : 'Refresh'}</span>
@@ -241,21 +240,19 @@ const WorkshopsComponent = () => {
         <div className="flex border-b border-gray-200 mb-8 mt-4">
           <button
             onClick={() => setActiveTab('available')}
-            className={`px-6 py-3 font-medium border-b-2 transition-colors ${
-              activeTab === 'available'
-                ? 'border-[#169AB4] text-[#169AB4]'
-                : 'border-transparent text-gray-500 hover:text-gray-700'
-            }`}
+            className={`px-6 py-3 font-medium border-b-2 transition-colors ${activeTab === 'available'
+              ? 'border-[#169AB4] text-[#169AB4]'
+              : 'border-transparent text-gray-500 hover:text-gray-700'
+              }`}
           >
             Available Workshops
           </button>
           <button
             onClick={() => setActiveTab('registrations')}
-            className={`px-6 py-3 font-medium border-b-2 transition-colors ${
-              activeTab === 'registrations'
-                ? 'border-[#169AB4] text-[#169AB4]'
-                : 'border-transparent text-gray-500 hover:text-gray-700'
-            }`}
+            className={`px-6 py-3 font-medium border-b-2 transition-colors ${activeTab === 'registrations'
+              ? 'border-[#169AB4] text-[#169AB4]'
+              : 'border-transparent text-gray-500 hover:text-gray-700'
+              }`}
           >
             My Registration ({userRegistrations.length})
           </button>
@@ -273,7 +270,7 @@ const WorkshopsComponent = () => {
 
             <div className="mb-8">
               <h2 className="text-xl font-semibold text-[#04445E] mb-4">Select Training Month</h2>
-              
+
               {loadingMonths ? (
                 <div className="flex justify-center items-center py-8">
                   <Loader className="h-8 w-8 animate-spin text-[#169AB4]" />
@@ -285,11 +282,10 @@ const WorkshopsComponent = () => {
                     <button
                       key={index}
                       onClick={() => handleMonthSelect(monthData)}
-                      className={`p-4 rounded-lg border-2 transition-all ${
-                        selectedMonth?.month === monthData.month && selectedMonth?.year === monthData.year
-                          ? 'border-[#169AB4] bg-[#169AB4] text-white shadow-lg'
-                          : 'border-gray-200 bg-white text-gray-700 hover:border-[#169AB4] hover:bg-gray-50'
-                      }`}
+                      className={`p-4 rounded-lg border-2 transition-all ${selectedMonth?.month === monthData.month && selectedMonth?.year === monthData.year
+                        ? 'border-[#169AB4] bg-[#169AB4] text-white shadow-lg'
+                        : 'border-gray-200 bg-white text-gray-700 hover:border-[#169AB4] hover:bg-gray-50'
+                        }`}
                     >
                       <div className="text-center">
                         <Calendar className="h-6 w-6 mx-auto mb-2" />
@@ -319,7 +315,7 @@ const WorkshopsComponent = () => {
                     {workshops.map((workshop) => {
                       const registrationStatus = getRegistrationStatus(workshop._id);
                       const isUserRegistered = isRegistered(workshop._id);
-                      
+
                       return (
                         <div key={workshop._id} className="bg-white border border-gray-200 rounded-lg p-6 hover:shadow-lg transition-shadow">
                           <div className="mb-4">
@@ -327,9 +323,8 @@ const WorkshopsComponent = () => {
                               {workshop.title}
                             </h3>
                             <div className="flex gap-2 flex-wrap">
-                              <span className={`inline-block px-3 py-1 rounded-full text-xs font-medium ${
-                                workshop.type === 'BLS' ? 'bg-blue-100 text-blue-800' : 'bg-purple-100 text-purple-800'
-                              }`}>
+                              <span className={`inline-block px-3 py-1 rounded-full text-xs font-medium ${workshop.type === 'BLS' ? 'bg-blue-100 text-blue-800' : 'bg-purple-100 text-purple-800'
+                                }`}>
                                 {workshop.type}
                               </span>
                               {isUserRegistered && getStatusBadge(registrationStatus)}
@@ -444,9 +439,8 @@ const WorkshopsComponent = () => {
                           {workshop.title}
                         </h4>
                         <div className="flex gap-2 flex-wrap">
-                          <span className={`inline-block px-3 py-1 rounded-full text-xs font-medium ${
-                            workshop.type === 'BLS' ? 'bg-blue-100 text-blue-800' : 'bg-purple-100 text-purple-800'
-                          }`}>
+                          <span className={`inline-block px-3 py-1 rounded-full text-xs font-medium ${workshop.type === 'BLS' ? 'bg-blue-100 text-blue-800' : 'bg-purple-100 text-purple-800'
+                            }`}>
                             {workshop.type}
                           </span>
                           {getStatusBadge(registration.status)}
@@ -472,31 +466,28 @@ const WorkshopsComponent = () => {
                       </div>
                     )}
 
-                    {/* {registration.certificate && (
-                      <div className="mb-4 p-4 bg-green-50 border border-green-200 rounded-lg">
-                        <div className="flex items-start gap-3">
-                          <CheckCircle className="h-5 w-5 text-green-600 mt-0.5 flex-shrink-0" />
-                          <div className="flex-1">
-                            <p className="text-green-800 font-semibold mb-2">
-                              🎉 Your Certificate is Ready!
-                            </p>
-                            <p className="text-green-700 text-sm mb-3">
-                              Congratulations on completing the workshop. Download your certificate below.
-                            </p>
-                            <a
-                              href={registration.certificate}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              download
-                              className="inline-flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors text-sm font-medium"
-                            >
-                              <BookOpen className="h-4 w-4" />
-                              Download Certificate
-                            </a>
+                    {registration.certificate?.url && (
+                      <div className="mb-6 p-5 bg-gradient-to-r from-green-50 to-emerald-50 border border-green-200 rounded-2xl shadow-sm">
+                        <div className="flex flex-col sm:flex-row items-center gap-5">
+                          <div className="w-12 h-12 bg-white rounded-full flex items-center justify-center text-green-600 shadow-sm">
+                            <CheckCircle className="h-7 w-7" />
                           </div>
+                          <div className="flex-1 text-center sm:text-left">
+                            <h5 className="text-green-900 font-bold text-lg">Certificate Awarded!</h5>
+                            <p className="text-green-700 text-sm italic">
+                              You've successfully completed the {workshop.type} Workshop.
+                            </p>
+                          </div>
+                          <button
+                            onClick={() => window.open(registration.certificate.url, '_blank')}
+                            className="w-full sm:w-auto flex items-center justify-center gap-2 px-6 py-3 bg-green-600 text-white rounded-xl hover:bg-green-700 transition-all font-bold shadow-md shadow-green-200 active:scale-95"
+                          >
+                            <Download className="h-5 w-5" />
+                            Download
+                          </button>
                         </div>
                       </div>
-                    )} */}
+                    )}
 
                     <div className="space-y-3 mb-4">
                       <div className="flex items-center gap-2 text-sm text-gray-600">
@@ -519,29 +510,30 @@ const WorkshopsComponent = () => {
                       )}
                     </div>
 
-                    <div className="flex justify-end">
-                      <button
-                        onClick={() => handleCancelClick(registration._id)}
-                        disabled={cancellingId === registration._id}
-                        className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-colors text-sm ${
-                          cancellingId === registration._id
+                    {!registration.certificate?.url && (
+                      <div className="flex justify-end">
+                        <button
+                          onClick={() => handleCancelClick(registration._id)}
+                          disabled={cancellingId === registration._id}
+                          className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-colors text-sm ${cancellingId === registration._id
                             ? 'bg-gray-400 cursor-not-allowed text-white'
                             : 'bg-red-500 text-white hover:bg-red-600'
-                        }`}
-                      >
-                        {cancellingId === registration._id ? (
-                          <>
-                            <Loader className="h-4 w-4 animate-spin" />
-                            Cancelling...
-                          </>
-                        ) : (
-                          <>
-                            <X className="h-4 w-4" />
-                            Cancel Registration
-                          </>
-                        )}
-                      </button>
-                    </div>
+                            }`}
+                        >
+                          {cancellingId === registration._id ? (
+                            <>
+                              <Loader className="h-4 w-4 animate-spin" />
+                              Cancelling...
+                            </>
+                          ) : (
+                            <>
+                              <X className="h-4 w-4" />
+                              Cancel Registration
+                            </>
+                          )}
+                        </button>
+                      </div>
+                    )}
                   </div>
                 );
               })

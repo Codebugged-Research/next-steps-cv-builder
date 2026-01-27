@@ -6,12 +6,16 @@ import { ApiResponse } from '../utils/ApiResponse.js';
 import { asyncHandler } from '../utils/asyncHandler.js';
 
 const createPublication = asyncHandler(async (req, res) => {
-  const { userName, userEmail, teamSize, numberOfProjects, projects } = req.body;
-  const userId = req.user._id;
+  const { user: studentId, userName, userEmail, teamSize, numberOfProjects, projects } = req.body;
+  const requesterId = req.user._id;
+  const isAdmin = req.user.role === 'admin';
 
   if (!userName || !userEmail || !teamSize || !numberOfProjects || !projects) {
     throw new ApiError(400, 'All fields are required');
   }
+
+  // If admin, use provided studentId, else use requesterId
+  const targetUserId = isAdmin && studentId ? studentId : requesterId;
 
   if (!Array.isArray(projects) || projects.length !== numberOfProjects) {
     throw new ApiError(400, `Projects array must contain exactly ${numberOfProjects} projects`);
@@ -28,12 +32,12 @@ const createPublication = asyncHandler(async (req, res) => {
     stageHistory: [{
       stage: project.stage || 1,
       movedAt: new Date(),
-      movedBy: userId
+      movedBy: requesterId
     }]
   }));
 
   const publication = await Publication.create({
-    user: userId,
+    user: targetUserId,
     userName,
     userEmail,
     teamSize,
@@ -261,6 +265,59 @@ const getPublicationsByStage = asyncHandler(async (req, res) => {
   );
 });
 
+const uploadProjectFile = asyncHandler(async (req, res) => {
+  const { id, projectId } = req.params;
+  const adminId = req.user._id;
+
+  if (!req.file) {
+    throw new ApiError(400, 'Project file is required');
+  }
+
+  const publication = await Publication.findById(id);
+
+  if (!publication) {
+    throw new ApiError(404, 'Publication not found');
+  }
+
+  const project = publication.projects.id(projectId);
+
+  if (!project) {
+    throw new ApiError(404, 'Project not found');
+  }
+
+  // Delete old file if exists
+  if (project.file && project.file.key) {
+    try {
+      await s3.deleteObject({
+        Bucket: process.env.S3_BUCKET_NAME,
+        Key: project.file.key
+      }).promise();
+    } catch (error) {
+      console.error('Error deleting old project file:', error);
+    }
+  }
+
+  project.file = {
+    url: req.file.location,
+    key: req.file.key,
+    fileName: req.file.originalname,
+    fileSize: req.file.size,
+    mimeType: req.file.mimetype,
+    uploadedAt: new Date()
+  };
+
+  await publication.save();
+
+  const updatedPublication = await Publication.findById(id)
+    .populate('user', 'firstName lastName email fullName')
+    .populate('projects.stageHistory.movedBy', 'firstName lastName email')
+    .populate('certificate.uploadedBy', 'firstName lastName email');
+
+  return res.status(200).json(
+    new ApiResponse(200, updatedPublication, 'Project file uploaded successfully')
+  );
+});
+
 const uploadCertificate = asyncHandler(async (req, res) => {
   const { id } = req.params;
   const adminId = req.user._id;
@@ -379,6 +436,7 @@ export {
   updateProjectName,
   getPublicationsByStage,
   uploadCertificate,
+  uploadProjectFile,
   deleteCertificate,
   getPublicationStats
 };

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Calendar, Play, Clock, Users, ExternalLink, CheckCircle, X, FileText, Loader, MapPin, AlertCircle, Info } from 'lucide-react';
+import { Calendar, Play, Clock, Users, ExternalLink, CheckCircle, X, FileText, Loader, MapPin, AlertCircle, Info, Download } from 'lucide-react';
 import HipaaAgreementComponent from './HipaaAgreeement';
 import HipaaContent from './HipaaContent';
 import ConfirmationModal from '../../../components/Common/ConfirmationModal';
@@ -94,43 +94,42 @@ const EmrTrainingComponent = () => {
   };
 
   const confirmRegistration = async () => {
-  try {
-    const response = await api.post('/emr-training/register', {
-      month: selectedSession.month,
-      sessionTime: selectedSession.time,
-      year: 2026
+    try {
+      const response = await api.post('/emr-training/register', {
+        month: selectedSession.month,
+        sessionTime: selectedSession.time,
+        year: 2026
 
-    });
-    console.log(selectedSession)
-    
-    if (response.data.success) {
-      toast.success('Registration request submitted successfully! Awaiting admin approval.');
-      await fetchUserRegistrations();
-      setActiveTab('registrations');
-    }
-  } catch (error) {
-    const errorMessage = error.response?.data?.message || 'Registration failed. Please try again.';
-    toast.error(errorMessage);
-    console('Registration error:', error);
-  } finally {
-    setShowRegistrationModal(false);
-    setSelectedSession(null);
-  }
-};
+      });
 
-const handleCancelRegistration = async (registrationId) => {
-  try {
-    const response = await api.delete(`/emr-training/registrations/${registrationId}`);
-    if (response.data.success) {
-      toast.success('Registration cancelled successfully');
-      await fetchUserRegistrations();
+      if (response.data.success) {
+        toast.success('Registration request submitted successfully! Awaiting admin approval.');
+        await fetchUserRegistrations();
+        setActiveTab('registrations');
+      }
+    } catch (error) {
+      const errorMessage = error.response?.data?.message || 'Registration failed. Please try again.';
+      toast.error(errorMessage);
+      console('Registration error:', error);
+    } finally {
+      setShowRegistrationModal(false);
+      setSelectedSession(null);
     }
-  } catch (error) {
-    const errorMessage = error.response?.data?.message || 'Failed to cancel registration';
-    toast.error(errorMessage);
-    console.error('Cancel error:', error);
-  }
-};
+  };
+
+  const handleCancelRegistration = async (registrationId) => {
+    try {
+      const response = await api.delete(`/emr-training/registrations/${registrationId}`);
+      if (response.data.success) {
+        toast.success('Registration cancelled successfully');
+        await fetchUserRegistrations();
+      }
+    } catch (error) {
+      const errorMessage = error.response?.data?.message || 'Failed to cancel registration';
+      toast.error(errorMessage);
+      console.error('Cancel error:', error);
+    }
+  };
 
   const handleShowBookingTab = () => {
     if (!hasAgreedToTerms) {
@@ -168,8 +167,8 @@ const handleCancelRegistration = async (registrationId) => {
 
   const isMonthRegistered = (monthName) => {
     return registrations.some(
-      r => r.month === monthName && 
-      (r.status === 'pending' || r.status === 'confirmed')
+      r => r.month === monthName &&
+        (r.status === 'pending' || r.status === 'confirmed')
     );
   };
 
@@ -187,7 +186,7 @@ const handleCancelRegistration = async (registrationId) => {
           </div>
         </div>
       </div>
-      
+
       <div className="space-y-3 mb-6">
         <div className="flex items-center gap-2 text-sm text-gray-600">
           <Calendar className="h-4 w-4 text-[#169AB4] flex-shrink-0" />
@@ -209,15 +208,36 @@ const handleCancelRegistration = async (registrationId) => {
             day: 'numeric'
           })}</span>
         </div>
-        {registration.rejectionReason && (
-          <div className="flex items-start gap-2 text-sm text-red-600 bg-red-50 p-3 rounded-lg">
-            <AlertCircle className="h-4 w-4 flex-shrink-0 mt-0.5" />
-            <span><strong>Reason:</strong> {registration.rejectionReason}</span>
-          </div>
-        )}
       </div>
-      
-      {registration.status === 'pending' && (
+
+      {registration.certificate?.url && (
+        <div className="mb-6 p-4 bg-gradient-to-r from-green-50 to-emerald-50 border border-green-200 rounded-xl">
+          <div className="flex items-center gap-4">
+            <div className="w-10 h-10 bg-white rounded-full flex items-center justify-center text-green-600 shadow-sm flex-shrink-0">
+              <CheckCircle className="h-6 w-6" />
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="text-green-900 font-bold text-sm">Certificate Ready!</p>
+              <button
+                onClick={() => window.open(registration.certificate.url, '_blank')}
+                className="mt-1 flex items-center gap-1.5 text-[#169AB4] font-bold text-xs hover:underline"
+              >
+                <Download className="h-3.5 w-3.5" />
+                Download Now
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {registration.rejectionReason && (
+        <div className="flex items-start gap-2 text-sm text-red-600 bg-red-50 p-3 rounded-lg">
+          <AlertCircle className="h-4 w-4 flex-shrink-0 mt-0.5" />
+          <span><strong>Reason:</strong> {registration.rejectionReason}</span>
+        </div>
+      )}
+
+      {registration.status === 'pending' && !registration.certificate?.url && (
         <button
           onClick={() => handleCancelRegistration(registration._id)}
           className="w-full flex items-center justify-center gap-2 px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors font-medium"
@@ -226,7 +246,7 @@ const handleCancelRegistration = async (registrationId) => {
           Cancel Registration
         </button>
       )}
-      
+
       {registration.status === 'confirmed' && (
         <div className="bg-green-50 border border-green-200 rounded-lg p-3 text-center">
           <p className="text-sm text-green-800 font-medium">
@@ -246,7 +266,7 @@ const handleCancelRegistration = async (registrationId) => {
           onClose={() => setShowAgreement(false)}
         />
       )}
-      
+
       {showHipaaContent && (
         <HipaaContent onClose={() => setShowHipaaContent(false)} />
       )}
@@ -255,32 +275,29 @@ const handleCancelRegistration = async (registrationId) => {
         <div className="flex overflow-x-auto">
           <button
             onClick={handleShowBookingTab}
-            className={`px-4 sm:px-6 py-3 font-medium border-b-2 transition-colors whitespace-nowrap ${
-              activeTab === 'book'
-                ? 'border-[#169AB4] text-[#169AB4]'
-                : 'border-transparent text-gray-500 hover:text-gray-700'
-            }`}
+            className={`px-4 sm:px-6 py-3 font-medium border-b-2 transition-colors whitespace-nowrap ${activeTab === 'book'
+              ? 'border-[#169AB4] text-[#169AB4]'
+              : 'border-transparent text-gray-500 hover:text-gray-700'
+              }`}
           >
             Book Training
             {!hasAgreedToTerms && <span className="ml-2 text-xs text-red-500">*</span>}
           </button>
           <button
             onClick={() => setActiveTab('recordings')}
-            className={`px-4 sm:px-6 py-3 font-medium border-b-2 transition-colors whitespace-nowrap ${
-              activeTab === 'recordings'
-                ? 'border-[#169AB4] text-[#169AB4]'
-                : 'border-transparent text-gray-500 hover:text-gray-700'
-            }`}
+            className={`px-4 sm:px-6 py-3 font-medium border-b-2 transition-colors whitespace-nowrap ${activeTab === 'recordings'
+              ? 'border-[#169AB4] text-[#169AB4]'
+              : 'border-transparent text-gray-500 hover:text-gray-700'
+              }`}
           >
             Virtual Training
           </button>
           <button
             onClick={() => setActiveTab('registrations')}
-            className={`px-4 sm:px-6 py-3 font-medium border-b-2 transition-colors whitespace-nowrap ${
-              activeTab === 'registrations'
-                ? 'border-[#169AB4] text-[#169AB4]'
-                : 'border-transparent text-gray-500 hover:text-gray-700'
-            }`}
+            className={`px-4 sm:px-6 py-3 font-medium border-b-2 transition-colors whitespace-nowrap ${activeTab === 'registrations'
+              ? 'border-[#169AB4] text-[#169AB4]'
+              : 'border-transparent text-gray-500 hover:text-gray-700'
+              }`}
           >
             <span className="hidden sm:inline">Your Registrations</span>
             <span className="sm:hidden">Registrations</span>
@@ -335,11 +352,10 @@ const handleCancelRegistration = async (registrationId) => {
                     key={month.name}
                     onClick={() => !isRegistered && handleRegisterClick(month.name)}
                     disabled={isRegistered}
-                    className={`px-4 py-6 rounded-lg font-semibold transition-all text-sm sm:text-base ${
-                      isRegistered
-                        ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
-                        : 'bg-white border-2 border-gray-200 hover:border-[#169AB4] hover:bg-[#169AB4] hover:text-white text-gray-700 shadow-sm hover:shadow-md'
-                    }`}
+                    className={`px-4 py-6 rounded-lg font-semibold transition-all text-sm sm:text-base ${isRegistered
+                      ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                      : 'bg-white border-2 border-gray-200 hover:border-[#169AB4] hover:bg-[#169AB4] hover:text-white text-gray-700 shadow-sm hover:shadow-md'
+                      }`}
                   >
                     {month.name}
                   </button>
