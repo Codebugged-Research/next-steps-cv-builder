@@ -5,10 +5,11 @@ import dotenv from 'dotenv';
 dotenv.config();
 
 const app = express();
-
+//checking for publication
 app.use(cors({
     origin: '*',
     credentials: true
+
 }));
 app.use(express.json());
 app.use(cookieParser());
