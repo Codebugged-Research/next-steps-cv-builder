@@ -699,7 +699,12 @@ function addWorkshops(doc, data, y) {
             .text(workshop.name, MARGINS.left, y, { width: LAYOUT.contentWidth });
         y += 15;
 
-        const details = [workshop.organizer, workshop.year || workshop.date].filter(Boolean);
+        const details = [
+            workshop.organizer,
+            workshop.year || workshop.date,
+            workshop.location,
+            workshop.duration
+        ].filter(Boolean);
         if (details.length) {
             doc.fontSize(SIZES.body).fillColor(COLORS.text).font(FONTS.regular)
                 .text(details.join(' | '), MARGINS.left, y);

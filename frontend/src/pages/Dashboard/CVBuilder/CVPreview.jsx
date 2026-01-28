@@ -21,63 +21,87 @@ const CVPreview = ({ cvData, onBack, onDownload }) => {
           </div>
 
           {/* Education Section */}
-          {(cvData?.education?.medicalSchoolName || cvData?.basicDetails?.medicalSchool || cvData?.basicDetails?.graduationYear) && (
-            <div className="mb-10">
-              <h2 className="text-2xl font-bold text-[#04445E] mb-6 border-b-2 border-gray-200 pb-2">
-                Education
-              </h2>
-              
-              <div className="space-y-4">
-                {cvData?.education?.medicalSchoolName && (
-                  <div>
-                    <div className="font-semibold text-lg">{cvData.education.medicalSchoolName}</div>
-                    {cvData?.education?.country && (
-                      <div className="text-gray-600">{cvData.education.country}</div>
-                    )}
-                    {(cvData?.education?.joiningDate || cvData?.education?.completionDate) && (
-                      <div className="text-gray-600">
-                        {cvData.education.joiningDate} - {cvData.education.completionDate}
-                      </div>
-                    )}
-                  </div>
-                )}
-                
-                {cvData?.basicDetails?.medicalSchool && !cvData?.education?.medicalSchoolName && (
-                  <div>
-                    <div className="font-semibold text-lg">{cvData.basicDetails.medicalSchool}</div>
-                  </div>
-                )}
-                
-                {cvData?.basicDetails?.graduationYear && (
-                  <div className="text-gray-700">
-                    <span className="font-medium">Graduation Year:</span> {cvData.basicDetails.graduationYear}
-                  </div>
-                )}
+          {(cvData?.education?.schooling?.schoolName || cvData?.education?.college?.collegeName ||
+            cvData?.education?.graduation?.universityName || cvData?.education?.postGraduation?.universityName ||
+            cvData?.education?.internship?.institution) && (
+              <div className="mb-10">
+                <h2 className="text-2xl font-bold text-[#04445E] mb-6 border-b-2 border-gray-200 pb-2">
+                  Education
+                </h2>
 
-                {/* Academic Performance */}
-                {(cvData?.education?.firstYearPercentage || cvData?.education?.secondYearPercentage || 
-                  cvData?.education?.preFinalYearPercentage || cvData?.education?.finalYearPercentage) && (
-                  <div className="mt-4">
-                    <div className="font-medium text-gray-700 mb-2">Academic Performance:</div>
-                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
-                      {cvData.education.firstYearPercentage && (
-                        <div>First Year: {cvData.education.firstYearPercentage}%</div>
-                      )}
-                      {cvData.education.secondYearPercentage && (
-                        <div>Second Year: {cvData.education.secondYearPercentage}%</div>
-                      )}
-                      {cvData.education.preFinalYearPercentage && (
-                        <div>Pre-Final: {cvData.education.preFinalYearPercentage}%</div>
-                      )}
-                      {cvData.education.finalYearPercentage && (
-                        <div>Final Year: {cvData.education.finalYearPercentage}%</div>
-                      )}
+                <div className="space-y-6">
+                  {/* Post Graduation */}
+                  {cvData.education?.postGraduation?.universityName && (
+                    <div className="border-l-4 border-[#169AB4] pl-4">
+                      <div className="font-semibold text-lg">{cvData.education.postGraduation.degree || 'Post Graduation'}</div>
+                      <div className="text-gray-600">
+                        {cvData.education.postGraduation.universityName}
+                        {cvData.education.postGraduation.specialization && ` • ${cvData.education.postGraduation.specialization}`}
+                      </div>
+                      <div className="text-sm text-gray-500">
+                        {[cvData.education.postGraduation.city, cvData.education.postGraduation.state, cvData.education.postGraduation.country].filter(Boolean).join(', ')}
+                        {cvData.education.postGraduation.endDate && ` • ${cvData.education.postGraduation.endDate.split('-')[0]}`}
+                      </div>
                     </div>
-                  </div>
-                )}
+                  )}
+
+                  {/* Graduation */}
+                  {cvData.education?.graduation?.universityName && (
+                    <div className="border-l-4 border-[#169AB4] pl-4">
+                      <div className="font-semibold text-lg">{cvData.education.graduation.degree || 'Graduation'}</div>
+                      <div className="text-gray-600">
+                        {cvData.education.graduation.universityName}
+                        {cvData.education.graduation.specialization && ` • ${cvData.education.graduation.specialization}`}
+                      </div>
+                      <div className="text-sm text-gray-500">
+                        {[cvData.education.graduation.city, cvData.education.graduation.state, cvData.education.graduation.country].filter(Boolean).join(', ')}
+                        {cvData.education.graduation.endDate && ` • ${cvData.education.graduation.endDate.split('-')[0]}`}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Internship */}
+                  {cvData.education?.internship?.institution && (
+                    <div className="border-l-4 border-[#169AB4] pl-4">
+                      <div className="font-semibold text-lg">Internship</div>
+                      <div className="text-gray-600">{cvData.education.internship.institution}</div>
+                      <div className="text-sm text-gray-500">
+                        {cvData.education.internship.city}
+                        {(cvData.education.internship.startDate || cvData.education.internship.endDate) &&
+                          ` • ${cvData.education.internship.startDate?.split('-')[0]} - ${cvData.education.internship.endDate?.split('-')[0]}`}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Higher Secondary */}
+                  {cvData.education?.college?.collegeName && (
+                    <div className="border-l-4 border-[#169AB4] pl-4">
+                      <div className="font-semibold text-lg">Higher Secondary (+1 & +2)</div>
+                      <div className="text-gray-600">
+                        {cvData.education.college.collegeName}
+                        {cvData.education.college.stream && ` • ${cvData.education.college.stream}`}
+                      </div>
+                      <div className="text-sm text-gray-500">
+                        {[cvData.education.college.city, cvData.education.college.state].filter(Boolean).join(', ')}
+                        {cvData.education.college.endYear && ` • ${cvData.education.college.endYear}`}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Secondary School */}
+                  {cvData.education?.schooling?.schoolName && (
+                    <div className="border-l-4 border-[#169AB4] pl-4">
+                      <div className="font-semibold text-lg">Secondary School (10th)</div>
+                      <div className="text-gray-600">{cvData.education.schooling.schoolName}</div>
+                      <div className="text-sm text-gray-500">
+                        {[cvData.education.schooling.city, cvData.education.schooling.state].filter(Boolean).join(', ')}
+                        {cvData.education.schooling.endYear && ` • ${cvData.education.schooling.endYear}`}
+                      </div>
+                    </div>
+                  )}
+                </div>
               </div>
-            </div>
-          )}
+            )}
 
           {/* USMLE Scores */}
           {(cvData?.usmleScores?.step1Status !== 'not-taken' || cvData?.usmleScores?.step2ckScore || cvData?.usmleScores?.ecfmgCertified) && (
@@ -106,7 +130,7 @@ const CVPreview = ({ cvData, onBack, onDownload }) => {
                 Skills & Competencies
               </h2>
               <div className="text-gray-700 whitespace-pre-line">
-                {cvData.skills}
+                {typeof cvData.skills === 'string' ? cvData.skills : cvData.skills?.skillsList}
               </div>
             </div>
           )}
@@ -161,16 +185,21 @@ const CVPreview = ({ cvData, onBack, onDownload }) => {
               <div className="space-y-4">
                 {cvData.workshops.map((workshop, index) => (
                   <div key={index} className="border-l-4 border-[#169AB4] pl-4">
-                    <div className="font-semibold">{workshop.name}</div>
+                    <div className="font-semibold text-lg">{workshop.name}</div>
                     <div className="text-gray-600">
                       {workshop.organizer && `${workshop.organizer} • `}
                       {workshop.year || workshop.date}
                     </div>
+                    {(workshop.location || workshop.duration) && (
+                      <div className="text-sm text-gray-500">
+                        {[workshop.location, workshop.duration].filter(Boolean).join(' • ')}
+                      </div>
+                    )}
                     {workshop.description && (
-                      <div className="text-gray-700 mt-1">{workshop.description}</div>
+                      <div className="text-gray-700 mt-2 text-sm whitespace-pre-line">{workshop.description}</div>
                     )}
                     {workshop.awards && (
-                      <div className="text-green-600 mt-1 font-medium">{workshop.awards}</div>
+                      <div className="text-green-600 mt-1 font-medium italic">Awards: {workshop.awards}</div>
                     )}
                   </div>
                 ))}
@@ -199,6 +228,63 @@ const CVPreview = ({ cvData, onBack, onDownload }) => {
             </div>
           )}
 
+          {/* Experience Sections */}
+          {[
+            { title: 'US Clinical Experience', items: cvData?.usClinicalExperience?.list },
+            { title: 'Clinical Experience', items: cvData?.clinicalExperiences },
+            { title: 'Work Experience', items: cvData?.workExperience },
+            { title: 'Professional Experience', items: cvData?.professionalExperiences },
+            { title: 'Volunteer Experience', items: cvData?.volunteerExperiences }
+          ].map((section, idx) => section.items && section.items.length > 0 && (
+            <div key={idx} className="mb-10">
+              <h2 className="text-2xl font-bold text-[#04445E] mb-6 border-b-2 border-gray-200 pb-2">
+                {section.title}
+              </h2>
+              <div className="space-y-6">
+                {section.items.map((exp, i) => (
+                  <div key={i} className="border-l-4 border-[#169AB4] pl-4">
+                    <div className="font-semibold text-lg">{exp.title || exp.position || exp.role}</div>
+                    <div className="text-gray-600">
+                      {exp.hospital || exp.organization || exp.institution}
+                      {exp.location && ` • ${exp.location}`}
+                    </div>
+                    <div className="text-sm text-gray-500 italic">
+                      {exp.duration || (exp.startDate && `${exp.startDate} - ${exp.current ? 'Present' : exp.endDate}`)}
+                    </div>
+                    {exp.description && (
+                      <div className="text-gray-700 mt-2 text-sm whitespace-pre-line">{exp.description}</div>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </div>
+          ))}
+
+          {/* Certifications (ACLS/BLS) */}
+          {(cvData?.aclsBls?.aclsCertified || cvData?.aclsBls?.blsCertified) && (
+            <div className="mb-10">
+              <h2 className="text-2xl font-bold text-[#04445E] mb-6 border-b-2 border-gray-200 pb-2">
+                Certifications
+              </h2>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {cvData.aclsBls.aclsCertified && (
+                  <div className="bg-gray-50 p-4 rounded-lg border border-gray-100">
+                    <div className="font-bold text-[#169AB4]">ACLS Certified</div>
+                    <div className="text-sm text-gray-600">{cvData.aclsBls.aclsProvider}</div>
+                    <div className="text-xs text-gray-500">{cvData.aclsBls.aclsIssueDate} - {cvData.aclsBls.aclsExpiryDate}</div>
+                  </div>
+                )}
+                {cvData.aclsBls.blsCertified && (
+                  <div className="bg-gray-50 p-4 rounded-lg border border-gray-100">
+                    <div className="font-bold text-[#169AB4]">BLS Certified</div>
+                    <div className="text-sm text-gray-600">{cvData.aclsBls.blsProvider}</div>
+                    <div className="text-xs text-gray-500">{cvData.aclsBls.blsIssueDate} - {cvData.aclsBls.blsExpiryDate}</div>
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+
           {cvData?.significantAchievements && (
             <div className="mb-10">
               <h2 className="text-2xl font-bold text-[#04445E] mb-6 border-b-2 border-gray-200 pb-2">
@@ -219,7 +305,7 @@ const CVPreview = ({ cvData, onBack, onDownload }) => {
             <ArrowLeft className="h-5 w-5" />
             Back to Edit
           </button>
-          
+
           <button
             onClick={onDownload}
             className="flex items-center gap-2 px-8 py-3 bg-[#04445E] text-white rounded-lg hover:bg-[#033a4d] transition-colors font-medium"

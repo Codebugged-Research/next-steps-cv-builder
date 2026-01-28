@@ -583,6 +583,18 @@ const cvSchema = new mongoose.Schema({
         date: {
             type: String,
             default: ""
+        },
+        location: {
+            type: String,
+            default: ""
+        },
+        duration: {
+            type: String,
+            default: ""
+        },
+        certificateReceived: {
+            type: Boolean,
+            default: false
         }
     }],
     emrRcmTraining: {
@@ -624,6 +636,22 @@ const cvSchema = new mongoose.Schema({
             default: ""
         },
         provider: {
+            type: String,
+            default: ""
+        },
+        aclsProvider: {
+            type: String,
+            default: ""
+        },
+        blsProvider: {
+            type: String,
+            default: ""
+        },
+        aclsCertificateNumber: {
+            type: String,
+            default: ""
+        },
+        blsCertificateNumber: {
             type: String,
             default: ""
         }

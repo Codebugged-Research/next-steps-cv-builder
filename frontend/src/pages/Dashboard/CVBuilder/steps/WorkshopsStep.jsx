@@ -14,7 +14,7 @@ const WorkshopsStep = ({ formData, onInputChange, onArrayAdd, onArrayRemove, onA
   ];
 
   const newWorkshop = {
-    workshopName: '',
+    name: '',
     organizer: '',
     location: '',
     date: '',
@@ -31,7 +31,7 @@ const WorkshopsStep = ({ formData, onInputChange, onArrayAdd, onArrayRemove, onA
     if (issueDate && expiryDate) {
       const issue = new Date(issueDate);
       const expiry = new Date(expiryDate);
-      
+
       if (expiry <= issue) {
         setDateErrors(prev => ({
           ...prev,
@@ -52,7 +52,7 @@ const WorkshopsStep = ({ formData, onInputChange, onArrayAdd, onArrayRemove, onA
 
   const updateAclsBls = useCallback((field, value) => {
     onInputChange('aclsBls', field, value);
-    
+
     if (field === 'blsIssueDate') {
       validateDates(value, formData.aclsBls?.blsExpiryDate, 'bls');
     } else if (field === 'blsExpiryDate') {
@@ -68,11 +68,10 @@ const WorkshopsStep = ({ formData, onInputChange, onArrayAdd, onArrayRemove, onA
     return (
       <button
         onClick={() => handleTabClick(tab.id)}
-        className={`flex items-center gap-2 px-4 py-3 rounded-lg transition-all duration-200 ${
-          isActive
+        className={`flex items-center gap-2 px-4 py-3 rounded-lg transition-all duration-200 ${isActive
             ? 'bg-[#169AB4] text-white shadow-md'
             : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-        }`}
+          }`}
       >
         <span className="font-medium">{tab.label}</span>
       </button>
@@ -243,8 +242,8 @@ const WorkshopsStep = ({ formData, onInputChange, onArrayAdd, onArrayRemove, onA
           <FormGrid>
             <FormField
               label="Workshop Name"
-              value={workshop.workshopName}
-              onChange={(value) => onArrayUpdate('workshops', index, 'workshopName', value)}
+              value={workshop.name}
+              onChange={(value) => onArrayUpdate('workshops', index, 'name', value)}
               placeholder="e.g., Advanced Suturing Techniques"
               required
             />
@@ -325,7 +324,7 @@ const WorkshopsStep = ({ formData, onInputChange, onArrayAdd, onArrayRemove, onA
   return (
     <div className="space-y-6">
       <h2 className="text-2xl font-bold text-[#04445E] mb-6">Professional Training & Workshops</h2>
-      
+
       <div className="flex flex-wrap gap-2 mb-6 p-2 bg-gray-50 rounded-lg">
         {tabs.map((tab) => (
           <TabButton

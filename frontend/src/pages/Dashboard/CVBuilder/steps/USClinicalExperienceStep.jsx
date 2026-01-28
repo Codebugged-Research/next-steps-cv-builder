@@ -29,19 +29,19 @@ const USClinicalExperienceStep = ({ formData, onInputChange }) => {
   const removeUSCE = (id) => {
     const updatedList = usceList.filter(usce => usce.id !== id);
     setUsceList(updatedList);
-    onInputChange('experienceDetails', 'usce', updatedList);
-    
+    onInputChange('usClinicalExperience', 'list', updatedList);
+
     if (updatedList.length === 0) {
       setShowUSCE(false);
     }
   };
 
   const updateUSCE = (id, field, value) => {
-    const updatedList = usceList.map(usce => 
+    const updatedList = usceList.map(usce =>
       usce.id === id ? { ...usce, [field]: value } : usce
     );
     setUsceList(updatedList);
-    onInputChange('experienceDetails', 'usce', updatedList);
+    onInputChange('usClinicalExperience', 'list', updatedList);
   };
 
   return (
@@ -62,11 +62,10 @@ const USClinicalExperienceStep = ({ formData, onInputChange }) => {
         <button
           type="button"
           onClick={handleToggleUSCE}
-          className={`px-6 py-2 rounded-lg font-medium transition-all ${
-            showUSCE
+          className={`px-6 py-2 rounded-lg font-medium transition-all ${showUSCE
               ? 'bg-red-500 text-white hover:bg-red-600'
               : 'bg-[#169AB4] text-white hover:bg-[#147a8f]'
-          }`}
+            }`}
         >
           {showUSCE ? 'Hide USCE' : 'Add USCE'}
         </button>
