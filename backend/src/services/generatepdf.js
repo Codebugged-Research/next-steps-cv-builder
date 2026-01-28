@@ -382,7 +382,7 @@ function addSkills(doc, data, y) {
             if (item.url) {
                 y = checkPageBreak(doc, y, 15);
                 doc.fontSize(SIZES.body).fillColor(COLORS.accent).font(FONTS.regular)
-                    .text(`• ${item.name}`, MARGINS.left, y, {
+                    .text(`• View Document`, MARGINS.left, y, {
                         link: item.url,
                         underline: true,
                         width: LAYOUT.contentWidth

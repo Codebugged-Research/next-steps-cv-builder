@@ -208,10 +208,8 @@ const CVBuilder = ({ onPreview, user, onStepChange, currentStep, onStepComplete 
         }
         setFormData(cvData);
         setCompletedSteps(calculateCompletedSteps(cvData));
-        // Update local storage with fresh backend data
         localStorage.setItem(`cv_draft_${userId}`, JSON.stringify(cvData));
       } else {
-        // If backend has no data, try loading from local storage
         const savedDraft = localStorage.getItem(`cv_draft_${userId}`);
         if (savedDraft) {
           const draftData = JSON.parse(savedDraft);
@@ -221,7 +219,6 @@ const CVBuilder = ({ onPreview, user, onStepChange, currentStep, onStepComplete 
       }
     } catch (error) {
       console.error('Error loading CV:', error);
-      // Fallback to local storage on API error
       const savedDraft = localStorage.getItem(`cv_draft_${userId}`);
       if (savedDraft) {
         const draftData = JSON.parse(savedDraft);
@@ -233,7 +230,6 @@ const CVBuilder = ({ onPreview, user, onStepChange, currentStep, onStepComplete 
     }
   }, [getUserId, calculateCompletedSteps]);
 
-  // Effect to save to local storage whenever formData changes
   useEffect(() => {
     const userId = getUserId();
     if (userId && formData !== initialCVData) {
@@ -384,7 +380,6 @@ const CVBuilder = ({ onPreview, user, onStepChange, currentStep, onStepComplete 
 
       if (response.data.success) {
         toast.success("CV Saved Successfully");
-        // Clear local storage draft after successful backend save
         localStorage.removeItem(`cv_draft_${userId}`);
       } else {
         toast.error(response.data.message || 'Failed to save CV');
